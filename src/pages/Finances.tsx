@@ -1,6 +1,5 @@
 import { DollarSign, Download } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { exportDailyCostsCSV, exportAgentCostsCSV } from "@/lib/export-utils";
 import BillingCards from "@/components/finances/BillingCards";
