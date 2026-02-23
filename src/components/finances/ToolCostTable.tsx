@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Wrench, Clock, Zap, DollarSign } from "lucide-react";
@@ -22,7 +22,6 @@ const ToolCostTable = ({ data }: ToolCostTableProps) => {
 
   return (
     <div className="space-y-4">
-      {/* Summary row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { icon: Wrench, label: "Total Tools", value: data.length.toString(), color: "text-cyan" },
@@ -30,57 +29,56 @@ const ToolCostTable = ({ data }: ToolCostTableProps) => {
           { icon: DollarSign, label: "Custo Total", value: `$${totalCost.toFixed(2)}`, color: "text-terminal" },
           { icon: Clock, label: "Tokens Consumidos", value: formatTokens(totalTokens), color: "text-amber" },
         ].map((s) => (
-          <Card key={s.label} className="border-border bg-card">
-            <CardContent className="p-3 flex items-center gap-3">
+          <Card key={s.label} className="border-border/50 bg-card surface-elevated">
+            <CardContent className="p-3.5 flex items-center gap-3">
               <s.icon className={`h-4 w-4 ${s.color}`} />
               <div>
-                <p className="font-mono text-[10px] text-muted-foreground">{s.label}</p>
-                <p className={`font-mono text-base font-bold ${s.color}`}>{s.value}</p>
+                <p className="text-[10px] text-muted-foreground font-medium">{s.label}</p>
+                <p className={`text-base font-bold tabular-nums ${s.color}`}>{s.value}</p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Tool cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {data.map((t) => {
           const pct = (t.cost / maxCost) * 100;
           const costPer = t.calls > 0 ? (t.cost / t.calls) : 0;
 
           return (
-            <Card key={`${t.tool}-${t.agent}`} className="border-border bg-card group hover:border-muted-foreground/30 transition-colors">
+            <Card key={`${t.tool}-${t.agent}`} className="border-border/50 bg-card surface-elevated group hover:border-border transition-colors">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-mono text-sm font-semibold text-cyan">{t.tool}</p>
-                    <p className="font-mono text-[10px] text-muted-foreground">via {t.agent}</p>
+                    <p className="text-[13px] font-semibold text-cyan">{t.tool}</p>
+                    <p className="text-[10px] text-muted-foreground font-medium">via {t.agent}</p>
                   </div>
-                  <span className="font-mono text-lg font-bold text-terminal">${t.cost.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-terminal tabular-nums">${t.cost.toFixed(2)}</span>
                 </div>
 
                 <Progress value={pct} className="h-1" />
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <p className="font-mono text-[9px] text-muted-foreground">Chamadas</p>
-                    <p className="font-mono text-xs font-semibold text-foreground">{t.calls.toLocaleString()}</p>
+                    <p className="text-[9px] text-muted-foreground font-medium">Chamadas</p>
+                    <p className="text-[12px] font-semibold text-foreground tabular-nums">{t.calls.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="font-mono text-[9px] text-muted-foreground">Tokens</p>
-                    <p className="font-mono text-xs font-semibold text-foreground">{formatTokens(t.tokens)}</p>
+                    <p className="text-[9px] text-muted-foreground font-medium">Tokens</p>
+                    <p className="text-[12px] font-semibold text-foreground tabular-nums">{formatTokens(t.tokens)}</p>
                   </div>
                   <div>
-                    <p className="font-mono text-[9px] text-muted-foreground">$/Chamada</p>
-                    <p className="font-mono text-xs font-semibold text-foreground">${costPer.toFixed(3)}</p>
+                    <p className="text-[9px] text-muted-foreground font-medium">$/Chamada</p>
+                    <p className="text-[12px] font-semibold text-foreground tabular-nums">${costPer.toFixed(3)}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between font-mono text-[10px]">
+                <div className="flex items-center justify-between text-[10px]">
                   <span className="text-muted-foreground flex items-center gap-1">
                     <Clock className="h-3 w-3" />Avg: {t.avgDuration}
                   </span>
-                  <Badge variant="outline" className="font-mono text-[8px] px-1.5 py-0 border-border">
+                  <Badge variant="outline" className="text-[8px] px-1.5 py-0 border-border/50 rounded-full font-medium">
                     {((t.cost / totalCost) * 100).toFixed(1)}% do total
                   </Badge>
                 </div>

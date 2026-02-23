@@ -37,7 +37,6 @@ const accentForLabel: Record<string, string> = {
 const BillingCards = () => {
   const { data: snapshots } = useBillingSnapshots();
 
-  // Build first 4 cards from DB billing_snapshots, fallback to defaults
   const dbMetrics: BentoMetric[] = (snapshots ?? []).slice(0, 4).map((s) => ({
     label: s.label,
     value: s.value,
@@ -48,7 +47,6 @@ const BillingCards = () => {
     size: "md" as const,
   }));
 
-  // Static extra metrics
   const extras: BentoMetric[] = [
     { label: "Custo/Token Médio", value: "$0.00025", change: "-3%", trend: "down", icon: <Cpu className="h-4 w-4" />, accent: "text-terminal", size: "sm" },
     { label: "Budget Restante", value: "$272.22", change: "34%", trend: "neutral", icon: <Target className="h-4 w-4" />, accent: "text-violet", size: "sm", extra: <Progress value={66} className="h-1 mt-1.5" /> },
@@ -72,17 +70,17 @@ const BillingCards = () => {
         const trendColor = m.trend === "up" ? (m.accent === "text-terminal" ? "text-terminal" : "text-rose") : m.trend === "down" ? "text-terminal" : "text-muted-foreground";
 
         return (
-          <Card key={m.label} className={`border-border bg-card ${span}`}>
-            <CardContent className="p-3 space-y-1">
+          <Card key={m.label} className={`border-border/50 bg-card surface-elevated ${span}`}>
+            <CardContent className="p-3.5 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className={`${m.accent}`}>{m.icon}</span>
-                <div className={`flex items-center gap-0.5 font-mono text-[10px] ${trendColor}`}>
+                <div className={`flex items-center gap-0.5 text-[10px] font-medium tabular-nums ${trendColor}`}>
                   {trendIcon[m.trend]}
                   {m.change}
                 </div>
               </div>
-              <p className="font-mono text-lg font-bold text-foreground leading-none">{m.value}</p>
-              <p className="font-mono text-[10px] text-muted-foreground">{m.label}</p>
+              <p className="text-lg font-bold text-foreground leading-none tabular-nums">{m.value}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">{m.label}</p>
               {m.extra}
             </CardContent>
           </Card>
