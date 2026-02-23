@@ -1,14 +1,9 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { mockAgents } from "@/lib/mock-data";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import type { Tables } from "@/integrations/supabase/types";
 
-const AgentPerformanceTable = () => (
+type DbAgent = Tables<"agents">;
+
+const AgentPerformanceTable = ({ agents }: { agents: DbAgent[] }) => (
   <div className="rounded-lg border border-border">
     <Table>
       <TableHeader>
@@ -21,16 +16,16 @@ const AgentPerformanceTable = () => (
         </TableRow>
       </TableHeader>
       <TableBody>
-        {mockAgents.map((a) => (
+        {agents.map((a) => (
           <TableRow key={a.id} className="border-border">
             <TableCell className="font-mono text-xs">
               <span className="mr-1.5">{a.emoji}</span>
               {a.name}
             </TableCell>
-            <TableCell className="font-mono text-xs text-right">{a.metrics.tasksCompleted}</TableCell>
-            <TableCell className="font-mono text-xs text-right">{a.metrics.avgTime}</TableCell>
-            <TableCell className="font-mono text-xs text-right">{a.metrics.errorRate}%</TableCell>
-            <TableCell className="font-mono text-xs text-right">${a.metrics.totalCost.toFixed(2)}</TableCell>
+            <TableCell className="font-mono text-xs text-right">{a.tasks_completed ?? 0}</TableCell>
+            <TableCell className="font-mono text-xs text-right">{a.avg_time ?? "—"}</TableCell>
+            <TableCell className="font-mono text-xs text-right">{a.error_rate ?? 0}%</TableCell>
+            <TableCell className="font-mono text-xs text-right">${(a.total_cost ?? 0).toFixed(2)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

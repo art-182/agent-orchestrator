@@ -4,19 +4,36 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AgentDetailSheet from "@/components/agents/AgentDetailSheet";
 import AgentPerformanceTable from "@/components/agents/AgentPerformanceTable";
 import AgentOrgChart from "@/components/agents/AgentOrgChart";
-import type { Agent } from "@/lib/mock-data";
+import { PageTransition } from "@/components/animations/MotionPrimitives";
+import { useAgents } from "@/hooks/use-supabase-data";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Tables } from "@/integrations/supabase/types";
+
+type DbAgent = Tables<"agents">;
 
 const Agents = () => {
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<DbAgent | null>(null);
+  const { data: agents, isLoading } = useAgents();
+
+  if (isLoading) {
+    return (
+      <PageTransition className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Bot className="h-6 w-6 text-terminal" />
+          <h1 className="font-mono text-xl font-semibold text-foreground">Agentes</h1>
+        </div>
+        <Skeleton className="h-64" />
+      </PageTransition>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       <div className="flex items-center gap-3">
         <Bot className="h-6 w-6 text-terminal" />
         <h1 className="font-mono text-xl font-semibold text-foreground">Agentes</h1>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="overview" className="mt-6">
         <TabsList className="font-mono">
           <TabsTrigger value="overview" className="font-mono text-xs">Organograma</TabsTrigger>
@@ -24,21 +41,20 @@ const Agents = () => {
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-          <AgentOrgChart onSelectAgent={setSelectedAgent} />
+          <AgentOrgChart agents={agents ?? []} onSelectAgent={setSelectedAgent} />
         </TabsContent>
 
         <TabsContent value="performance" className="mt-4">
-          <AgentPerformanceTable />
+          <AgentPerformanceTable agents={agents ?? []} />
         </TabsContent>
       </Tabs>
 
-      {/* Detail Sheet */}
       <AgentDetailSheet
         agent={selectedAgent}
         open={!!selectedAgent}
         onOpenChange={(open) => !open && setSelectedAgent(null)}
       />
-    </div>
+    </PageTransition>
   );
 };
 
