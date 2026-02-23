@@ -34,18 +34,18 @@ const CommandCenter = () => {
   ];
 
   return (
-    <PageTransition className="space-y-6">
+    <PageTransition className="space-y-8">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <LayoutDashboard className="h-6 w-6 text-terminal" />
-        <h1 className="font-mono text-xl font-semibold text-foreground">Command Center</h1>
+        <LayoutDashboard className="h-7 w-7 text-terminal" />
+        <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Command Center</h1>
       </div>
 
       {/* Status badges */}
       <StatusBar />
 
       {/* Metric cards */}
-      <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {metrics.map((m) => (
           <FadeIn key={m.label}><MetricCard metric={m} /></FadeIn>
         ))}
@@ -55,11 +55,11 @@ const CommandCenter = () => {
       <AgentFleet />
 
       {/* Main content: Feed + sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 space-y-5">
           <LiveFeed />
         </div>
-        <div className="space-y-4">
+        <div className="space-y-5">
           <ActiveMissions />
           <ProviderStatus />
           <QuickStats />

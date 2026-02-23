@@ -30,11 +30,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="px-3 py-4">
-        <div className="flex items-center gap-2 overflow-hidden">
+      <SidebarHeader className="px-4 py-5">
+        <div className="flex items-center gap-2.5 overflow-hidden">
           <Terminal className="h-5 w-5 text-terminal shrink-0 glow-icon" />
           {!collapsed && (
-            <span className="font-mono text-sm font-semibold text-terminal tracking-tight whitespace-nowrap">
+            <span className="font-mono text-base font-semibold text-terminal tracking-tight whitespace-nowrap">
               {">_"} Revenue OS
             </span>
           )}
@@ -51,11 +51,11 @@ export function AppSidebar() {
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="flex items-center gap-3 text-sidebar-foreground transition-colors duration-200"
+                      className="flex items-center gap-3 text-sidebar-foreground transition-all duration-200 py-2"
                       activeClassName="text-terminal bg-sidebar-accent glow-terminal"
                     >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      <span className="truncate text-sm">{item.title}</span>
+                      <item.icon className="h-[18px] w-[18px] shrink-0" />
+                      <span className="truncate text-[14px]">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -65,7 +65,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="p-4">
         <RealtimeIndicator />
       </SidebarFooter>
     </Sidebar>

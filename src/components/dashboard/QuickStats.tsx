@@ -19,11 +19,11 @@ const QuickStats = () => {
 
   return (
     <Card className="border-border bg-card">
-      <CardContent className="p-4 space-y-4">
+      <CardContent className="p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-xs text-muted-foreground">Custo 7 Dias</span>
+          <span className="font-mono text-sm text-muted-foreground">Custo 7 Dias</span>
         </div>
-        <div className="h-[48px] -mx-1">
+        <div className="h-[52px] -mx-1">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={costData.length > 0 ? costData : [{ v: 0 }]}>
               <defs>
@@ -37,14 +37,14 @@ const QuickStats = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-2.5 pt-1">
+        <div className="space-y-3 pt-1">
           {[
             { label: "Total Tarefas", value: totalTasks.toLocaleString(), color: "text-terminal" },
             { label: "Taxa Erro Média", value: `${avgError}%`, color: parseFloat(avgError) < 2 ? "text-terminal" : "text-amber" },
             { label: "Economia Mensal", value: `$${(totalROISavings / 1000).toFixed(1)}K`, color: "text-cyan" },
             { label: "Agentes Ativos", value: `${list.filter((a) => a.status !== "error").length}/${list.length}`, color: "text-foreground" },
           ].map((s) => (
-            <div key={s.label} className="flex items-center justify-between font-mono text-xs">
+            <div key={s.label} className="flex items-center justify-between font-mono text-sm">
               <span className="text-muted-foreground">{s.label}</span>
               <span className={`font-semibold ${s.color}`}>{s.value}</span>
             </div>
