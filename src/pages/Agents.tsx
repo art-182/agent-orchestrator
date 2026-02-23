@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Bot, Search, Filter, Activity, TrendingUp } from "lucide-react";
+import { Bot, Search, Filter } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
