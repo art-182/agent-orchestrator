@@ -19,37 +19,37 @@ const ActiveMissions = () => {
 
   return (
     <Card className="border-border bg-card">
-      <CardHeader className="p-4 pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-mono">
-          <Target className="h-4 w-4 text-terminal" />
+      <CardHeader className="p-5 pb-3">
+        <CardTitle className="flex items-center gap-2.5 text-base font-mono">
+          <Target className="h-5 w-5 text-terminal" />
           Missões Ativas
-          <Badge variant="outline" className="ml-auto rounded px-1.5 py-0 text-[10px] border-border font-mono">
+          <Badge variant="outline" className="ml-auto rounded-lg px-2 py-0.5 text-xs border-border font-mono">
             {active.length}
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4 pt-2 space-y-2.5">
+      <CardContent className="p-5 pt-2 space-y-3">
         {active.length === 0 && (
-          <p className="font-mono text-xs text-muted-foreground text-center py-4">Nenhuma missão ativa</p>
+          <p className="font-mono text-sm text-muted-foreground text-center py-6">Nenhuma missão ativa</p>
         )}
         {active.map((m) => (
           <button
             key={m.id}
             onClick={() => navigate("/missions")}
-            className="w-full text-left rounded-lg border border-border bg-muted/20 p-3 space-y-2 hover:border-muted-foreground/30 transition-colors"
+            className="w-full text-left rounded-xl border border-border bg-muted/20 p-4 space-y-2.5 hover:border-muted-foreground/30 transition-all duration-200 active:scale-[0.98]"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-xs font-semibold text-foreground truncate flex-1">{m.name}</span>
-              <Badge variant="outline" className={`rounded px-1.5 py-0 text-[9px] border font-mono shrink-0 ${priorityColor[m.priority] ?? priorityColor.medium}`}>
+              <span className="font-mono text-sm font-semibold text-foreground truncate flex-1">{m.name}</span>
+              <Badge variant="outline" className={`rounded-lg px-2 py-0.5 text-[10px] border font-mono shrink-0 ${priorityColor[m.priority] ?? priorityColor.medium}`}>
                 {m.priority}
               </Badge>
             </div>
-            <div className="flex items-center gap-2">
-              <Progress value={m.progress ?? 0} className="h-1.5 flex-1" />
-              <span className="font-mono text-[10px] text-muted-foreground shrink-0">{m.progress ?? 0}%</span>
+            <div className="flex items-center gap-3">
+              <Progress value={m.progress ?? 0} className="h-2 flex-1" />
+              <span className="font-mono text-xs text-muted-foreground shrink-0">{m.progress ?? 0}%</span>
             </div>
             {m.deadline && (
-              <p className="font-mono text-[9px] text-muted-foreground">
+              <p className="font-mono text-xs text-muted-foreground">
                 Prazo: {new Date(m.deadline).toLocaleDateString("pt-BR")}
               </p>
             )}
