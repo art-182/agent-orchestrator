@@ -2,6 +2,8 @@ import { ListChecks, CheckCircle2, Play, Clock, AlertTriangle, Filter } from "lu
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { PageTransition } from "@/components/animations/MotionPrimitives";
 
 type TaskStatus = "done" | "in_progress" | "todo" | "blocked";
 type TaskPriority = "critical" | "high" | "medium" | "low";
