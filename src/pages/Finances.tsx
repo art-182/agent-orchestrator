@@ -10,6 +10,7 @@ import ProjectionChart from "@/components/finances/ProjectionChart";
 import ToolCostTable from "@/components/finances/ToolCostTable";
 import SkillCostTable from "@/components/finances/SkillCostTable";
 import ProjectionDetails from "@/components/finances/ProjectionDetails";
+import ProviderLimitsView from "@/components/finances/ProviderLimitsView";
 import {
   mockBillingSummary,
   mockDailyCosts,
@@ -20,6 +21,9 @@ import {
   mockMonthlyProjections,
   mockToolCosts,
   mockSkillCosts,
+  mockProviderLimits,
+  mockRateLimitEvents,
+  mockCostAnomalies,
 } from "@/lib/finance-data";
 
 const Finances = () => (
@@ -38,6 +42,7 @@ const Finances = () => (
         <TabsTrigger value="overview" className="font-mono text-xs">Visão Geral</TabsTrigger>
         <TabsTrigger value="tokens" className="font-mono text-xs">Tokens</TabsTrigger>
         <TabsTrigger value="tools" className="font-mono text-xs">Tools & Skills</TabsTrigger>
+        <TabsTrigger value="providers" className="font-mono text-xs">Providers & Limites</TabsTrigger>
         <TabsTrigger value="projections" className="font-mono text-xs">Projeções</TabsTrigger>
       </TabsList>
 
@@ -61,6 +66,13 @@ const Finances = () => (
         <SkillCostTable data={mockSkillCosts} />
       </TabsContent>
 
+      <TabsContent value="providers" className="mt-4">
+        <ProviderLimitsView
+          providers={mockProviderLimits}
+          events={mockRateLimitEvents}
+          anomalies={mockCostAnomalies}
+        />
+      </TabsContent>
       <TabsContent value="projections" className="mt-4 space-y-6">
         <ProjectionChart data={mockMonthlyProjections} />
         <ProjectionDetails />
