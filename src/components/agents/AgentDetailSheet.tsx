@@ -293,7 +293,7 @@ const AgentDetailSheet = ({ agent, open, onOpenChange }: AgentDetailSheetProps) 
         </SheetHeader>
 
         <div className="mt-6">
-          <Tabs defaultValue="skills">
+          <Tabs defaultValue="roi">
             <TabsList className="font-mono w-full">
               <TabsTrigger value="roi" className="font-mono text-[10px] flex-1">ROI</TabsTrigger>
               <TabsTrigger value="skills" className="font-mono text-[10px] flex-1">Skills</TabsTrigger>
