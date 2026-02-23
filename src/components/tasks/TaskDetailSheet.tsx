@@ -365,7 +365,7 @@ const TaskDetailSheet = ({ task, open, onOpenChange }: TaskDetailSheetProps) => 
                         ))}
                       </div>
                     </div>
-                  )))}
+                  ))}
                 </div>
               )}
             </div>
