@@ -1,16 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Target, Shield, Zap, Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 // ── Scenario Data ──────────────────────────────────────
 
@@ -31,7 +22,7 @@ const scenarios: Scenario[] = [
 ];
 
 const riskColor = { low: "text-terminal", medium: "text-amber", high: "text-rose" };
-const riskBg = { low: "bg-terminal/15", medium: "bg-amber/15", high: "bg-rose/15" };
+const riskBg = { low: "bg-terminal/10", medium: "bg-amber/10", high: "bg-rose/10" };
 
 // ── ROI Metrics ────────────────────────────────────────
 
@@ -76,13 +67,13 @@ const ProjectionDetails = () => (
     {/* ROI Metrics */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {roiMetrics.map((m) => (
-        <Card key={m.label} className="border-border bg-card">
+        <Card key={m.label} className="border-border/50 bg-card surface-elevated">
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-mono text-[10px] text-muted-foreground">{m.label}</p>
-                <p className={`font-mono text-2xl font-bold ${m.color}`}>{m.value}</p>
-                <p className="font-mono text-[10px] text-muted-foreground mt-0.5">{m.subtext}</p>
+                <p className="text-[10px] text-muted-foreground font-medium">{m.label}</p>
+                <p className={`text-2xl font-bold tabular-nums ${m.color}`}>{m.value}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{m.subtext}</p>
               </div>
               <m.icon className={`h-4 w-4 ${m.color} opacity-60`} />
             </div>
@@ -92,9 +83,9 @@ const ProjectionDetails = () => (
     </div>
 
     {/* Budget Alerts */}
-    <Card className="border-border bg-card">
-      <CardContent className="p-4 space-y-4">
-        <p className="font-mono text-sm font-semibold text-foreground">Alertas de Orçamento</p>
+    <Card className="border-border/50 bg-card surface-elevated">
+      <CardContent className="p-5 space-y-4">
+        <p className="text-sm font-semibold text-foreground tracking-tight">Alertas de Orçamento</p>
         {budgetAlerts.map((a) => {
           const pct = (a.spent / a.budget) * 100;
           return (
@@ -102,9 +93,9 @@ const ProjectionDetails = () => (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {alertStatusIcon[a.status]}
-                  <span className="font-mono text-xs text-foreground">{a.label}</span>
+                  <span className="text-[12px] text-foreground font-medium">{a.label}</span>
                 </div>
-                <span className="font-mono text-xs text-muted-foreground">
+                <span className="text-[12px] text-muted-foreground tabular-nums">
                   ${a.spent.toFixed(2)} / ${a.budget}
                   <span className={`ml-2 ${pct > 85 ? "text-amber" : "text-muted-foreground"}`}>
                     ({pct.toFixed(0)}%)
@@ -120,21 +111,21 @@ const ProjectionDetails = () => (
 
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Scenarios */}
-      <Card className="border-border bg-card">
-        <CardContent className="p-4 space-y-3">
-          <p className="font-mono text-sm font-semibold text-foreground">Cenários de Custo</p>
+      <Card className="border-border/50 bg-card surface-elevated">
+        <CardContent className="p-5 space-y-3">
+          <p className="text-sm font-semibold text-foreground tracking-tight">Cenários de Custo</p>
           {scenarios.map((s) => (
-            <div key={s.label} className="rounded-lg border border-border p-3 space-y-1.5">
+            <div key={s.label} className="rounded-2xl border border-border/40 p-3.5 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-semibold text-foreground">{s.label}</span>
-                <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded ${riskBg[s.risk]} ${riskColor[s.risk]}`}>
+                <span className="text-[12px] font-semibold text-foreground">{s.label}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${riskBg[s.risk]} ${riskColor[s.risk]}`}>
                   risco {s.risk}
                 </span>
               </div>
-              <p className="font-mono text-[10px] text-muted-foreground">{s.description}</p>
-              <div className="flex items-center gap-4 font-mono text-xs">
-                <span className="text-foreground">${s.monthlyCost}/mês</span>
-                <span className="text-muted-foreground">${s.annualCost.toLocaleString()}/ano</span>
+              <p className="text-[10px] text-muted-foreground">{s.description}</p>
+              <div className="flex items-center gap-4 text-[12px]">
+                <span className="text-foreground tabular-nums">${s.monthlyCost}/mês</span>
+                <span className="text-muted-foreground tabular-nums">${s.annualCost.toLocaleString()}/ano</span>
                 {s.savings !== 0 && (
                   <span className={`flex items-center gap-0.5 ${s.savings > 0 ? "text-terminal" : "text-rose"}`}>
                     {s.savings > 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
@@ -148,31 +139,20 @@ const ProjectionDetails = () => (
       </Card>
 
       {/* Efficiency by Day */}
-      <Card className="border-border bg-card">
-        <CardContent className="p-4">
-          <p className="font-mono text-sm font-semibold text-foreground mb-3">Eficiência por Dia da Semana</p>
+      <Card className="border-border/50 bg-card surface-elevated">
+        <CardContent className="p-5">
+          <p className="text-sm font-semibold text-foreground mb-3 tracking-tight">Eficiência por Dia da Semana</p>
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={efficiencyByDay} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(230, 15%, 14%)" />
-                <XAxis
-                  dataKey="day"
-                  tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(220, 10%, 50%)" }}
-                  axisLine={{ stroke: "hsl(230, 15%, 14%)" }}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(220, 10%, 50%)" }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v) => `$${v}`}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(230, 22%, 5%)",
-                    border: "1px solid hsl(230, 15%, 14%)",
-                    borderRadius: "8px",
-                    fontFamily: "JetBrains Mono",
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "12px",
                     fontSize: 11,
                   }}
                   formatter={(value: number, name: string) => [
@@ -180,7 +160,7 @@ const ProjectionDetails = () => (
                     name === "costPerTask" ? "$/Tarefa" : "Tarefas",
                   ]}
                 />
-                <Bar dataKey="costPerTask" name="costPerTask" radius={[3, 3, 0, 0]}>
+                <Bar dataKey="costPerTask" name="costPerTask" radius={[4, 4, 0, 0]}>
                   {efficiencyByDay.map((entry, i) => (
                     <Cell
                       key={i}
@@ -191,7 +171,7 @@ const ProjectionDetails = () => (
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <p className="font-mono text-[10px] text-muted-foreground mt-2 text-center">
+          <p className="text-[10px] text-muted-foreground mt-2 text-center font-medium">
             Custo por tarefa — verde ≤ $0.09 · amarelo ≤ $0.11 · vermelho {">"} $0.11
           </p>
         </CardContent>

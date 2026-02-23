@@ -1,14 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import type { DailyCost } from "@/lib/finance-data";
 
 interface CostChartProps {
@@ -16,11 +7,11 @@ interface CostChartProps {
 }
 
 const CostChart = ({ data }: CostChartProps) => (
-  <Card className="border-border bg-card">
-    <CardHeader className="pb-2">
-      <CardTitle className="font-mono text-sm text-foreground">Custo Diário por Provider</CardTitle>
+  <Card className="border-border/50 bg-card surface-elevated">
+    <CardHeader className="p-5 pb-3">
+      <CardTitle className="text-sm font-semibold text-foreground tracking-tight">Custo Diário por Provider</CardTitle>
     </CardHeader>
-    <CardContent>
+    <CardContent className="p-5 pt-2">
       <div className="h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
@@ -38,57 +29,23 @@ const CostChart = ({ data }: CostChartProps) => (
                 <stop offset="95%" stopColor="hsl(45, 93%, 56%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(230, 15%, 14%)" />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(220, 10%, 50%)" }}
-              axisLine={{ stroke: "hsl(230, 15%, 14%)" }}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(220, 10%, 50%)" }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(v) => `$${v}`}
-            />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="date" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(230, 22%, 5%)",
-                border: "1px solid hsl(230, 15%, 14%)",
-                borderRadius: "8px",
-                fontFamily: "JetBrains Mono",
+                backgroundColor: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "12px",
                 fontSize: 11,
               }}
-              labelStyle={{ color: "hsl(220, 20%, 95%)" }}
+              labelStyle={{ color: "hsl(var(--foreground))" }}
               formatter={(value: number) => [`$${value.toFixed(2)}`, undefined]}
             />
-            <Legend
-              wrapperStyle={{ fontFamily: "JetBrains Mono", fontSize: 10 }}
-            />
-            <Area
-              type="monotone"
-              dataKey="openai"
-              name="OpenAI"
-              stroke="hsl(160, 51%, 49%)"
-              fill="url(#gradOpenai)"
-              strokeWidth={1.5}
-            />
-            <Area
-              type="monotone"
-              dataKey="anthropic"
-              name="Anthropic"
-              stroke="hsl(260, 67%, 70%)"
-              fill="url(#gradAnthropic)"
-              strokeWidth={1.5}
-            />
-            <Area
-              type="monotone"
-              dataKey="google"
-              name="Google"
-              stroke="hsl(45, 93%, 56%)"
-              fill="url(#gradGoogle)"
-              strokeWidth={1.5}
-            />
+            <Legend wrapperStyle={{ fontSize: 10 }} />
+            <Area type="monotone" dataKey="openai" name="OpenAI" stroke="hsl(160, 51%, 49%)" fill="url(#gradOpenai)" strokeWidth={1.5} />
+            <Area type="monotone" dataKey="anthropic" name="Anthropic" stroke="hsl(260, 67%, 70%)" fill="url(#gradAnthropic)" strokeWidth={1.5} />
+            <Area type="monotone" dataKey="google" name="Google" stroke="hsl(45, 93%, 56%)" fill="url(#gradGoogle)" strokeWidth={1.5} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

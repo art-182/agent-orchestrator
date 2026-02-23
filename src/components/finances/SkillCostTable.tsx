@@ -15,11 +15,11 @@ const formatTokens = (n: number) => {
 };
 
 const categoryColor: Record<string, { bg: string; text: string; border: string }> = {
-  Development: { bg: "bg-terminal/10", text: "text-terminal", border: "border-terminal/30" },
-  Quality: { bg: "bg-cyan/10", text: "text-cyan", border: "border-cyan/30" },
-  Security: { bg: "bg-rose/10", text: "text-rose", border: "border-rose/30" },
-  DevOps: { bg: "bg-amber/10", text: "text-amber", border: "border-amber/30" },
-  Strategy: { bg: "bg-violet/10", text: "text-violet", border: "border-violet/30" },
+  Development: { bg: "bg-terminal/10", text: "text-terminal", border: "border-terminal/20" },
+  Quality: { bg: "bg-cyan/10", text: "text-cyan", border: "border-cyan/20" },
+  Security: { bg: "bg-rose/10", text: "text-rose", border: "border-rose/20" },
+  DevOps: { bg: "bg-amber/10", text: "text-amber", border: "border-amber/20" },
+  Strategy: { bg: "bg-violet/10", text: "text-violet", border: "border-violet/20" },
   Analytics: { bg: "bg-muted", text: "text-muted-foreground", border: "border-border" },
 };
 
@@ -34,52 +34,50 @@ const SkillCostTable = ({ data }: SkillCostTableProps) => {
         const costPerExec = s.executions > 0 ? (s.cost / s.executions) : 0;
 
         return (
-          <Card key={s.skill} className={`border-border bg-card hover:border-muted-foreground/30 transition-colors`}>
+          <Card key={s.skill} className="border-border/50 bg-card surface-elevated hover:border-border transition-colors">
             <CardContent className="p-4 space-y-3">
               <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="font-mono text-sm font-semibold text-foreground">{s.skill}</p>
-                  <Badge variant="outline" className={`rounded px-1.5 py-0 text-[9px] border font-mono ${cat.bg} ${cat.text} ${cat.border}`}>
+                <div className="space-y-1.5">
+                  <p className="text-[13px] font-semibold text-foreground">{s.skill}</p>
+                  <Badge variant="outline" className={`rounded-full px-2 py-0 text-[9px] border font-medium ${cat.bg} ${cat.text} ${cat.border}`}>
                     {s.category}
                   </Badge>
                 </div>
-                <span className="font-mono text-lg font-bold text-terminal">${s.cost.toFixed(2)}</span>
+                <span className="text-lg font-bold text-terminal tabular-nums">${s.cost.toFixed(2)}</span>
               </div>
 
-              {/* Execution bar */}
               <div className="space-y-1">
-                <div className="flex items-center justify-between font-mono text-[10px]">
-                  <span className="text-muted-foreground">Execuções</span>
-                  <span className="text-foreground">{s.executions.toLocaleString()}</span>
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className="text-muted-foreground font-medium">Execuções</span>
+                  <span className="text-foreground tabular-nums">{s.executions.toLocaleString()}</span>
                 </div>
                 <Progress value={(s.executions / maxExec) * 100} className="h-1" />
               </div>
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <p className="font-mono text-[9px] text-muted-foreground">Tokens</p>
-                  <p className="font-mono text-xs font-semibold text-foreground">{formatTokens(s.tokens)}</p>
+                  <p className="text-[9px] text-muted-foreground font-medium">Tokens</p>
+                  <p className="text-[12px] font-semibold text-foreground tabular-nums">{formatTokens(s.tokens)}</p>
                 </div>
                 <div>
-                  <p className="font-mono text-[9px] text-muted-foreground">$/Exec</p>
-                  <p className="font-mono text-xs font-semibold text-foreground">${costPerExec.toFixed(3)}</p>
+                  <p className="text-[9px] text-muted-foreground font-medium">$/Exec</p>
+                  <p className="text-[12px] font-semibold text-foreground tabular-nums">${costPerExec.toFixed(3)}</p>
                 </div>
                 <div>
-                  <p className="font-mono text-[9px] text-muted-foreground">Sucesso</p>
+                  <p className="text-[9px] text-muted-foreground font-medium">Sucesso</p>
                   <div className="flex items-center gap-1">
                     {s.successRate >= 95 ? (
                       <CheckCircle className="h-3 w-3 text-terminal" />
                     ) : (
                       <XCircle className="h-3 w-3 text-amber" />
                     )}
-                    <span className={`font-mono text-xs font-semibold ${s.successRate >= 95 ? "text-terminal" : s.successRate >= 90 ? "text-amber" : "text-rose"}`}>
+                    <span className={`text-[12px] font-semibold tabular-nums ${s.successRate >= 95 ? "text-terminal" : s.successRate >= 90 ? "text-amber" : "text-rose"}`}>
                       {s.successRate}%
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Success/Failure micro bar */}
               <div className="flex h-1 rounded-full overflow-hidden">
                 <div className="bg-terminal" style={{ width: `${s.successRate}%` }} />
                 <div className="bg-rose" style={{ width: `${failRate}%` }} />
