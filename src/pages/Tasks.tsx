@@ -7,6 +7,7 @@ import { PageTransition } from "@/components/animations/MotionPrimitives";
 import { useTasks } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import TaskDetailSheet from "@/components/tasks/TaskDetailSheet";
+import CreateTaskDialog from "@/components/tasks/CreateTaskDialog";
 
 type TaskStatus = "done" | "in_progress" | "todo" | "blocked";
 type TaskPriority = "critical" | "high" | "medium" | "low";
