@@ -4,38 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PageTransition } from "@/components/animations/MotionPrimitives";
+import { useTasks } from "@/hooks/use-supabase-data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type TaskStatus = "done" | "in_progress" | "todo" | "blocked";
 type TaskPriority = "critical" | "high" | "medium" | "low";
-
-interface Task {
-  id: string;
-  name: string;
-  agent: string;
-  emoji: string;
-  mission: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  duration: string;
-  tokens: number;
-  cost: number;
-  created: string;
-}
-
-const tasks: Task[] = [
-  { id: "t1", name: "Criar middleware JWT", agent: "Coder", emoji: "💻", mission: "Auth Feature v2", status: "done", priority: "critical", duration: "12.3s", tokens: 34200, cost: 0.42, created: "14:32" },
-  { id: "t2", name: "Implementar refresh tokens", agent: "Coder", emoji: "💻", mission: "Auth Feature v2", status: "done", priority: "critical", duration: "8.7s", tokens: 28400, cost: 0.35, created: "14:28" },
-  { id: "t3", name: "RBAC policies", agent: "Coder", emoji: "💻", mission: "Auth Feature v2", status: "in_progress", priority: "high", duration: "—", tokens: 15200, cost: 0.19, created: "14:25" },
-  { id: "t4", name: "Rollback automático", agent: "Deployer", emoji: "🚀", mission: "Deploy Pipeline v2.3", status: "in_progress", priority: "high", duration: "—", tokens: 8900, cost: 0.11, created: "14:20" },
-  { id: "t5", name: "Secret rotation", agent: "Scout", emoji: "🔍", mission: "Security Hardening Q1", status: "in_progress", priority: "critical", duration: "—", tokens: 22100, cost: 0.28, created: "14:18" },
-  { id: "t6", name: "Security audit auth flow", agent: "Scout", emoji: "🔍", mission: "Auth Feature v2", status: "todo", priority: "high", duration: "—", tokens: 0, cost: 0, created: "14:15" },
-  { id: "t7", name: "Testes e2e auth", agent: "Coder", emoji: "💻", mission: "Auth Feature v2", status: "todo", priority: "medium", duration: "—", tokens: 0, cost: 0, created: "14:12" },
-  { id: "t8", name: "OWASP compliance check", agent: "Scout", emoji: "🔍", mission: "Security Hardening Q1", status: "todo", priority: "high", duration: "—", tokens: 0, cost: 0, created: "14:10" },
-  { id: "t9", name: "Monitoring integration", agent: "Analyst", emoji: "📊", mission: "Deploy Pipeline v2.3", status: "todo", priority: "medium", duration: "—", tokens: 0, cost: 0, created: "14:08" },
-  { id: "t10", name: "Otimizar N+1 queries", agent: "Coder", emoji: "💻", mission: "Performance Optimization", status: "blocked", priority: "medium", duration: "—", tokens: 0, cost: 0, created: "14:05" },
-  { id: "t11", name: "Load testing", agent: "Deployer", emoji: "🚀", mission: "Performance Optimization", status: "blocked", priority: "low", duration: "—", tokens: 0, cost: 0, created: "14:02" },
-  { id: "t12", name: "Pen test automatizado", agent: "Scout", emoji: "🔍", mission: "Security Hardening Q1", status: "todo", priority: "high", duration: "—", tokens: 0, cost: 0, created: "14:00" },
-];
 
 const statusConfig: Record<TaskStatus, { color: string; icon: React.ReactNode; label: string }> = {
   done: { color: "bg-terminal/15 text-terminal border-terminal/30", icon: <CheckCircle2 className="h-3.5 w-3.5" />, label: "Concluído" },
@@ -64,10 +37,26 @@ const Tasks = () => {
   const [searchParams] = useSearchParams();
   const missionFilter = searchParams.get("mission");
   const [filter, setFilter] = useState<string>("all");
+  const { data: tasks, isLoading } = useTasks();
 
-  const baseTasks = missionFilter ? tasks.filter((t) => t.mission === missionFilter) : tasks;
-  const filteredTasks = filter === "all" ? baseTasks : baseTasks.filter((t) => t.agent === filter);
-  const agents = [...new Set(baseTasks.map((t) => t.agent))];
+  if (isLoading) {
+    return (
+      <PageTransition className="space-y-6">
+        <div className="flex items-center gap-3">
+          <ListChecks className="h-6 w-6 text-terminal" />
+          <h1 className="font-mono text-xl font-semibold text-foreground">Tarefas</h1>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-48" />)}
+        </div>
+      </PageTransition>
+    );
+  }
+
+  const allTasks = tasks ?? [];
+  const baseTasks = missionFilter ? allTasks.filter((t) => t.mission_id === missionFilter) : allTasks;
+  const filteredTasks = filter === "all" ? baseTasks : baseTasks.filter((t) => t.agents?.name === filter);
+  const agents = [...new Set(baseTasks.map((t) => t.agents?.name).filter(Boolean))];
 
   return (
     <PageTransition className="space-y-6">
@@ -77,7 +66,7 @@ const Tasks = () => {
           <h1 className="font-mono text-xl font-semibold text-foreground">Tarefas</h1>
           {missionFilter && (
             <Badge variant="outline" className="font-mono text-[10px] px-2 py-0.5 border-violet/30 bg-violet/10 text-violet">
-              {missionFilter}
+              {baseTasks[0]?.missions?.name ?? missionFilter}
             </Badge>
           )}
         </div>
@@ -96,7 +85,7 @@ const Tasks = () => {
                 key={a}
                 variant="outline"
                 className={`font-mono text-[10px] px-2 py-0.5 cursor-pointer border ${filter === a ? "bg-terminal/15 text-terminal border-terminal/30" : "border-border text-muted-foreground"}`}
-                onClick={() => setFilter(a)}
+                onClick={() => setFilter(a!)}
               >
                 {a}
               </Badge>
@@ -105,7 +94,6 @@ const Tasks = () => {
         </div>
       </div>
 
-      {/* Kanban columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {columns.map((col) => {
           const colTasks = filteredTasks.filter((t) => t.status === col.key);
@@ -123,23 +111,23 @@ const Tasks = () => {
                     <CardContent className="p-3 space-y-2">
                       <div className="flex items-start justify-between">
                         <p className="font-mono text-xs font-semibold text-foreground leading-tight">{t.name}</p>
-                        <Badge variant="outline" className={`font-mono text-[8px] px-1 py-0 border shrink-0 ${priorityColor[t.priority]}`}>
+                        <Badge variant="outline" className={`font-mono text-[8px] px-1 py-0 border shrink-0 ${priorityColor[t.priority as TaskPriority] ?? ""}`}>
                           {t.priority}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
-                        <span>{t.emoji} {t.agent}</span>
+                        <span>{t.agents?.emoji} {t.agents?.name}</span>
                         <span>·</span>
-                        <span className="truncate">{t.mission}</span>
+                        <span className="truncate">{t.missions?.name}</span>
                       </div>
                       {t.status === "done" && (
                         <div className="flex items-center justify-between font-mono text-[10px]">
                           <span className="text-muted-foreground">{t.duration}</span>
-                          <span className="text-terminal">${t.cost.toFixed(2)}</span>
+                          <span className="text-terminal">${(t.cost ?? 0).toFixed(2)}</span>
                         </div>
                       )}
-                      {t.tokens > 0 && (
-                        <div className="font-mono text-[9px] text-muted-foreground">{formatTokens(t.tokens)} tokens</div>
+                      {(t.tokens ?? 0) > 0 && (
+                        <div className="font-mono text-[9px] text-muted-foreground">{formatTokens(t.tokens ?? 0)} tokens</div>
                       )}
                     </CardContent>
                   </Card>
