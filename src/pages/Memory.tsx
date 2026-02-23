@@ -216,8 +216,8 @@ const Memory = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm">{tc.emoji}</span>
-                          <Badge variant="outline" className={`font-mono text-[8px] px-1.5 py-0 border ${tc.color}`}>{tc.label}</Badge>
-                          <span className="font-mono text-[10px] text-muted-foreground">{agent?.emoji} {agent?.name}</span>
+                          <Badge variant="outline" className={`text-[9px] px-1.5 py-0 border rounded-full font-medium ${tc.color}`}>{tc.label}</Badge>
+                          <span className="text-[11px] text-muted-foreground">{agent?.emoji} {agent?.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-16">
