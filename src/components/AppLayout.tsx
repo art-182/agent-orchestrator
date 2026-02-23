@@ -14,6 +14,7 @@ const routeLabels: Record<string, string> = {
   "/timeline": "Timeline",
   "/memory": "Memória",
   "/finances": "Finanças",
+  "/roi": "ROI",
   "/traces": "Traces & Erros",
 };
 
@@ -24,7 +25,7 @@ function LiveClock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span className="font-mono text-xs text-terminal tabular-nums">
+    <span className="font-mono text-sm text-terminal tabular-nums tracking-tight">
       {time.toLocaleTimeString("pt-BR", { hour12: false })}
     </span>
   );
@@ -39,15 +40,15 @@ export default function AppLayout() {
       <div className="flex min-h-svh w-full">
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-12 items-center gap-3 border-b border-border px-4">
-            <SidebarTrigger className="text-muted-foreground hover:text-terminal" />
-            <span className="font-mono text-sm text-muted-foreground">/</span>
-            <span className="font-mono text-sm text-foreground">{label}</span>
+          <header className="flex h-14 items-center gap-3 border-b border-border px-5">
+            <SidebarTrigger className="text-muted-foreground hover:text-terminal transition-colors" />
+            <span className="text-sm text-muted-foreground">/</span>
+            <span className="text-sm font-medium text-foreground">{label}</span>
             <div className="ml-auto">
               <LiveClock />
             </div>
           </header>
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-5 md:p-6 lg:p-8">
             <Outlet />
           </main>
         </SidebarInset>
