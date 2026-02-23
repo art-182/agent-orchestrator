@@ -70,6 +70,56 @@ export interface SkillCost {
   successRate: number;
 }
 
+export interface ProviderLimit {
+  provider: string;
+  tier: string;
+  rpmLimit: number;
+  rpmUsed: number;
+  tpmLimit: number;
+  tpmUsed: number;
+  dailyBudget: number;
+  dailySpent: number;
+  monthlyBudget: number;
+  monthlySpent: number;
+  rateLimitHits24h: number;
+  avgLatency: number;
+  p99Latency: number;
+  uptime: number;
+  fallbackProvider: string | null;
+  fallbackModel: string | null;
+  fallbackActivations24h: number;
+  models: ProviderModelQuota[];
+}
+
+export interface ProviderModelQuota {
+  model: string;
+  rpmLimit: number;
+  rpmUsed: number;
+  tpmLimit: number;
+  tpmUsed: number;
+  contextWindow: number;
+  maxOutput: number;
+}
+
+export interface RateLimitEvent {
+  timestamp: string;
+  provider: string;
+  model: string;
+  type: "rate_limit" | "timeout" | "error" | "fallback_activated";
+  detail: string;
+  fallbackUsed: string | null;
+  latencyMs: number;
+}
+
+export interface CostAnomaly {
+  date: string;
+  provider: string;
+  expectedCost: number;
+  actualCost: number;
+  deviation: number;
+  reason: string;
+}
+
 // ── Mock Daily Costs (last 14 days) ────────────────────
 
 export const mockDailyCosts: DailyCost[] = [
