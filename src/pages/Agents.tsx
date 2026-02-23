@@ -99,11 +99,16 @@ const Agents = () => {
       <Tabs defaultValue="overview" className="mt-2">
         <TabsList className="bg-muted/30 border border-border/30 rounded-xl p-1">
           <TabsTrigger value="overview" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Organograma</TabsTrigger>
+          <TabsTrigger value="skills" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Grafo de Skills</TabsTrigger>
           <TabsTrigger value="performance" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Desempenho</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
           <AgentOrgChart agents={filtered} onSelectAgent={setSelectedAgent} />
+        </TabsContent>
+
+        <TabsContent value="skills" className="mt-4">
+          <SkillsNetworkGraph agents={agents ?? []} onSelectAgent={setSelectedAgent} />
         </TabsContent>
 
         <TabsContent value="performance" className="mt-4">
