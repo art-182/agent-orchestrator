@@ -27,7 +27,7 @@ const CommandCenter = () => (
       </div>
       <ProviderStatus />
     </div>
-  </div>
+  </PageTransition>
 );
 
 export default CommandCenter;
