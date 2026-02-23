@@ -29,13 +29,16 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarHeader className="px-4 py-5">
-        <div className="flex items-center gap-2.5 overflow-hidden">
-          <Terminal className="h-5 w-5 text-terminal shrink-0 glow-icon" />
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border/50">
+      <SidebarHeader className="px-4 py-6">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="relative">
+            <Terminal className="h-5 w-5 text-terminal shrink-0 glow-icon" />
+            <div className="absolute -inset-1 bg-terminal/10 rounded-full blur-sm" />
+          </div>
           {!collapsed && (
-            <span className="font-mono text-base font-semibold text-terminal tracking-tight whitespace-nowrap">
-              {">_"} Revenue OS
+            <span className="text-[15px] font-semibold text-terminal tracking-tight whitespace-nowrap">
+              Revenue OS
             </span>
           )}
         </div>
@@ -44,18 +47,18 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-0.5">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="flex items-center gap-3 text-sidebar-foreground transition-all duration-200 py-2"
-                      activeClassName="text-terminal bg-sidebar-accent glow-terminal"
+                      className="flex items-center gap-3 text-sidebar-foreground/70 transition-all duration-200 py-2.5 px-3 rounded-xl hover:text-foreground hover:bg-sidebar-accent/50"
+                      activeClassName="text-terminal bg-terminal/8 glow-terminal"
                     >
-                      <item.icon className="h-[18px] w-[18px] shrink-0" />
-                      <span className="truncate text-[14px]">{item.title}</span>
+                      <item.icon className="h-[17px] w-[17px] shrink-0" />
+                      <span className="truncate text-[13px] font-medium">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -65,7 +68,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 border-t border-sidebar-border/30">
         <RealtimeIndicator />
       </SidebarFooter>
     </Sidebar>
