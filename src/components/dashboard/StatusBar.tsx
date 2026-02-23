@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { useAgents } from "@/hooks/use-supabase-data";
 
 const iconMap: Record<string, React.ReactNode> = {
-  Bot: <Bot className="h-3 w-3" />,
-  TrendingUp: <TrendingUp className="h-3 w-3" />,
-  DollarSign: <DollarSign className="h-3 w-3" />,
-  Activity: <Activity className="h-3 w-3" />,
+  Bot: <Bot className="h-3.5 w-3.5" />,
+  TrendingUp: <TrendingUp className="h-3.5 w-3.5" />,
+  DollarSign: <DollarSign className="h-3.5 w-3.5" />,
+  Activity: <Activity className="h-3.5 w-3.5" />,
 };
 
 const StatusBar = () => {
@@ -26,10 +26,10 @@ const StatusBar = () => {
   return (
     <div className="flex flex-wrap gap-3">
       {badges.map((badge) => (
-        <Badge key={badge.label} variant="outline" className="gap-1.5 rounded-md border-border bg-card px-3 py-1.5 font-mono text-xs">
+        <Badge key={badge.label} variant="outline" className="gap-2 rounded-lg border-border bg-card px-4 py-2 font-mono text-sm">
           <span className="text-terminal">{iconMap[badge.icon]}</span>
           <span className="text-muted-foreground">{badge.label}:</span>
-          <span className="text-foreground">{badge.value}</span>
+          <span className="text-foreground font-semibold">{badge.value}</span>
         </Badge>
       ))}
     </div>
