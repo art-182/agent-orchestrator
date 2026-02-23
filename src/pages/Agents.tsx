@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { Bot, Search, Filter } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import AgentDetailSheet from "@/components/agents/AgentDetailSheet";
 import AgentPerformanceTable from "@/components/agents/AgentPerformanceTable";
 import AgentOrgChart from "@/components/agents/AgentOrgChart";
-import SkillsNetworkGraph from "@/components/agents/SkillsNetworkGraph";
+const SkillsNetworkGraph = lazy(() => import("@/components/agents/SkillsNetworkGraph"));
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { useAgents } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -108,7 +108,9 @@ const Agents = () => {
         </TabsContent>
 
         <TabsContent value="skills" className="mt-4">
-          <SkillsNetworkGraph agents={agents ?? []} onSelectAgent={setSelectedAgent} />
+          <Suspense fallback={<Skeleton className="h-[600px] rounded-xl" />}>
+            <SkillsNetworkGraph agents={agents ?? []} onSelectAgent={setSelectedAgent} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="performance" className="mt-4">
