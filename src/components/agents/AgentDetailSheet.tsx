@@ -188,6 +188,86 @@ const SoulMdViewer = ({ content }: { content: string }) => {
   );
 };
 
+// ── ROI View ───────────────────────────────────────────
+
+const AgentROIView = ({ roi, agent }: { roi: AgentROI; agent: Agent }) => (
+  <ScrollArea className="h-[450px] pr-2">
+    <div className="space-y-4">
+      {/* Hero ROI */}
+      <div className="rounded-lg border border-terminal/30 bg-terminal/5 p-4 text-center">
+        <p className="font-mono text-[10px] text-muted-foreground">ROI deste agente</p>
+        <p className="font-mono text-3xl font-bold text-terminal">{roi.roiMultiplier}x</p>
+        <p className="font-mono text-xs text-muted-foreground mt-1">retorno sobre investimento</p>
+      </div>
+
+      {/* Key metrics grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <p className="text-[10px] font-mono text-muted-foreground">Economia Mensal</p>
+          <p className="text-lg font-bold font-mono text-terminal">${roi.monthlySavings.toLocaleString()}</p>
+          <p className="text-[9px] font-mono text-muted-foreground">${roi.weeklySavings.toLocaleString()}/sem</p>
+        </div>
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <p className="text-[10px] font-mono text-muted-foreground">Horas Poupadas/Sem</p>
+          <p className="text-lg font-bold font-mono text-cyan">{roi.hoursPerWeekSaved}h</p>
+          <p className="text-[9px] font-mono text-muted-foreground">@${roi.costPerHourHuman}/h humano</p>
+        </div>
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <p className="text-[10px] font-mono text-muted-foreground">Speedup vs Humano</p>
+          <p className="text-lg font-bold font-mono text-amber">{roi.speedup}</p>
+          <p className="text-[9px] font-mono text-muted-foreground">{roi.avgTaskTimeHuman} → {roi.avgTaskTimeAgent}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-muted/30 p-3">
+          <p className="text-[10px] font-mono text-muted-foreground">Impacto em Receita</p>
+          <p className="text-lg font-bold font-mono text-violet">{roi.revenueImpact}</p>
+        </div>
+      </div>
+
+      <Separator className="bg-border" />
+
+      {/* Automation & Quality */}
+      <div className="space-y-3">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between font-mono text-xs">
+            <span className="text-muted-foreground">Taxa de Automação</span>
+            <span className="text-foreground font-semibold">{roi.automationRate}%</span>
+          </div>
+          <Progress value={roi.automationRate} className="h-2" />
+          <p className="text-[9px] font-mono text-muted-foreground">{roi.tasksAutomated.toLocaleString()} de {agent.metrics.tasksCompleted.toLocaleString()} tarefas automatizadas</p>
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between font-mono text-xs">
+            <span className="text-muted-foreground">Quality Score</span>
+            <span className={`font-semibold ${roi.qualityScore >= 95 ? "text-terminal" : roi.qualityScore >= 90 ? "text-amber" : "text-rose"}`}>{roi.qualityScore}%</span>
+          </div>
+          <Progress value={roi.qualityScore} className="h-2" />
+        </div>
+      </div>
+
+      <Separator className="bg-border" />
+
+      {/* Investor metrics */}
+      <div className="space-y-2">
+        <p className="font-mono text-xs font-semibold text-foreground">Métricas para Investidores</p>
+        {[
+          { label: "Custo Operacional (agente)", value: `$${agent.metrics.totalCost.toFixed(2)}/mês` },
+          { label: "Custo Equivalente (humano)", value: `$${(roi.hoursPerWeekSaved * roi.costPerHourHuman * 4.33).toFixed(0)}/mês` },
+          { label: "Economia Anual Projetada", value: `$${(roi.monthlySavings * 12).toLocaleString()}` },
+          { label: "Incidentes Prevenidos", value: `${roi.incidentsPrevented} este mês` },
+          { label: "Payback Period", value: roi.roiMultiplier > 20 ? "< 2 dias" : roi.roiMultiplier > 10 ? "< 1 semana" : "< 2 semanas" },
+          { label: "Custo por Tarefa Automatizada", value: `$${(agent.metrics.totalCost / roi.tasksAutomated).toFixed(3)}` },
+        ].map((m) => (
+          <div key={m.label} className="flex items-center justify-between font-mono text-xs py-1 border-b border-border/50 last:border-0">
+            <span className="text-muted-foreground">{m.label}</span>
+            <span className="text-foreground font-semibold">{m.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </ScrollArea>
+);
+
 // ── Main Component ─────────────────────────────────────
 
 const AgentDetailSheet = ({ agent, open, onOpenChange }: AgentDetailSheetProps) => {
