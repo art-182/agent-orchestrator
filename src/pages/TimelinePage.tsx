@@ -220,9 +220,9 @@ const TimelinePage = () => {
           <div className="overflow-x-auto flex-1" ref={scrollRef}>
             <div style={{ minWidth: HOURS.length * HOUR_WIDTH }}>
               {/* Time headers */}
-              <div className="flex h-10 border-b border-border">
+              <div className="flex h-10 border-b border-border/30">
                 {HOURS.map((h) => (
-                  <div key={h} className="flex items-center justify-center border-r border-border/30 font-mono text-[10px] text-muted-foreground relative" style={{ width: HOUR_WIDTH }}>
+                  <div key={h} className="flex items-center justify-center border-r border-border/15 text-[10px] text-muted-foreground tabular-nums relative" style={{ width: HOUR_WIDTH }}>
                     {String(h).padStart(2, "0")}:00
                     {/* Half hour mark */}
                     <div className="absolute bottom-0 left-1/2 w-px h-2 bg-border/30" />
