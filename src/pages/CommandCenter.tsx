@@ -4,9 +4,10 @@ import MetricCard from "@/components/dashboard/MetricCard";
 import LiveFeed from "@/components/dashboard/LiveFeed";
 import ProviderStatus from "@/components/dashboard/ProviderStatus";
 import { mockDashboardMetrics } from "@/lib/mock-data";
+import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 
 const CommandCenter = () => (
-  <div className="space-y-6">
+  <PageTransition className="space-y-6">
     <div className="flex items-center gap-3">
       <LayoutDashboard className="h-6 w-6 text-terminal" />
       <h1 className="font-mono text-xl font-semibold text-foreground">Command Center</h1>
