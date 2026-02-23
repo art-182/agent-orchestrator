@@ -30,7 +30,8 @@ const MetricCard = ({ metric }: { metric: DashboardMetric }) => {
   const data = metric.sparkline.map((v, i) => ({ v, i }));
   const { icon, color } = iconMap[metric.icon] ?? { icon: null, color: "text-foreground" };
   const stroke = strokeColors[metric.icon] ?? "hsl(160, 51%, 49%)";
-  const trendColor = metric.trend === "down" ? "text-terminal" : metric.trend === "up" ? "text-rose" : "text-muted-foreground";
+  const isPositive = (metric.icon === "DollarSign" && metric.trend === "down") || (metric.icon !== "DollarSign" && metric.trend === "up");
+  const trendColor = isPositive ? "text-terminal" : "text-rose";
 
   return (
     <motion.div whileHover={{ y: -2, transition: { duration: 0.2 } }}>
