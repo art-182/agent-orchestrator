@@ -32,8 +32,8 @@ const Agents = () => {
     return (
       <PageTransition className="space-y-6">
         <div className="flex items-center gap-3">
-          <Bot className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Agentes</h1>
+          <div className="bg-violet/10 text-violet p-2 rounded-xl"><Bot className="h-5 w-5" /></div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Agentes</h1>
         </div>
         <Skeleton className="h-64" />
       </PageTransition>
@@ -49,55 +49,56 @@ const Agents = () => {
   return (
     <PageTransition className="space-y-6">
       <div className="flex items-center gap-3">
-        <Bot className="h-7 w-7 text-terminal" />
+        <div className="bg-violet/10 text-violet p-2 rounded-xl">
+          <Bot className="h-5 w-5" />
+        </div>
         <div>
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Agentes</h1>
-          <p className="text-xs text-muted-foreground">{all.length} agentes · {online} online</p>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Agentes</h1>
+          <p className="text-[11px] text-muted-foreground font-medium">{all.length} agentes · {online} online</p>
         </div>
       </div>
 
       <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "Online", value: `${online}/${all.length}`, color: "text-terminal" },
-          { label: "Tarefas Total", value: totalTasks.toString(), color: "text-cyan" },
+          { label: "Tarefas", value: totalTasks.toString(), color: "text-cyan" },
           { label: "Custo Total", value: `$${totalCost.toFixed(2)}`, color: "text-amber" },
           { label: "Erro Médio", value: `${avgError}%`, color: "text-rose" },
         ].map((s) => (
           <FadeIn key={s.label}>
-            <Card className="border-border bg-card">
-              <CardContent className="p-3">
-                <p className="font-mono text-[10px] text-muted-foreground">{s.label}</p>
-                <p className={`font-mono text-xl font-bold ${s.color}`}>{s.value}</p>
+            <Card className="border-border/50 bg-card surface-elevated">
+              <CardContent className="p-4">
+                <p className="text-[11px] text-muted-foreground font-medium">{s.label}</p>
+                <p className={`text-xl font-bold ${s.color} tracking-tight`}>{s.value}</p>
               </CardContent>
             </Card>
           </FadeIn>
         ))}
       </StaggerContainer>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar agentes..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 font-mono text-xs bg-card border-border" />
+          <Input placeholder="Buscar agentes..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 text-[12px] bg-card border-border/50 rounded-xl" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[130px] font-mono text-xs bg-card border-border">
+          <SelectTrigger className="w-[130px] text-[12px] bg-card border-border/50 rounded-xl">
             <Filter className="h-3.5 w-3.5 mr-1.5" />
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" className="font-mono text-xs">Todos</SelectItem>
+            <SelectItem value="all" className="text-[12px]">Todos</SelectItem>
             {["online", "busy", "idle", "error"].map((s) => (
-              <SelectItem key={s} value={s} className="font-mono text-xs">{s}</SelectItem>
+              <SelectItem key={s} value={s} className="text-[12px]">{s}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
       <Tabs defaultValue="overview" className="mt-2">
-        <TabsList className="font-mono">
-          <TabsTrigger value="overview" className="font-mono text-xs">Organograma</TabsTrigger>
-          <TabsTrigger value="performance" className="font-mono text-xs">Desempenho</TabsTrigger>
+        <TabsList className="bg-muted/30 border border-border/30 rounded-xl p-1">
+          <TabsTrigger value="overview" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Organograma</TabsTrigger>
+          <TabsTrigger value="performance" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Desempenho</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
@@ -109,11 +110,7 @@ const Agents = () => {
         </TabsContent>
       </Tabs>
 
-      <AgentDetailSheet
-        agent={selectedAgent}
-        open={!!selectedAgent}
-        onOpenChange={(open) => !open && setSelectedAgent(null)}
-      />
+      <AgentDetailSheet agent={selectedAgent} open={!!selectedAgent} onOpenChange={(open) => !open && setSelectedAgent(null)} />
     </PageTransition>
   );
 };
