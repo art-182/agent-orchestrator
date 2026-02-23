@@ -5,6 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import AgentCard from "@/components/agents/AgentCard";
 import AgentDetailSheet from "@/components/agents/AgentDetailSheet";
 import AgentPerformanceTable from "@/components/agents/AgentPerformanceTable";
+import AgentOrgChart from "@/components/agents/AgentOrgChart";
 import { mockAgents, statusColorMap } from "@/lib/mock-data";
 import type { Agent } from "@/lib/mock-data";
 
