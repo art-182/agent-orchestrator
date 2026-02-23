@@ -154,7 +154,7 @@ const Tasks = () => {
           );
         })}
       </div>
-    </div>
+    </PageTransition>
   );
 };
 
