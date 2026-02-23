@@ -15,7 +15,7 @@ import SkillCostTable from "@/components/finances/SkillCostTable";
 import ProjectionDetails from "@/components/finances/ProjectionDetails";
 import ProviderLimitsView from "@/components/finances/ProviderLimitsView";
 import { PageTransition } from "@/components/animations/MotionPrimitives";
-import { useDailyCosts, useBillingSnapshots, useAgents } from "@/hooks/use-supabase-data";
+import { useDailyCosts, useAgents } from "@/hooks/use-supabase-data";
 import {
   mockProviderBreakdown, mockDailyTokens, mockModelPricing, mockMonthlyProjections,
   mockToolCosts, mockSkillCosts, mockProviderLimits, mockRateLimitEvents, mockCostAnomalies,
