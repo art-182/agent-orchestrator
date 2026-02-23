@@ -3,6 +3,13 @@
 export type AgentStatus = "online" | "busy" | "idle" | "error";
 export type ProviderHealthStatus = "healthy" | "degraded" | "down";
 
+export interface AgentSkill {
+  name: string;
+  level: number; // 0-100
+  category: string;
+  connections: string[]; // names of connected skills
+}
+
 export interface Agent {
   id: string;
   name: string;
@@ -20,6 +27,8 @@ export interface Agent {
     totalCost: number;
   };
   recentTasks: { name: string; status: "done" | "running" | "error"; duration: string }[];
+  skills: AgentSkill[];
+  soulMd: string;
 }
 
 export interface FeedEvent {
