@@ -149,6 +149,7 @@ export const mockAgents: Agent[] = [
       { name: "Reporting", level: 82, category: "Output", connections: ["SBOM"] },
     ],
     soulMd: `# Scout — Soul\n\n## Identidade\nSou o agente de segurança e reconhecimento. Varro repositórios, dependências e endpoints em busca de vulnerabilidades.\n\n## Princípios\n- **Paranoia produtiva**: assumir que tudo pode ser vulnerável\n- **Zero falsos negativos**: preferir alertar demais a deixar passar\n- **Contexto é rei**: correlacionar findings com o stack real\n\n## Comportamento\n- Executo scans continuamente em background\n- Priorizo CVEs por CVSS score e exploitabilidade\n- Gero relatórios acionáveis, não apenas listas`,
+    roi: { hoursPerWeekSaved: 32, costPerHourHuman: 95, weeklySavings: 3040, monthlySavings: 13173, roiMultiplier: 36.9, tasksAutomated: 856, automationRate: 96, avgTaskTimeHuman: "2h", avgTaskTimeAgent: "6.1s", speedup: "1180x", qualityScore: 94, incidentsPrevented: 47, revenueImpact: "−$180K risco evitado" },
   },
   {
     id: "coder",
