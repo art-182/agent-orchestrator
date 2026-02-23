@@ -61,17 +61,25 @@ const columns: { key: TaskStatus; label: string }[] = [
 const formatTokens = (n: number) => n >= 1_000 ? `${(n / 1_000).toFixed(0)}K` : n.toString();
 
 const Tasks = () => {
+  const [searchParams] = useSearchParams();
+  const missionFilter = searchParams.get("mission");
   const [filter, setFilter] = useState<string>("all");
 
-  const filteredTasks = filter === "all" ? tasks : tasks.filter((t) => t.agent === filter);
-  const agents = [...new Set(tasks.map((t) => t.agent))];
+  const baseTasks = missionFilter ? tasks.filter((t) => t.mission === missionFilter) : tasks;
+  const filteredTasks = filter === "all" ? baseTasks : baseTasks.filter((t) => t.agent === filter);
+  const agents = [...new Set(baseTasks.map((t) => t.agent))];
 
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ListChecks className="h-6 w-6 text-terminal" />
           <h1 className="font-mono text-xl font-semibold text-foreground">Tarefas</h1>
+          {missionFilter && (
+            <Badge variant="outline" className="font-mono text-[10px] px-2 py-0.5 border-violet/30 bg-violet/10 text-violet">
+              {missionFilter}
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Filter className="h-3.5 w-3.5 text-muted-foreground" />
