@@ -72,6 +72,7 @@ const Tasks = () => {
               {baseTasks[0]?.missions?.name ?? missionFilter}
             </Badge>
           )}
+          <CreateTaskDialog />
         </div>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
