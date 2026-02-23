@@ -62,7 +62,20 @@ const Tasks = () => {
     const { active, over } = event;
     if (!over) return;
     const taskId = active.id as string;
-    const newStatus = over.id as string;
+    
+    // Determine new status: over.id could be a column id or another task id
+    let newStatus = over.id as string;
+    const validStatuses = ["done", "in_progress", "todo", "blocked"];
+    if (!validStatuses.includes(newStatus)) {
+      // over.id is a task id, find which column it belongs to
+      const overTask = (tasks ?? []).find((t) => t.id === newStatus);
+      if (overTask) {
+        newStatus = overTask.status;
+      } else {
+        return;
+      }
+    }
+    
     const task = (tasks ?? []).find((t) => t.id === taskId);
     if (!task || task.status === newStatus) return;
     queryClient.setQueryData(["tasks"], (old: any[]) => old?.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
