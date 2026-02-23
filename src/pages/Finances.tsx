@@ -1,4 +1,5 @@
-import { DollarSign, Download } from "lucide-react";
+import { DollarSign, Download, TrendingUp, Users, BarChart3 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { exportDailyCostsCSV, exportAgentCostsCSV } from "@/lib/export-utils";
