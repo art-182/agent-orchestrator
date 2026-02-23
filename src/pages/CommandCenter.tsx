@@ -69,7 +69,7 @@ const CommandCenter = () => {
 
       {/* Live Feed + Active Missions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 auto-rows-fr">
-        <div className="lg:col-span-2 flex">
+        <div className="lg:col-span-2 flex min-w-0">
           <LiveFeed />
         </div>
         <div className="flex">
