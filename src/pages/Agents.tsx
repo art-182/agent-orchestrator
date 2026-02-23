@@ -106,11 +106,8 @@ const Agents = () => {
           <AgentOrgChart agents={filtered} onSelectAgent={setSelectedAgent} />
         </TabsContent>
 
-        <TabsContent value="skills" className="mt-4">
-          <Suspense fallback={<Skeleton className="h-[600px] rounded-xl" />}>
-            <SkillsNetworkGraph agents={agents ?? []} onSelectAgent={setSelectedAgent} />
-          </Suspense>
-        </TabsContent>
+
+
 
         <TabsContent value="performance" className="mt-4">
           <AgentPerformanceTable agents={filtered} />
