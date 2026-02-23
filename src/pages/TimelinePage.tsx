@@ -198,19 +198,19 @@ const TimelinePage = () => {
       </div>
 
       {/* Gantt Chart */}
-      <div className="border border-border rounded-lg bg-card overflow-hidden">
+      <div className="border border-border/50 rounded-2xl bg-card surface-elevated overflow-hidden">
         <div className="flex">
           {/* Agent labels column */}
-          <div className="shrink-0 w-[180px] border-r border-border z-10 bg-card">
-            <div className="h-10 border-b border-border flex items-center px-3">
-              <span className="font-mono text-[10px] text-muted-foreground">Agentes</span>
+          <div className="shrink-0 w-[180px] border-r border-border/30 z-10 bg-card">
+            <div className="h-10 border-b border-border/30 flex items-center px-3">
+              <span className="text-[11px] text-muted-foreground font-medium">Agentes</span>
             </div>
             {ganttData.map((row) => (
-              <div key={row.agent.id} className="flex items-center gap-2 px-3 border-b border-border/50" style={{ height: ROW_HEIGHT }}>
+              <div key={row.agent.id} className="flex items-center gap-2 px-3 border-b border-border/20" style={{ height: ROW_HEIGHT }}>
                 <span className="text-base">{row.agent.emoji}</span>
                 <div className="min-w-0">
-                  <p className="font-mono text-xs font-semibold text-foreground truncate">{row.agent.name}</p>
-                  <p className="font-mono text-[9px] text-muted-foreground">{row.agent.model}</p>
+                  <p className="text-[12px] font-semibold text-foreground truncate">{row.agent.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{row.agent.model}</p>
                 </div>
               </div>
             ))}
