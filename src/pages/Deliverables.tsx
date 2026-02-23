@@ -1,7 +1,11 @@
-import { PackageCheck, FileCode, FileText, Shield, TestTube, ExternalLink } from "lucide-react";
+import { PackageCheck, FileCode, FileText, Shield, TestTube, ExternalLink, Search, Filter, BarChart3 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { useState, useMemo } from "react";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { useDeliverables } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,6 +31,32 @@ const statusConfig: Record<DeliverableStatus, { color: string; label: string }> 
 
 const Deliverables = () => {
   const { data: deliverables, isLoading } = useDeliverables();
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const list = deliverables ?? [];
+
+  const filtered = useMemo(() => {
+    return list.filter((d) => {
+      if (search && !d.name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (typeFilter !== "all" && d.type !== typeFilter) return false;
+      if (statusFilter !== "all" && d.status !== statusFilter) return false;
+      return true;
+    });
+  }, [list, search, typeFilter, statusFilter]);
+
+  const delivered = list.filter((d) => d.status === "delivered").length;
+  const totalFiles = list.reduce((s, d) => s + (d.files ?? 0), 0);
+  const totalLines = list.reduce((s, d) => s + (d.lines_changed ?? 0), 0);
+  const deliveryRate = list.length > 0 ? Math.round((delivered / list.length) * 100) : 0;
+
+  // Type distribution
+  const typeDist = useMemo(() => {
+    const map: Record<string, number> = {};
+    list.forEach((d) => { map[d.type] = (map[d.type] ?? 0) + 1; });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [list]);
 
   if (isLoading) {
     return (
@@ -42,38 +72,92 @@ const Deliverables = () => {
     );
   }
 
-  const list = deliverables ?? [];
-  const delivered = list.filter((d) => d.status === "delivered").length;
-  const totalFiles = list.reduce((s, d) => s + (d.files ?? 0), 0);
-  const totalLines = list.reduce((s, d) => s + (d.lines_changed ?? 0), 0);
-
   return (
     <PageTransition className="space-y-8">
       <div className="flex items-center gap-3">
         <PackageCheck className="h-7 w-7 text-terminal" />
-        <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Entregáveis</h1>
+        <div>
+          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Entregáveis</h1>
+          <p className="text-xs text-muted-foreground">{list.length} entregáveis · {deliveryRate}% entregues</p>
+        </div>
       </div>
 
-      <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <StaggerContainer className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
           { label: "Total", value: list.length.toString(), color: "text-foreground" },
           { label: "Entregues", value: `${delivered}/${list.length}`, color: "text-terminal" },
           { label: "Arquivos", value: totalFiles.toString(), color: "text-cyan" },
-          { label: "Linhas Alteradas", value: totalLines.toLocaleString(), color: "text-violet" },
+          { label: "Linhas", value: totalLines.toLocaleString(), color: "text-violet" },
+          { label: "Taxa Entrega", value: `${deliveryRate}%`, color: "text-terminal" },
         ].map((s) => (
           <FadeIn key={s.label}>
             <Card className="border-border bg-card">
-              <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
-                <p className={`font-mono text-2xl font-bold ${s.color}`}>{s.value}</p>
+              <CardContent className="p-3">
+                <p className="font-mono text-[10px] text-muted-foreground">{s.label}</p>
+                <p className={`font-mono text-xl font-bold ${s.color}`}>{s.value}</p>
               </CardContent>
             </Card>
           </FadeIn>
         ))}
       </StaggerContainer>
 
+      {/* Type distribution bar */}
+      <Card className="border-border bg-card">
+        <CardContent className="p-4 space-y-2">
+          <div className="flex items-center gap-2 mb-2">
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <span className="font-mono text-xs text-muted-foreground">Distribuição por tipo</span>
+          </div>
+          <div className="flex gap-1 h-3 rounded-full overflow-hidden">
+            {typeDist.map(([type, count]) => {
+              const pct = (count / list.length) * 100;
+              const colors: Record<string, string> = { code: "bg-terminal", report: "bg-amber", config: "bg-violet", test: "bg-cyan", doc: "bg-muted-foreground" };
+              return <div key={type} className={`${colors[type] ?? "bg-muted"} transition-all`} style={{ width: `${pct}%` }} />;
+            })}
+          </div>
+          <div className="flex gap-3 flex-wrap">
+            {typeDist.map(([type, count]) => (
+              <span key={type} className="font-mono text-[10px] text-muted-foreground">{typeLabel[type as DeliverableType] ?? type}: {count}</span>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Buscar entregáveis..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 font-mono text-xs bg-card border-border" />
+        </div>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-[130px] font-mono text-xs bg-card border-border">
+            <Filter className="h-3.5 w-3.5 mr-1.5" />
+            <SelectValue placeholder="Tipo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="font-mono text-xs">Todos tipos</SelectItem>
+            {Object.entries(typeLabel).map(([k, v]) => (
+              <SelectItem key={k} value={k} className="font-mono text-xs">{v}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[130px] font-mono text-xs bg-card border-border">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="font-mono text-xs">Todos</SelectItem>
+            {Object.entries(statusConfig).map(([k, v]) => (
+              <SelectItem key={k} value={k} className="font-mono text-xs">{v.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <p className="font-mono text-[10px] text-muted-foreground">{filtered.length} resultado(s)</p>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {list.map((d) => {
+        {filtered.map((d) => {
           const sc = statusConfig[(d.status as DeliverableStatus) ?? "pending"];
           const agent = d.agents as any;
           const mission = d.missions as any;
@@ -107,6 +191,13 @@ const Deliverables = () => {
                   <div className="flex items-center gap-3 text-xs pt-2 border-t border-border">
                     <span className="text-foreground font-mono">{d.files} arquivos</span>
                     {(d.lines_changed ?? 0) > 0 && <span className="text-terminal font-mono">+{d.lines_changed} linhas</span>}
+                  </div>
+                )}
+
+                {d.status === "in_progress" && (
+                  <div className="pt-2 border-t border-border">
+                    <Progress value={50} className="h-1.5" />
+                    <p className="font-mono text-[9px] text-muted-foreground mt-1">Em desenvolvimento</p>
                   </div>
                 )}
 
