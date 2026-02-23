@@ -244,19 +244,19 @@ const Memory = () => {
 
                       {/* Expanded detail */}
                       {isSelected && (
-                        <div className="mt-2 pt-2 border-t border-border space-y-2">
+                        <div className="mt-2 pt-2 border-t border-border/30 space-y-2">
                           <div className="grid grid-cols-3 gap-2 text-center">
                             <div>
-                              <p className="font-mono text-[9px] text-muted-foreground">Acessos</p>
-                              <p className="font-mono text-sm font-bold text-foreground">{entry.access_count}</p>
+                              <p className="text-[10px] text-muted-foreground">Acessos</p>
+                              <p className="text-sm font-bold text-foreground tabular-nums">{entry.access_count}</p>
                             </div>
                             <div>
-                              <p className="font-mono text-[9px] text-muted-foreground">Confiança</p>
-                              <p className="font-mono text-sm font-bold text-foreground">{entry.confidence}%</p>
+                              <p className="text-[10px] text-muted-foreground">Confiança</p>
+                              <p className="text-sm font-bold text-foreground tabular-nums">{entry.confidence}%</p>
                             </div>
                             <div>
-                              <p className="font-mono text-[9px] text-muted-foreground">Último acesso</p>
-                              <p className="font-mono text-sm font-bold text-foreground">{entry.last_accessed ? new Date(entry.last_accessed).toLocaleDateString("pt-BR") : "—"}</p>
+                              <p className="text-[10px] text-muted-foreground">Último acesso</p>
+                              <p className="text-sm font-bold text-foreground">{entry.last_accessed ? new Date(entry.last_accessed).toLocaleDateString("pt-BR") : "—"}</p>
                             </div>
                           </div>
                         </div>
