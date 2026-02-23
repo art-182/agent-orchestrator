@@ -368,17 +368,17 @@ const Memory = () => {
           <ScrollArea className="h-[calc(100vh-380px)]">
             <div className="space-y-2">
               {mis.map((m) => (
-                <Card key={m.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
-                  <CardContent className="p-3 space-y-2">
+                <Card key={m.id} className="border-border/50 bg-card surface-elevated hover:border-border transition-all duration-200">
+                  <CardContent className="p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <p className="font-mono text-sm font-semibold text-foreground">{m.name}</p>
-                      <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 border ${statusColor[m.status] ?? "text-muted-foreground"}`}>{m.status}</Badge>
+                      <p className="text-[13px] font-semibold text-foreground tracking-tight">{m.name}</p>
+                      <Badge variant="outline" className={`text-[10px] px-2 py-0.5 border rounded-full font-medium ${statusColor[m.status] ?? "text-muted-foreground"}`}>{m.status}</Badge>
                     </div>
-                    {m.description && <p className="font-mono text-[10px] text-muted-foreground">{m.description}</p>}
+                    {m.description && <p className="text-[11px] text-muted-foreground">{m.description}</p>}
                     <div className="space-y-1">
-                      <div className="flex items-center justify-between font-mono text-[10px]">
+                      <div className="flex items-center justify-between text-[10px]">
                         <span className="text-muted-foreground">Progresso</span>
-                        <span className="text-foreground font-semibold">{m.progress ?? 0}%</span>
+                        <span className="text-foreground font-semibold tabular-nums">{m.progress ?? 0}%</span>
                       </div>
                       <Progress value={m.progress ?? 0} className="h-1.5" />
                     </div>
