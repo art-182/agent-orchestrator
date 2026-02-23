@@ -44,18 +44,6 @@ const Memory = () => {
 
   const isLoading = loadingMemory || loadingAgents || loadingMissions || loadingTasks || loadingDeliverables || loadingInteractions || loadingTraces;
 
-  if (isLoading) {
-    return (
-      <PageTransition className="space-y-6">
-        <div className="flex items-center gap-3">
-          <Brain className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Memória</h1>
-        </div>
-        <div className="space-y-2">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}</div>
-      </PageTransition>
-    );
-  }
-
   const mem = memoryEntries ?? [];
   const ags = agents ?? [];
   const mis = missions ?? [];
@@ -107,6 +95,18 @@ const Memory = () => {
     }
     return connections;
   }, [mem]);
+
+  if (isLoading) {
+    return (
+      <PageTransition className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Brain className="h-7 w-7 text-terminal" />
+          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Memória</h1>
+        </div>
+        <div className="space-y-2">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}</div>
+      </PageTransition>
+    );
+  }
 
   const layers = [
     { label: "Memórias", value: mem.length, icon: Brain, color: "text-terminal" },
