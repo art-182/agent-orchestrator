@@ -154,6 +154,7 @@ export type Database = {
           name: string
           status: string
           type: string
+          url: string | null
         }
         Insert: {
           agent_id?: string | null
@@ -166,6 +167,7 @@ export type Database = {
           name: string
           status?: string
           type: string
+          url?: string | null
         }
         Update: {
           agent_id?: string | null
@@ -178,6 +180,7 @@ export type Database = {
           name?: string
           status?: string
           type?: string
+          url?: string | null
         }
         Relationships: [
           {
