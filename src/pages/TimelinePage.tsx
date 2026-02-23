@@ -149,37 +149,39 @@ const TimelinePage = () => {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <GanttChart className="h-7 w-7 text-terminal" />
+          <div className="bg-terminal/10 text-terminal p-2 rounded-xl">
+            <GanttChart className="h-5 w-5" />
+          </div>
           <div>
-            <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Timeline</h1>
-            <p className="text-xs text-muted-foreground">Gantt · {ganttData.reduce((s, r) => s + r.tasks.length, 0)} tarefas · {ganttData.length} agentes</p>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Timeline</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">Gantt · {ganttData.reduce((s, r) => s + r.tasks.length, 0)} tarefas · {ganttData.length} agentes</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Select value={missionFilter} onValueChange={setMissionFilter}>
-            <SelectTrigger className="w-[160px] font-mono text-xs bg-card border-border h-8">
+            <SelectTrigger className="w-[160px] text-[12px] bg-card border-border/50 rounded-xl h-8">
               <SelectValue placeholder="Missão" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="font-mono text-xs">Todas missões</SelectItem>
+              <SelectItem value="all" className="text-[12px]">Todas missões</SelectItem>
               {(missions ?? []).map((m) => (
-                <SelectItem key={m.id} value={m.id} className="font-mono text-xs">{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id} className="text-[12px]">{m.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Button
             variant={showDependencies ? "default" : "outline"}
             size="sm"
-            className={`font-mono text-[10px] h-8 gap-1.5 ${showDependencies ? "bg-terminal text-background hover:bg-terminal/80" : ""}`}
+            className={`text-[11px] h-8 gap-1.5 rounded-xl ${showDependencies ? "bg-terminal text-background hover:bg-terminal/80" : "border-border/50"}`}
             onClick={() => setShowDependencies(!showDependencies)}
           >
             <Link2 className="h-3.5 w-3.5" /> Deps
           </Button>
-          <div className="flex items-center gap-1 border border-border rounded-lg px-1">
+          <div className="flex items-center gap-1 border border-border/50 rounded-xl px-1">
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} disabled={zoomIdx === 0}>
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
-            <span className="font-mono text-[10px] text-muted-foreground w-8 text-center">{ZOOM_LABELS[zoomIdx]}</span>
+            <span className="text-[10px] text-muted-foreground w-8 text-center tabular-nums">{ZOOM_LABELS[zoomIdx]}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomIn} disabled={zoomIdx === ZOOM_LEVELS.length - 1}>
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
