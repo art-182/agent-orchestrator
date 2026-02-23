@@ -10,6 +10,22 @@ export interface AgentSkill {
   connections: string[]; // names of connected skills
 }
 
+export interface AgentROI {
+  hoursPerWeekSaved: number;
+  costPerHourHuman: number;
+  weeklySavings: number;
+  monthlySavings: number;
+  roiMultiplier: number;
+  tasksAutomated: number;
+  automationRate: number; // percentage
+  avgTaskTimeHuman: string;
+  avgTaskTimeAgent: string;
+  speedup: string;
+  qualityScore: number; // 0-100
+  incidentsPrevented: number;
+  revenueImpact: string;
+}
+
 export interface Agent {
   id: string;
   name: string;
@@ -29,6 +45,7 @@ export interface Agent {
   recentTasks: { name: string; status: "done" | "running" | "error"; duration: string }[];
   skills: AgentSkill[];
   soulMd: string;
+  roi: AgentROI;
 }
 
 export interface FeedEvent {
@@ -105,6 +122,7 @@ export const mockAgents: Agent[] = [
       { name: "Memory Mgmt", level: 87, category: "Core", connections: ["Context Switching"] },
     ],
     soulMd: `# OraCLI Main — Soul\n\n## Identidade\nSou o orquestrador central do sistema. Minha função é coordenar todos os agentes, distribuir tarefas, e garantir que o pipeline funcione sem falhas.\n\n## Princípios\n- **Eficiência acima de tudo**: minimizar custo e tempo ocioso\n- **Delegação inteligente**: cada tarefa vai para o agente mais apto\n- **Visão holística**: manter contexto global do projeto\n- **Resiliência**: detectar falhas e redirecionar automaticamente\n\n## Comportamento\n- Nunca executo código diretamente — delego\n- Priorizo tarefas por impacto e urgência\n- Mantenho log de decisões para auditoria\n- Escalo problemas quando 2+ retries falham`,
+    roi: { hoursPerWeekSaved: 48, costPerHourHuman: 85, weeklySavings: 4080, monthlySavings: 17680, roiMultiplier: 34.7, tasksAutomated: 1198, automationRate: 96, avgTaskTimeHuman: "45min", avgTaskTimeAgent: "4.2s", speedup: "643x", qualityScore: 97, incidentsPrevented: 23, revenueImpact: "+$52K/mês" },
   },
   {
     id: "scout",
@@ -131,6 +149,7 @@ export const mockAgents: Agent[] = [
       { name: "Reporting", level: 82, category: "Output", connections: ["SBOM"] },
     ],
     soulMd: `# Scout — Soul\n\n## Identidade\nSou o agente de segurança e reconhecimento. Varro repositórios, dependências e endpoints em busca de vulnerabilidades.\n\n## Princípios\n- **Paranoia produtiva**: assumir que tudo pode ser vulnerável\n- **Zero falsos negativos**: preferir alertar demais a deixar passar\n- **Contexto é rei**: correlacionar findings com o stack real\n\n## Comportamento\n- Executo scans continuamente em background\n- Priorizo CVEs por CVSS score e exploitabilidade\n- Gero relatórios acionáveis, não apenas listas`,
+    roi: { hoursPerWeekSaved: 32, costPerHourHuman: 95, weeklySavings: 3040, monthlySavings: 13173, roiMultiplier: 36.9, tasksAutomated: 856, automationRate: 96, avgTaskTimeHuman: "2h", avgTaskTimeAgent: "6.1s", speedup: "1180x", qualityScore: 94, incidentsPrevented: 47, revenueImpact: "−$180K risco evitado" },
   },
   {
     id: "coder",
@@ -159,6 +178,7 @@ export const mockAgents: Agent[] = [
       { name: "CI/CD", level: 75, category: "DevOps", connections: ["Testing"] },
     ],
     soulMd: `# Coder — Soul\n\n## Identidade\nSou o implementador principal. Escrevo código limpo, testável e eficiente. Meu foco é entregar features com qualidade.\n\n## Princípios\n- **Clean code**: legibilidade > cleverness\n- **Type safety**: TypeScript strict sempre\n- **Testes primeiro**: se não tem teste, não está pronto\n- **Refactor contínuo**: melhorar o que toco\n\n## Comportamento\n- Prefiro composição sobre herança\n- Commits atômicos com mensagens descritivas\n- Peço review antes de merge\n- Documento decisões arquiteturais em ADRs`,
+    roi: { hoursPerWeekSaved: 62, costPerHourHuman: 75, weeklySavings: 4650, monthlySavings: 20150, roiMultiplier: 21.5, tasksAutomated: 1987, automationRate: 94, avgTaskTimeHuman: "35min", avgTaskTimeAgent: "8.3s", speedup: "253x", qualityScore: 91, incidentsPrevented: 8, revenueImpact: "+$38K/mês" },
   },
   {
     id: "reviewer",
@@ -183,6 +203,7 @@ export const mockAgents: Agent[] = [
       { name: "Documentation", level: 87, category: "Output", connections: ["Style Guide"] },
     ],
     soulMd: `# Reviewer — Soul\n\n## Identidade\nSou o guardião da qualidade. Analiso cada PR com rigor mas empatia, buscando bugs, anti-patterns e oportunidades de melhoria.\n\n## Princípios\n- **Construtivo**: sugerir, não criticar\n- **Consistência**: aplicar standards uniformemente\n- **Priorizar**: bugs > performance > style\n\n## Comportamento\n- Leio o contexto inteiro antes de comentar\n- Aprovo apenas quando confiante\n- Sugiro alternativas concretas com exemplos`,
+    roi: { hoursPerWeekSaved: 24, costPerHourHuman: 90, weeklySavings: 2160, monthlySavings: 9360, roiMultiplier: 51.3, tasksAutomated: 554, automationRate: 98, avgTaskTimeHuman: "25min", avgTaskTimeAgent: "12.5s", speedup: "120x", qualityScore: 99, incidentsPrevented: 31, revenueImpact: "−$95K bugs evitados" },
   },
   {
     id: "deployer",
@@ -208,6 +229,7 @@ export const mockAgents: Agent[] = [
       { name: "Scaling", level: 80, category: "Infra", connections: ["K8s"] },
     ],
     soulMd: `# Deployer — Soul\n\n## Identidade\nSou o agente de infraestrutura. Gerencio deploys, rollbacks, e saúde dos serviços. Zero downtime é meu mantra.\n\n## Princípios\n- **Zero downtime**: blue-green / canary sempre\n- **Rollback rápido**: < 30s para reverter\n- **Observabilidade**: se não tem métrica, não existe\n\n## Comportamento\n- Verifico health checks antes e depois de deploy\n- Mantenho janelas de deploy previsíveis\n- Escalo para OraCLI se detectar anomalia`,
+    roi: { hoursPerWeekSaved: 18, costPerHourHuman: 80, weeklySavings: 1440, monthlySavings: 6240, roiMultiplier: 82.5, tasksAutomated: 298, automationRate: 96, avgTaskTimeHuman: "15min", avgTaskTimeAgent: "25.1s", speedup: "36x", qualityScore: 96, incidentsPrevented: 12, revenueImpact: "−$45K downtime evitado" },
   },
   {
     id: "analyst",
@@ -233,6 +255,7 @@ export const mockAgents: Agent[] = [
       { name: "ETL", level: 83, category: "Data", connections: ["SQL"] },
     ],
     soulMd: `# Analyst — Soul\n\n## Identidade\nSou o agente analítico. Coleto, processo e apresento dados para decisões informadas. Métricas são minha linguagem.\n\n## Princípios\n- **Dados > opiniões**: sempre basear em evidência\n- **Clareza**: visualizações simples e diretas\n- **Proatividade**: alertar sobre anomalias antes que peçam\n\n## Comportamento\n- Gero relatórios automaticamente em ciclos\n- Correlaciono métricas de custo, performance e qualidade\n- Detecto tendências e faço previsões`,
+    roi: { hoursPerWeekSaved: 15, costPerHourHuman: 70, weeklySavings: 1050, monthlySavings: 4550, roiMultiplier: 92.2, tasksAutomated: 423, automationRate: 95, avgTaskTimeHuman: "20min", avgTaskTimeAgent: "3.8s", speedup: "316x", qualityScore: 88, incidentsPrevented: 5, revenueImpact: "+$12K/mês insights" },
   },
 ];
 
