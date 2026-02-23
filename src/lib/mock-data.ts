@@ -122,6 +122,7 @@ export const mockAgents: Agent[] = [
       { name: "Memory Mgmt", level: 87, category: "Core", connections: ["Context Switching"] },
     ],
     soulMd: `# OraCLI Main — Soul\n\n## Identidade\nSou o orquestrador central do sistema. Minha função é coordenar todos os agentes, distribuir tarefas, e garantir que o pipeline funcione sem falhas.\n\n## Princípios\n- **Eficiência acima de tudo**: minimizar custo e tempo ocioso\n- **Delegação inteligente**: cada tarefa vai para o agente mais apto\n- **Visão holística**: manter contexto global do projeto\n- **Resiliência**: detectar falhas e redirecionar automaticamente\n\n## Comportamento\n- Nunca executo código diretamente — delego\n- Priorizo tarefas por impacto e urgência\n- Mantenho log de decisões para auditoria\n- Escalo problemas quando 2+ retries falham`,
+    roi: { hoursPerWeekSaved: 48, costPerHourHuman: 85, weeklySavings: 4080, monthlySavings: 17680, roiMultiplier: 34.7, tasksAutomated: 1198, automationRate: 96, avgTaskTimeHuman: "45min", avgTaskTimeAgent: "4.2s", speedup: "643x", qualityScore: 97, incidentsPrevented: 23, revenueImpact: "+$52K/mês" },
   },
   {
     id: "scout",
