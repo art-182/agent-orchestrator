@@ -66,6 +66,13 @@ const Finances = () => (
         <SkillCostTable data={mockSkillCosts} />
       </TabsContent>
 
+      <TabsContent value="providers" className="mt-4">
+        <ProviderLimitsView
+          providers={mockProviderLimits}
+          events={mockRateLimitEvents}
+          anomalies={mockCostAnomalies}
+        />
+      </TabsContent>
       <TabsContent value="projections" className="mt-4 space-y-6">
         <ProjectionChart data={mockMonthlyProjections} />
         <ProjectionDetails />
