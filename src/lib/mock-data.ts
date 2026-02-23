@@ -178,6 +178,7 @@ export const mockAgents: Agent[] = [
       { name: "CI/CD", level: 75, category: "DevOps", connections: ["Testing"] },
     ],
     soulMd: `# Coder — Soul\n\n## Identidade\nSou o implementador principal. Escrevo código limpo, testável e eficiente. Meu foco é entregar features com qualidade.\n\n## Princípios\n- **Clean code**: legibilidade > cleverness\n- **Type safety**: TypeScript strict sempre\n- **Testes primeiro**: se não tem teste, não está pronto\n- **Refactor contínuo**: melhorar o que toco\n\n## Comportamento\n- Prefiro composição sobre herança\n- Commits atômicos com mensagens descritivas\n- Peço review antes de merge\n- Documento decisões arquiteturais em ADRs`,
+    roi: { hoursPerWeekSaved: 62, costPerHourHuman: 75, weeklySavings: 4650, monthlySavings: 20150, roiMultiplier: 21.5, tasksAutomated: 1987, automationRate: 94, avgTaskTimeHuman: "35min", avgTaskTimeAgent: "8.3s", speedup: "253x", qualityScore: 91, incidentsPrevented: 8, revenueImpact: "+$38K/mês" },
   },
   {
     id: "reviewer",
