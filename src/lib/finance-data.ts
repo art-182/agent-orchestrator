@@ -236,3 +236,104 @@ export const mockSkillCosts: SkillCost[] = [
   { skill: "Testing", category: "Quality", executions: 623, tokens: 112400, cost: 22.50, successRate: 88.4 },
   { skill: "Documentation", category: "Development", executions: 234, tokens: 78900, cost: 9.80, successRate: 99.5 },
 ];
+
+// ── Provider Limits ────────────────────────────────────
+
+export const mockProviderLimits: ProviderLimit[] = [
+  {
+    provider: "OpenAI",
+    tier: "Tier 5",
+    rpmLimit: 10000,
+    rpmUsed: 4230,
+    tpmLimit: 2000000,
+    tpmUsed: 892400,
+    dailyBudget: 50,
+    dailySpent: 31.40,
+    monthlyBudget: 800,
+    monthlySpent: 361.57,
+    rateLimitHits24h: 3,
+    avgLatency: 142,
+    p99Latency: 890,
+    uptime: 99.94,
+    fallbackProvider: "Anthropic",
+    fallbackModel: "claude-3-haiku",
+    fallbackActivations24h: 2,
+    models: [
+      { model: "gpt-4o", rpmLimit: 5000, rpmUsed: 2810, tpmLimit: 800000, tpmUsed: 685200, contextWindow: 128000, maxOutput: 16384 },
+      { model: "gpt-4o-mini", rpmLimit: 10000, rpmUsed: 1420, tpmLimit: 2000000, tpmUsed: 412800, contextWindow: 128000, maxOutput: 16384 },
+    ],
+  },
+  {
+    provider: "Anthropic",
+    tier: "Scale",
+    rpmLimit: 4000,
+    rpmUsed: 1890,
+    tpmLimit: 400000,
+    tpmUsed: 213500,
+    dailyBudget: 30,
+    dailySpent: 16.80,
+    monthlyBudget: 400,
+    monthlySpent: 134.97,
+    rateLimitHits24h: 7,
+    avgLatency: 198,
+    p99Latency: 1240,
+    uptime: 99.87,
+    fallbackProvider: "OpenAI",
+    fallbackModel: "gpt-4o-mini",
+    fallbackActivations24h: 5,
+    models: [
+      { model: "claude-3.5-sonnet", rpmLimit: 2000, rpmUsed: 1340, tpmLimit: 200000, tpmUsed: 145700, contextWindow: 200000, maxOutput: 8192 },
+      { model: "claude-3-haiku", rpmLimit: 4000, rpmUsed: 550, tpmLimit: 400000, tpmUsed: 67800, contextWindow: 200000, maxOutput: 4096 },
+    ],
+  },
+  {
+    provider: "Google",
+    tier: "Pay-as-you-go",
+    rpmLimit: 1000,
+    rpmUsed: 340,
+    tpmLimit: 4000000,
+    tpmUsed: 213400,
+    dailyBudget: 15,
+    dailySpent: 4.80,
+    monthlyBudget: 100,
+    monthlySpent: 31.24,
+    rateLimitHits24h: 0,
+    avgLatency: 523,
+    p99Latency: 2100,
+    uptime: 98.92,
+    fallbackProvider: "OpenAI",
+    fallbackModel: "gpt-4o-mini",
+    fallbackActivations24h: 1,
+    models: [
+      { model: "gemini-1.5-pro", rpmLimit: 360, rpmUsed: 210, tpmLimit: 4000000, tpmUsed: 145600, contextWindow: 2000000, maxOutput: 8192 },
+      { model: "gemini-1.5-flash", rpmLimit: 1000, rpmUsed: 130, tpmLimit: 4000000, tpmUsed: 67800, contextWindow: 1000000, maxOutput: 8192 },
+    ],
+  },
+];
+
+// ── Rate Limit Events ──────────────────────────────────
+
+export const mockRateLimitEvents: RateLimitEvent[] = [
+  { timestamp: "14:32:01", provider: "Anthropic", model: "claude-3.5-sonnet", type: "rate_limit", detail: "RPM limit exceeded (2000/2000)", fallbackUsed: "gpt-4o-mini", latencyMs: 0 },
+  { timestamp: "14:28:45", provider: "Anthropic", model: "claude-3.5-sonnet", type: "fallback_activated", detail: "Auto-routed to fallback after 3 retries", fallbackUsed: "gpt-4o-mini", latencyMs: 234 },
+  { timestamp: "14:25:12", provider: "OpenAI", model: "gpt-4o", type: "timeout", detail: "Request timeout after 30s", fallbackUsed: "claude-3-haiku", latencyMs: 30000 },
+  { timestamp: "14:22:33", provider: "Anthropic", model: "claude-3.5-sonnet", type: "rate_limit", detail: "TPM limit approaching (190K/200K)", fallbackUsed: null, latencyMs: 0 },
+  { timestamp: "14:18:01", provider: "Google", model: "gemini-1.5-pro", type: "error", detail: "500 Internal Server Error", fallbackUsed: "gpt-4o-mini", latencyMs: 2100 },
+  { timestamp: "14:15:22", provider: "Anthropic", model: "claude-3.5-sonnet", type: "rate_limit", detail: "RPM limit exceeded (2000/2000)", fallbackUsed: "gpt-4o-mini", latencyMs: 0 },
+  { timestamp: "14:12:45", provider: "OpenAI", model: "gpt-4o", type: "fallback_activated", detail: "High latency detected (>5s), routing to fallback", fallbackUsed: "claude-3-haiku", latencyMs: 5200 },
+  { timestamp: "14:08:33", provider: "Anthropic", model: "claude-3-haiku", type: "rate_limit", detail: "Concurrent request limit reached", fallbackUsed: null, latencyMs: 0 },
+  { timestamp: "13:55:10", provider: "Google", model: "gemini-1.5-pro", type: "timeout", detail: "Slow response, context too large (1.8M tokens)", fallbackUsed: null, latencyMs: 15000 },
+  { timestamp: "13:48:22", provider: "Anthropic", model: "claude-3.5-sonnet", type: "fallback_activated", detail: "Circuit breaker opened after 5 errors in 60s", fallbackUsed: "gpt-4o-mini", latencyMs: 0 },
+  { timestamp: "13:42:01", provider: "OpenAI", model: "gpt-4o-mini", type: "rate_limit", detail: "TPM limit warning (1.8M/2M)", fallbackUsed: null, latencyMs: 0 },
+  { timestamp: "13:35:15", provider: "Anthropic", model: "claude-3.5-sonnet", type: "rate_limit", detail: "RPM limit exceeded (2000/2000)", fallbackUsed: "gpt-4o-mini", latencyMs: 0 },
+];
+
+// ── Cost Anomalies ─────────────────────────────────────
+
+export const mockCostAnomalies: CostAnomaly[] = [
+  { date: "Feb 19", provider: "OpenAI", expectedCost: 15.20, actualCost: 19.20, deviation: 26, reason: "Spike em code generation (deploy hotfix)" },
+  { date: "Feb 18", provider: "Anthropic", expectedCost: 10.50, actualCost: 13.10, deviation: 25, reason: "Security audit completo no repo" },
+  { date: "Feb 12", provider: "OpenAI", expectedCost: 14.00, actualCost: 18.30, deviation: 31, reason: "Refactor massivo + testes e2e" },
+  { date: "Feb 14", provider: "Google", expectedCost: 2.20, actualCost: 3.10, deviation: 41, reason: "Context window grande (1.5M tokens)" },
+  { date: "Feb 10", provider: "Anthropic", expectedCost: 7.80, actualCost: 9.50, deviation: 22, reason: "Pico de PRs para review (12 PRs)" },
+];
