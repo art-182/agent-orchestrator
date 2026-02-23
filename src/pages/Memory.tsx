@@ -100,8 +100,8 @@ const Memory = () => {
     return (
       <PageTransition className="space-y-6">
         <div className="flex items-center gap-3">
-          <Brain className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Memória</h1>
+          <div className="bg-terminal/10 text-terminal p-2 rounded-xl"><Brain className="h-5 w-5" /></div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Memória</h1>
         </div>
         <div className="space-y-2">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}</div>
       </PageTransition>
