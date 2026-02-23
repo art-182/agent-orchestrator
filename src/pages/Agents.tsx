@@ -99,7 +99,6 @@ const Agents = () => {
       <Tabs defaultValue="overview" className="mt-2">
         <TabsList className="bg-muted/30 border border-border/30 rounded-xl p-1">
           <TabsTrigger value="overview" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Organograma</TabsTrigger>
-          <TabsTrigger value="skills" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Grafo de Skills</TabsTrigger>
           <TabsTrigger value="performance" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Desempenho</TabsTrigger>
         </TabsList>
 
