@@ -196,7 +196,7 @@ const Missions = () => {
           );
         })}
       </div>
-    </div>
+    </PageTransition>
   );
 };
 
