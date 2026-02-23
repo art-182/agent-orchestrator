@@ -12,7 +12,6 @@ import SkillCostTable from "@/components/finances/SkillCostTable";
 import ProjectionDetails from "@/components/finances/ProjectionDetails";
 import ProviderLimitsView from "@/components/finances/ProviderLimitsView";
 import {
-  mockBillingSummary,
   mockDailyCosts,
   mockAgentCosts,
   mockProviderBreakdown,
@@ -33,8 +32,8 @@ const Finances = () => (
       <h1 className="font-mono text-xl font-semibold text-foreground">Finanças</h1>
     </div>
 
-    {/* Billing summary cards */}
-    <BillingCards data={mockBillingSummary} />
+    {/* Bento billing cards */}
+    <BillingCards />
 
     {/* Tabs for deep views */}
     <Tabs defaultValue="overview" className="mt-2">
@@ -47,8 +46,9 @@ const Finances = () => (
       </TabsList>
 
       <TabsContent value="overview" className="mt-4 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        {/* Bento grid layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="lg:col-span-3">
             <CostChart data={mockDailyCosts} />
           </div>
           <ProviderPieChart data={mockProviderBreakdown} />
@@ -61,9 +61,15 @@ const Finances = () => (
         <ModelPricingTable data={mockModelPricing} />
       </TabsContent>
 
-      <TabsContent value="tools" className="mt-4 space-y-6">
-        <ToolCostTable data={mockToolCosts} />
-        <SkillCostTable data={mockSkillCosts} />
+      <TabsContent value="tools" className="mt-4 space-y-8">
+        <div>
+          <h2 className="font-mono text-sm font-semibold text-foreground mb-4">Tools</h2>
+          <ToolCostTable data={mockToolCosts} />
+        </div>
+        <div>
+          <h2 className="font-mono text-sm font-semibold text-foreground mb-4">Skills</h2>
+          <SkillCostTable data={mockSkillCosts} />
+        </div>
       </TabsContent>
 
       <TabsContent value="providers" className="mt-4">
