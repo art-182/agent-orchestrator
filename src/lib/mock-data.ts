@@ -255,6 +255,7 @@ export const mockAgents: Agent[] = [
       { name: "ETL", level: 83, category: "Data", connections: ["SQL"] },
     ],
     soulMd: `# Analyst — Soul\n\n## Identidade\nSou o agente analítico. Coleto, processo e apresento dados para decisões informadas. Métricas são minha linguagem.\n\n## Princípios\n- **Dados > opiniões**: sempre basear em evidência\n- **Clareza**: visualizações simples e diretas\n- **Proatividade**: alertar sobre anomalias antes que peçam\n\n## Comportamento\n- Gero relatórios automaticamente em ciclos\n- Correlaciono métricas de custo, performance e qualidade\n- Detecto tendências e faço previsões`,
+    roi: { hoursPerWeekSaved: 15, costPerHourHuman: 70, weeklySavings: 1050, monthlySavings: 4550, roiMultiplier: 92.2, tasksAutomated: 423, automationRate: 95, avgTaskTimeHuman: "20min", avgTaskTimeAgent: "3.8s", speedup: "316x", qualityScore: 88, incidentsPrevented: 5, revenueImpact: "+$12K/mês insights" },
   },
 ];
 
