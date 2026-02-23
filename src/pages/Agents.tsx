@@ -10,10 +10,6 @@ import type { Agent } from "@/lib/mock-data";
 
 const Agents = () => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [hierarchyOpen, setHierarchyOpen] = useState(true);
-
-  const parent = mockAgents.find((a) => !a.parentId);
-  const children = mockAgents.filter((a) => a.parentId);
 
   return (
     <div className="space-y-6">
