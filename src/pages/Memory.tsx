@@ -302,13 +302,13 @@ const Memory = () => {
         <TabsContent value="tags" className="mt-4">
           <ScrollArea className="h-[calc(100vh-380px)]">
             <div className="space-y-3">
-              <p className="font-mono text-xs text-muted-foreground">{tagMap.length} tags encontradas</p>
+              <p className="text-[11px] text-muted-foreground font-medium">{tagMap.length} tags encontradas</p>
               <div className="flex flex-wrap gap-2">
                 {tagMap.map(([tag, count]) => (
                   <Badge
                     key={tag}
                     variant="outline"
-                    className="font-mono text-xs px-3 py-1.5 border-border hover:border-terminal/30 hover:bg-terminal/5 cursor-pointer transition-colors"
+                    className="text-[12px] px-3 py-1.5 border-border/50 hover:border-terminal/30 hover:bg-terminal/5 cursor-pointer transition-colors rounded-full"
                     onClick={() => { setSearchQuery(tag); }}
                   >
                     #{tag} <span className="ml-1.5 text-muted-foreground">({count})</span>
