@@ -118,13 +118,14 @@ const taskStatusIcon: Record<string, React.ReactNode> = {
 const formatTokens = (n: number) => n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `${(n / 1_000).toFixed(0)}K` : n.toString();
 
 const Missions = () => {
+  const navigate = useNavigate();
   const activeMissions = missions.filter((m) => m.status === "active").length;
   const totalTasks = missions.reduce((s, m) => s + m.tasks.length, 0);
   const doneTasks = missions.reduce((s, m) => s + m.tasks.filter((t) => t.status === "done").length, 0);
   const totalCost = missions.reduce((s, m) => s + m.cost, 0);
 
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       <div className="flex items-center gap-3">
         <Rocket className="h-6 w-6 text-terminal" />
         <h1 className="font-mono text-xl font-semibold text-foreground">Missões</h1>
