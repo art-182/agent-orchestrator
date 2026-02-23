@@ -553,12 +553,24 @@ const SkillsNetworkGraph = ({ agents, onSelectAgent }: SkillsNetworkGraphProps) 
                 </ScrollArea>
               )}
               {selectedNodeData.type === "agent" && (
-                <div className="text-[11px] text-muted-foreground">
-                  <p>Clique para ver detalhes completos</p>
-                  <div className="flex items-center gap-1.5 mt-2">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-1.5 text-[11px]">
                     <div className="w-2 h-2 rounded-full" style={{ background: statusColorsHex[selectedNodeData.agentStatus ?? "online"] }} />
                     <span className="text-foreground">{selectedNodeData.agentStatus}</span>
                   </div>
+                  <Button
+                    size="sm"
+                    className="w-full gap-2 text-[12px] rounded-xl"
+                    onClick={() => {
+                      if (onSelectAgent && selectedNodeData.agentId) {
+                        const agent = agents.find((a) => a.id === selectedNodeData.agentId);
+                        if (agent) onSelectAgent(agent);
+                      }
+                    }}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    Ver Detalhes
+                  </Button>
                 </div>
               )}
             </div>
