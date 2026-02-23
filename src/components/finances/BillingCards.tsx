@@ -86,7 +86,7 @@ const BillingCards = () => {
     span: "col-span-1",
   }));
 
-  const topRow = dbMetrics.length > 0 ? dbMetrics : [
+  const topRow: BentoMetric[] = dbMetrics.length > 0 ? dbMetrics : [
     { label: "Custo Hoje", value: "$31.40", change: "+12%", trend: "up" as const, icon: <DollarSign className="h-4 w-4" />, accent: "text-rose", span: "col-span-1" },
     { label: "Custo Semana", value: "$198.54", change: "-5%", trend: "down" as const, icon: <BarChart3 className="h-4 w-4" />, accent: "text-terminal", span: "col-span-1" },
     { label: "Custo Mês", value: "$527.78", change: "+8%", trend: "up" as const, icon: <TrendingUp className="h-4 w-4" />, accent: "text-amber", span: "col-span-1" },
