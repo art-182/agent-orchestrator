@@ -226,20 +226,20 @@ const Memory = () => {
                           <span className={`text-[10px] font-semibold tabular-nums ${(entry.confidence ?? 0) >= 95 ? "text-terminal" : (entry.confidence ?? 0) >= 85 ? "text-amber" : "text-rose"}`}>{entry.confidence}%</span>
                         </div>
                       </div>
-                      <p className="font-mono text-[11px] text-foreground">{entry.content}</p>
+                      <p className="text-[12px] text-foreground leading-relaxed">{entry.content}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex gap-1 flex-wrap">
                           {(entry.tags ?? []).map((tag) => (
                             <span
                               key={tag}
-                              className="font-mono text-[8px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-terminal/10 hover:text-terminal cursor-pointer transition-colors"
+                              className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-terminal/10 hover:text-terminal cursor-pointer transition-colors"
                               onClick={(e) => { e.stopPropagation(); setSearchQuery(tag); }}
                             >
                               #{tag}
                             </span>
                           ))}
                         </div>
-                        <span className="font-mono text-[9px] text-muted-foreground">{entry.access_count}x · {new Date(entry.created_at).toLocaleDateString("pt-BR")}</span>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">{entry.access_count}x · {new Date(entry.created_at).toLocaleDateString("pt-BR")}</span>
                       </div>
 
                       {/* Expanded detail */}
