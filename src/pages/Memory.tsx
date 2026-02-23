@@ -324,17 +324,17 @@ const Memory = () => {
           <ScrollArea className="h-[calc(100vh-380px)]">
             <div className="space-y-2">
               {ags.map((a) => (
-                <Card key={a.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
-                  <CardContent className="p-3 space-y-2">
+                <Card key={a.id} className="border-border/50 bg-card surface-elevated hover:border-border transition-all duration-200">
+                  <CardContent className="p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         <span className="text-lg">{a.emoji}</span>
                         <div>
-                          <p className="font-mono text-sm font-semibold text-foreground">{a.name}</p>
-                          <p className="font-mono text-[10px] text-muted-foreground">{a.model} · {a.provider}</p>
+                          <p className="text-[13px] font-semibold text-foreground tracking-tight">{a.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{a.model} · {a.provider}</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 border ${statusColor[a.status] ?? "text-muted-foreground"}`}>{a.status}</Badge>
+                      <Badge variant="outline" className={`text-[10px] px-2 py-0.5 border rounded-full font-medium ${statusColor[a.status] ?? "text-muted-foreground"}`}>{a.status}</Badge>
                     </div>
                     <div className="grid grid-cols-4 gap-2 text-center">
                       {[
@@ -344,15 +344,14 @@ const Memory = () => {
                         { l: "Uptime", v: a.uptime ?? "—" },
                       ].map((m) => (
                         <div key={m.l}>
-                          <p className="font-mono text-[9px] text-muted-foreground">{m.l}</p>
-                          <p className="font-mono text-xs font-bold text-foreground">{m.v}</p>
+                          <p className="text-[10px] text-muted-foreground">{m.l}</p>
+                          <p className="text-[12px] font-bold text-foreground tabular-nums">{m.v}</p>
                         </div>
                       ))}
                     </div>
-                    {/* Memory count for this agent */}
-                    <div className="flex items-center gap-2 pt-1 border-t border-border/50">
+                    <div className="flex items-center gap-2 pt-1 border-t border-border/30">
                       <Brain className="h-3 w-3 text-terminal" />
-                      <span className="font-mono text-[10px] text-muted-foreground">
+                      <span className="text-[10px] text-muted-foreground">
                         {mem.filter((m) => (m.agents as any)?.name === a.name).length} memórias associadas
                       </span>
                     </div>

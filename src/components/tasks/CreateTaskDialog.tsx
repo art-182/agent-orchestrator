@@ -46,24 +46,24 @@ const CreateTaskDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-1.5 bg-terminal text-primary-foreground hover:bg-terminal/90 font-mono text-xs">
+        <Button size="sm" className="gap-1.5 bg-terminal text-primary-foreground hover:bg-terminal/90 text-[12px] rounded-xl">
           <Plus className="h-4 w-4" /> Nova Tarefa
         </Button>
       </DialogTrigger>
-      <DialogContent className="border-border bg-card sm:max-w-md">
+      <DialogContent className="border-border/50 bg-card sm:max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="font-mono text-lg text-foreground">Nova Tarefa</DialogTitle>
+          <DialogTitle className="text-lg text-foreground tracking-tight">Nova Tarefa</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-2">
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Nome</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome da tarefa" className="font-mono text-sm bg-muted/30" />
+            <Label className="text-[11px] text-muted-foreground font-medium">Nome</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome da tarefa" className="text-[13px] bg-muted/20 border-border/50 rounded-xl" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Prioridade</Label>
+              <Label className="text-[11px] text-muted-foreground font-medium">Prioridade</Label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="font-mono text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-[12px] border-border/50 rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="critical">Critical</SelectItem>
                   <SelectItem value="high">High</SelectItem>
@@ -73,9 +73,9 @@ const CreateTaskDialog = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Agente</Label>
+              <Label className="text-[11px] text-muted-foreground font-medium">Agente</Label>
               <Select value={agentId} onValueChange={setAgentId}>
-                <SelectTrigger className="font-mono text-xs"><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectTrigger className="text-[12px] border-border/50 rounded-xl"><SelectValue placeholder="Selecionar" /></SelectTrigger>
                 <SelectContent>
                   {(agents ?? []).map((a) => (
                     <SelectItem key={a.id} value={a.id}>{a.emoji} {a.name}</SelectItem>
@@ -85,9 +85,9 @@ const CreateTaskDialog = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Missão</Label>
+            <Label className="text-[11px] text-muted-foreground font-medium">Missão</Label>
             <Select value={missionId} onValueChange={setMissionId}>
-              <SelectTrigger className="font-mono text-xs"><SelectValue placeholder="Selecionar missão" /></SelectTrigger>
+              <SelectTrigger className="text-[12px] border-border/50 rounded-xl"><SelectValue placeholder="Selecionar missão" /></SelectTrigger>
               <SelectContent>
                 {(missions ?? []).map((m) => (
                   <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
@@ -96,7 +96,7 @@ const CreateTaskDialog = () => {
             </Select>
           </div>
           <Button
-            className="w-full gap-1.5 bg-terminal text-primary-foreground hover:bg-terminal/90 font-mono text-sm"
+            className="w-full gap-1.5 bg-terminal text-primary-foreground hover:bg-terminal/90 text-[13px] rounded-xl"
             onClick={() => createMutation.mutate()}
             disabled={!name.trim() || createMutation.isPending}
           >
