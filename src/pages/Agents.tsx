@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Bot, ChevronRight } from "lucide-react";
+import { Bot } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import AgentCard from "@/components/agents/AgentCard";
 import AgentDetailSheet from "@/components/agents/AgentDetailSheet";
 import AgentPerformanceTable from "@/components/agents/AgentPerformanceTable";
