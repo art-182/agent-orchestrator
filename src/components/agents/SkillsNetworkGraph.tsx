@@ -145,19 +145,22 @@ function buildGraph(agents: DbAgent[]): { nodes: GraphNode[]; edges: GraphEdge[]
 // --- 3D Components ---
 
 function EdgeLine({ from, to, highlighted, type }: { from: [number, number, number]; to: [number, number, number]; highlighted: boolean; type: string }) {
+  const ref = useRef<THREE.Line>(null);
   const points = useMemo(() => [new THREE.Vector3(...from), new THREE.Vector3(...to)], [from, to]);
   const geometry = useMemo(() => new THREE.BufferGeometry().setFromPoints(points), [points]);
   const isSkill = type === "skill-skill";
-  return (
-    <line geometry={geometry}>
-      <lineBasicMaterial
-        color={highlighted ? (isSkill ? "#38bdf8" : "#3ecf8e") : "#1e293b"}
-        transparent
-        opacity={highlighted ? 0.7 : 0.12}
-        linewidth={1}
-      />
-    </line>
-  );
+  const material = useMemo(() => new THREE.LineBasicMaterial({
+    color: highlighted ? (isSkill ? "#38bdf8" : "#3ecf8e") : "#1e293b",
+    transparent: true,
+    opacity: highlighted ? 0.7 : 0.12,
+  }), [highlighted, isSkill]);
+
+  const lineObj = useMemo(() => {
+    const l = new THREE.Line(geometry, material);
+    return l;
+  }, [geometry, material]);
+
+  return <primitive ref={ref} object={lineObj} />;
 }
 
 function SkillNode({
