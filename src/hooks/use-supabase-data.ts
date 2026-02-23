@@ -48,7 +48,7 @@ export const useDeliverables = () =>
   useQuery({
     queryKey: ["deliverables"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("deliverables").select("*, agents(name, emoji), missions(name)").order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("deliverables").select("*, agents(name, emoji), missions(name), url").order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
