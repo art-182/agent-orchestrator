@@ -1,29 +1,36 @@
 import { ListChecks, CheckCircle2, Play, Clock, AlertTriangle, Filter } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PageTransition } from "@/components/animations/MotionPrimitives";
 import { useTasks } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import TaskDetailSheet from "@/components/tasks/TaskDetailSheet";
 import CreateTaskDialog from "@/components/tasks/CreateTaskDialog";
+import TaskKanbanCard from "@/components/tasks/TaskKanbanCard";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+  useDroppable,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 type TaskStatus = "done" | "in_progress" | "todo" | "blocked";
-type TaskPriority = "critical" | "high" | "medium" | "low";
 
 const statusConfig: Record<TaskStatus, { color: string; icon: React.ReactNode; label: string }> = {
   done: { color: "bg-terminal/15 text-terminal border-terminal/30", icon: <CheckCircle2 className="h-4 w-4" />, label: "Concluído" },
   in_progress: { color: "bg-cyan/15 text-cyan border-cyan/30", icon: <Play className="h-4 w-4" />, label: "Em Progresso" },
   todo: { color: "bg-muted text-muted-foreground border-border", icon: <Clock className="h-4 w-4" />, label: "Pendente" },
   blocked: { color: "bg-rose/15 text-rose border-rose/30", icon: <AlertTriangle className="h-4 w-4" />, label: "Bloqueado" },
-};
-
-const priorityColor: Record<TaskPriority, string> = {
-  critical: "bg-rose/15 text-rose border-rose/30",
-  high: "bg-amber/15 text-amber border-amber/30",
-  medium: "bg-violet/15 text-violet border-violet/30",
-  low: "bg-muted text-muted-foreground border-border",
 };
 
 const columns: { key: TaskStatus; label: string }[] = [
@@ -33,14 +40,53 @@ const columns: { key: TaskStatus; label: string }[] = [
   { key: "blocked", label: "Bloqueado" },
 ];
 
-const formatTokens = (n: number) => n >= 1_000 ? `${(n / 1_000).toFixed(0)}K` : n.toString();
+function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className={`space-y-3 min-h-[120px] rounded-lg p-2 transition-colors ${isOver ? "bg-terminal/5 ring-1 ring-terminal/20" : ""}`}>
+      {children}
+    </div>
+  );
+}
 
 const Tasks = () => {
   const [searchParams] = useSearchParams();
   const missionFilter = searchParams.get("mission");
   const [filter, setFilter] = useState<string>("all");
   const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const { data: tasks, isLoading } = useTasks();
+  const queryClient = useQueryClient();
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  }, []);
+
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const taskId = active.id as string;
+    const newStatus = over.id as string;
+    const task = (tasks ?? []).find((t) => t.id === taskId);
+    if (!task || task.status === newStatus) return;
+
+    // Optimistic update
+    queryClient.setQueryData(["tasks"], (old: any[]) =>
+      old?.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
+    );
+
+    const { error } = await supabase.from("tasks").update({ status: newStatus }).eq("id", taskId);
+    if (error) {
+      toast.error("Erro ao mover tarefa");
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    } else {
+      toast.success(`Tarefa movida para ${statusConfig[newStatus as TaskStatus]?.label ?? newStatus}`);
+    }
+  }, [tasks, queryClient]);
 
   if (isLoading) {
     return (
@@ -60,6 +106,7 @@ const Tasks = () => {
   const baseTasks = missionFilter ? allTasks.filter((t) => t.mission_id === missionFilter) : allTasks;
   const filteredTasks = filter === "all" ? baseTasks : baseTasks.filter((t) => t.agents?.name === filter);
   const agents = [...new Set(baseTasks.map((t) => t.agents?.name).filter(Boolean))];
+  const activeTask = allTasks.find((t) => t.id === activeId);
 
   return (
     <PageTransition className="space-y-8">
@@ -98,58 +145,42 @@ const Tasks = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {columns.map((col) => {
-          const colTasks = filteredTasks.filter((t) => t.status === col.key);
-          const sc = statusConfig[col.key];
-          return (
-            <div key={col.key} className="space-y-3">
-              <div className="flex items-center gap-2 px-1">
-                {sc.icon}
-                <span className="font-mono text-sm font-semibold text-foreground">{col.label}</span>
-                <span className="font-mono text-xs text-muted-foreground">({colTasks.length})</span>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {columns.map((col) => {
+            const colTasks = filteredTasks.filter((t) => t.status === col.key);
+            const sc = statusConfig[col.key];
+            return (
+              <div key={col.key} className="space-y-3">
+                <div className="flex items-center gap-2 px-1">
+                  {sc.icon}
+                  <span className="font-mono text-sm font-semibold text-foreground">{col.label}</span>
+                  <span className="font-mono text-xs text-muted-foreground">({colTasks.length})</span>
+                </div>
+                <DroppableColumn id={col.key}>
+                  <SortableContext items={colTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+                    {colTasks.map((t) => (
+                      <TaskKanbanCard key={t.id} task={t} onClick={() => setSelectedTask(t)} />
+                    ))}
+                  </SortableContext>
+                  {colTasks.length === 0 && (
+                    <div className="rounded-xl border border-dashed border-border p-6 text-center">
+                      <p className="text-sm text-muted-foreground">Arraste tarefas aqui</p>
+                    </div>
+                  )}
+                </DroppableColumn>
               </div>
-              <div className="space-y-3">
-                {colTasks.map((t) => (
-                  <Card
-                    key={t.id}
-                    className="border-border bg-card hover:border-muted-foreground/30 transition-all duration-200 cursor-pointer active:scale-[0.98]"
-                    onClick={() => setSelectedTask(t)}
-                  >
-                    <CardContent className="p-4 space-y-2.5">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="font-mono text-sm font-semibold text-foreground leading-tight">{t.name}</p>
-                        <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0.5 border shrink-0 rounded-md ${priorityColor[t.priority as TaskPriority] ?? ""}`}>
-                          {t.priority}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{t.agents?.emoji} {t.agents?.name}</span>
-                        <span>·</span>
-                        <span className="truncate">{t.missions?.name}</span>
-                      </div>
-                      {t.status === "done" && (
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">{t.duration}</span>
-                          <span className="text-terminal font-semibold">${(t.cost ?? 0).toFixed(2)}</span>
-                        </div>
-                      )}
-                      {(t.tokens ?? 0) > 0 && (
-                        <div className="font-mono text-xs text-muted-foreground">{formatTokens(t.tokens ?? 0)} tokens</div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-                {colTasks.length === 0 && (
-                  <div className="rounded-xl border border-dashed border-border p-6 text-center">
-                    <p className="text-sm text-muted-foreground">Nenhuma tarefa</p>
-                  </div>
-                )}
-              </div>
+            );
+          })}
+        </div>
+        <DragOverlay>
+          {activeTask ? (
+            <div className="opacity-90 rotate-2 scale-105">
+              <TaskKanbanCard task={activeTask} onClick={() => {}} />
             </div>
-          );
-        })}
-      </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       <TaskDetailSheet
         task={selectedTask}

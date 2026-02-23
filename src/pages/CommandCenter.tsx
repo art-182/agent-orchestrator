@@ -1,11 +1,11 @@
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Activity, TrendingUp } from "lucide-react";
 import StatusBar from "@/components/dashboard/StatusBar";
 import MetricCard from "@/components/dashboard/MetricCard";
 import LiveFeed from "@/components/dashboard/LiveFeed";
 import ProviderStatus from "@/components/dashboard/ProviderStatus";
 import AgentFleet from "@/components/dashboard/AgentFleet";
-import ActiveMissions from "@/components/dashboard/ActiveMissions";
 import QuickStats from "@/components/dashboard/QuickStats";
+import ActiveMissions from "@/components/dashboard/ActiveMissions";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { useAgents, useTasks, useDailyCosts } from "@/hooks/use-supabase-data";
 import type { DashboardMetric } from "@/components/dashboard/MetricCard";
@@ -34,35 +34,41 @@ const CommandCenter = () => {
   ];
 
   return (
-    <PageTransition className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <LayoutDashboard className="h-7 w-7 text-terminal" />
-        <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Command Center</h1>
+    <PageTransition className="space-y-6">
+      {/* Header + Status inline */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <LayoutDashboard className="h-7 w-7 text-terminal" />
+          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Command Center</h1>
+        </div>
+        <StatusBar />
       </div>
 
-      {/* Status badges */}
-      <StatusBar />
-
       {/* Metric cards */}
-      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((m) => (
           <FadeIn key={m.label}><MetricCard metric={m} /></FadeIn>
         ))}
       </StaggerContainer>
 
-      {/* Agent Fleet */}
-      <AgentFleet />
-
-      {/* Main content: Feed + sidebar */}
+      {/* Two-column: Fleet + Quick Stats side-by-side */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 space-y-5">
-          <LiveFeed />
+        <div className="lg:col-span-2">
+          <AgentFleet />
         </div>
         <div className="space-y-5">
-          <ActiveMissions />
-          <ProviderStatus />
           <QuickStats />
+          <ProviderStatus />
+        </div>
+      </div>
+
+      {/* Bottom: Live Feed + Active Missions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <LiveFeed />
+        </div>
+        <div>
+          <ActiveMissions />
         </div>
       </div>
     </PageTransition>
