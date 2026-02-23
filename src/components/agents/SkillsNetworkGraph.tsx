@@ -4,7 +4,9 @@ import { OrbitControls, Text, Billboard } from "@react-three/drei";
 import * as THREE from "three";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Eye } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type DbAgent = Tables<"agents">;
