@@ -78,6 +78,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', system-ui, sans-serif;
     letter-spacing: -0.017em;
     line-height: 1.5;
+    font-size: 0.9rem;
   }
 
   .font-mono {
@@ -90,9 +91,22 @@
     letter-spacing: -0.035em;
     font-feature-settings: 'ss01', 'ss02';
   }
+
+  /* Global minimum font size override for tiny text */
+  p, span, td, th, label, a, li, div {
+    min-font-size: 13px;
+  }
 }
 
+/* Global font-size bumps for readability */
 @layer utilities {
+  .text-\[8px\] { font-size: 11px !important; }
+  .text-\[9px\] { font-size: 12px !important; }
+  .text-\[10px\] { font-size: 13px !important; }
+  .text-\[11px\] { font-size: 14px !important; }
+  .text-\[12px\] { font-size: 14px !important; }
+  .text-\[13px\] { font-size: 15px !important; }
+}
   .glow-terminal {
     box-shadow: 0 0 16px -4px hsl(var(--terminal) / 0.35), 0 0 4px -1px hsl(var(--terminal) / 0.15);
   }
