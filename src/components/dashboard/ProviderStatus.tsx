@@ -2,11 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wifi } from "lucide-react";
 
 // Provider status is not stored in DB yet, keep as static
-const providers = [
-  { name: "OpenAI", status: "healthy" as const, latency: 142 },
-  { name: "Anthropic", status: "healthy" as const, latency: 198 },
-  { name: "Google", status: "degraded" as const, latency: 523 },
-  { name: "Vercel", status: "healthy" as const, latency: 89 },
+const providers: { name: string; status: string; latency: number }[] = [
+  { name: "OpenAI", status: "healthy", latency: 142 },
+  { name: "Anthropic", status: "healthy", latency: 198 },
+  { name: "Google", status: "degraded", latency: 523 },
+  { name: "Vercel", status: "healthy", latency: 89 },
 ];
 
 const statusColor: Record<string, string> = {
