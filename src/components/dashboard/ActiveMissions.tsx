@@ -18,7 +18,7 @@ const ActiveMissions = () => {
   const active = (missions ?? []).filter((m) => m.status !== "done").slice(0, 5);
 
   return (
-    <Card className="border-border/50 bg-card surface-elevated">
+    <Card className="border-border/50 bg-card surface-elevated flex-1 flex flex-col">
       <CardHeader className="p-5 pb-3">
         <CardTitle className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
           <div className="bg-terminal/10 text-terminal p-1.5 rounded-lg">
