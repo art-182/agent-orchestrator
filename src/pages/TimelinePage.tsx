@@ -131,8 +131,8 @@ const TimelinePage = () => {
     return (
       <PageTransition className="space-y-6">
         <div className="flex items-center gap-3">
-          <GanttChart className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Timeline</h1>
+          <div className="bg-terminal/10 text-terminal p-2 rounded-xl"><GanttChart className="h-5 w-5" /></div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Timeline</h1>
         </div>
         <div className="space-y-2">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-16" />)}</div>
       </PageTransition>
@@ -149,37 +149,39 @@ const TimelinePage = () => {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <GanttChart className="h-7 w-7 text-terminal" />
+          <div className="bg-terminal/10 text-terminal p-2 rounded-xl">
+            <GanttChart className="h-5 w-5" />
+          </div>
           <div>
-            <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Timeline</h1>
-            <p className="text-xs text-muted-foreground">Gantt · {ganttData.reduce((s, r) => s + r.tasks.length, 0)} tarefas · {ganttData.length} agentes</p>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Timeline</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">Gantt · {ganttData.reduce((s, r) => s + r.tasks.length, 0)} tarefas · {ganttData.length} agentes</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Select value={missionFilter} onValueChange={setMissionFilter}>
-            <SelectTrigger className="w-[160px] font-mono text-xs bg-card border-border h-8">
+            <SelectTrigger className="w-[160px] text-[12px] bg-card border-border/50 rounded-xl h-8">
               <SelectValue placeholder="Missão" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="font-mono text-xs">Todas missões</SelectItem>
+              <SelectItem value="all" className="text-[12px]">Todas missões</SelectItem>
               {(missions ?? []).map((m) => (
-                <SelectItem key={m.id} value={m.id} className="font-mono text-xs">{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id} className="text-[12px]">{m.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Button
             variant={showDependencies ? "default" : "outline"}
             size="sm"
-            className={`font-mono text-[10px] h-8 gap-1.5 ${showDependencies ? "bg-terminal text-background hover:bg-terminal/80" : ""}`}
+            className={`text-[11px] h-8 gap-1.5 rounded-xl ${showDependencies ? "bg-terminal text-background hover:bg-terminal/80" : "border-border/50"}`}
             onClick={() => setShowDependencies(!showDependencies)}
           >
             <Link2 className="h-3.5 w-3.5" /> Deps
           </Button>
-          <div className="flex items-center gap-1 border border-border rounded-lg px-1">
+          <div className="flex items-center gap-1 border border-border/50 rounded-xl px-1">
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} disabled={zoomIdx === 0}>
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
-            <span className="font-mono text-[10px] text-muted-foreground w-8 text-center">{ZOOM_LABELS[zoomIdx]}</span>
+            <span className="text-[10px] text-muted-foreground w-8 text-center tabular-nums">{ZOOM_LABELS[zoomIdx]}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomIn} disabled={zoomIdx === ZOOM_LEVELS.length - 1}>
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
@@ -196,19 +198,19 @@ const TimelinePage = () => {
       </div>
 
       {/* Gantt Chart */}
-      <div className="border border-border rounded-lg bg-card overflow-hidden">
+      <div className="border border-border/50 rounded-2xl bg-card surface-elevated overflow-hidden">
         <div className="flex">
           {/* Agent labels column */}
-          <div className="shrink-0 w-[180px] border-r border-border z-10 bg-card">
-            <div className="h-10 border-b border-border flex items-center px-3">
-              <span className="font-mono text-[10px] text-muted-foreground">Agentes</span>
+          <div className="shrink-0 w-[180px] border-r border-border/30 z-10 bg-card">
+            <div className="h-10 border-b border-border/30 flex items-center px-3">
+              <span className="text-[11px] text-muted-foreground font-medium">Agentes</span>
             </div>
             {ganttData.map((row) => (
-              <div key={row.agent.id} className="flex items-center gap-2 px-3 border-b border-border/50" style={{ height: ROW_HEIGHT }}>
+              <div key={row.agent.id} className="flex items-center gap-2 px-3 border-b border-border/20" style={{ height: ROW_HEIGHT }}>
                 <span className="text-base">{row.agent.emoji}</span>
                 <div className="min-w-0">
-                  <p className="font-mono text-xs font-semibold text-foreground truncate">{row.agent.name}</p>
-                  <p className="font-mono text-[9px] text-muted-foreground">{row.agent.model}</p>
+                  <p className="text-[12px] font-semibold text-foreground truncate">{row.agent.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{row.agent.model}</p>
                 </div>
               </div>
             ))}
@@ -218,9 +220,9 @@ const TimelinePage = () => {
           <div className="overflow-x-auto flex-1" ref={scrollRef}>
             <div style={{ minWidth: HOURS.length * HOUR_WIDTH }}>
               {/* Time headers */}
-              <div className="flex h-10 border-b border-border">
+              <div className="flex h-10 border-b border-border/30">
                 {HOURS.map((h) => (
-                  <div key={h} className="flex items-center justify-center border-r border-border/30 font-mono text-[10px] text-muted-foreground relative" style={{ width: HOUR_WIDTH }}>
+                  <div key={h} className="flex items-center justify-center border-r border-border/15 text-[10px] text-muted-foreground tabular-nums relative" style={{ width: HOUR_WIDTH }}>
                     {String(h).padStart(2, "0")}:00
                     {/* Half hour mark */}
                     <div className="absolute bottom-0 left-1/2 w-px h-2 bg-border/30" />
@@ -313,7 +315,7 @@ const TimelinePage = () => {
                                 })}
                               >
                                 <div className={`h-2 w-2 rounded-full ${sc} shrink-0`} />
-                                <span className="font-mono text-[10px] text-foreground truncate">{task.name}</span>
+                                <span className="text-[10px] text-foreground truncate">{task.name}</span>
                                 {task.status === "in_progress" && (
                                   <span className="ml-auto shrink-0 h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
                                 )}
@@ -341,122 +343,121 @@ const TimelinePage = () => {
         {Object.entries(statusColor).map(([k, c]) => (
           <div key={k} className="flex items-center gap-1.5">
             <div className={`h-2.5 w-2.5 rounded-full ${c}`} />
-            <span className="font-mono text-[10px] text-muted-foreground">{statusLabel[k] ?? k}</span>
+            <span className="text-[10px] text-muted-foreground">{statusLabel[k] ?? k}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5 ml-2">
           <div className="h-3 w-px bg-rose/50" />
-          <span className="font-mono text-[10px] text-rose/60">Agora</span>
+          <span className="text-[10px] text-rose/60">Agora</span>
         </div>
         <div className="flex items-center gap-1.5 ml-2">
           <Milestone className="h-3 w-3 text-violet" />
-          <span className="font-mono text-[10px] text-violet/60">Milestone</span>
+          <span className="text-[10px] text-violet/60">Milestone</span>
         </div>
         {showDependencies && (
           <div className="flex items-center gap-1.5 ml-2">
             <div className="h-px w-4 bg-violet/50 border-t border-dashed border-violet/40" />
-            <span className="font-mono text-[10px] text-violet/60">Dependência</span>
+            <span className="text-[10px] text-violet/60">Dependência</span>
           </div>
         )}
       </div>
 
       {/* Detail Sheet */}
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <SheetContent className="border-border bg-card w-full sm:max-w-md overflow-y-auto">
+        <SheetContent className="border-border/50 bg-card w-full sm:max-w-md overflow-y-auto">
           {selected && (
             <>
               <SheetHeader>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-cyan/15 text-cyan border-cyan/30 font-mono text-[10px]">
+                  <Badge variant="outline" className="bg-cyan/10 text-cyan border-cyan/20 text-[10px] rounded-full font-medium">
                     {statusLabel[selected.status] ?? selected.status}
                   </Badge>
-                  <Badge variant="outline" className="font-mono text-[10px]">{selected.priority}</Badge>
+                  <Badge variant="outline" className="text-[10px] rounded-full font-medium border-border/50">{selected.priority}</Badge>
                 </div>
-                <SheetTitle className="font-mono text-lg">{selected.name}</SheetTitle>
-                <SheetDescription className="font-mono text-xs">
+                <SheetTitle className="text-lg tracking-tight">{selected.name}</SheetTitle>
+                <SheetDescription className="text-[12px]">
                   {selected.agentEmoji} {selected.agentName} · {selected.missionName} · {selected.durationHours}h
                 </SheetDescription>
               </SheetHeader>
 
               <div className="mt-6">
                 <Tabs defaultValue="tree">
-                  <TabsList className="font-mono w-full">
-                    <TabsTrigger value="tree" className="font-mono text-[10px] flex-1">Decisão</TabsTrigger>
-                    <TabsTrigger value="logs" className="font-mono text-[10px] flex-1">JSON</TabsTrigger>
-                    <TabsTrigger value="artifacts" className="font-mono text-[10px] flex-1">Artifacts</TabsTrigger>
+                  <TabsList className="w-full bg-muted/30 border border-border/30 rounded-xl p-1">
+                    <TabsTrigger value="tree" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Decisão</TabsTrigger>
+                    <TabsTrigger value="logs" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">JSON</TabsTrigger>
+                    <TabsTrigger value="artifacts" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Artifacts</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="tree" className="mt-4">
                     <div className="space-y-3">
-                      <div className="rounded-lg border border-border bg-muted/30 p-3">
+                      <div className="rounded-xl border border-border/30 bg-muted/20 p-3">
                         <div className="flex items-center gap-2 mb-1.5">
                           <div className="h-2 w-2 rounded-full bg-foreground" />
-                          <span className="font-mono text-[10px] font-bold text-muted-foreground">INPUT_RECEIVED</span>
+                          <span className="text-[10px] font-semibold text-muted-foreground tracking-wide uppercase">Input Received</span>
                         </div>
-                        <p className="font-mono text-xs text-foreground">"{selected.name}"</p>
+                        <p className="text-[12px] text-foreground">"{selected.name}"</p>
                       </div>
 
-                      <div className="rounded-lg border border-violet/30 bg-violet/5 p-3">
+                      <div className="rounded-xl border border-violet/20 bg-violet/5 p-3">
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-violet" />
-                            <span className="font-mono text-[10px] font-bold text-violet">INTENT_CLASSIFICATION</span>
+                            <span className="text-[10px] font-semibold text-violet tracking-wide uppercase">Intent Classification</span>
                           </div>
-                          <Badge variant="outline" className="font-mono text-[8px] border-terminal/30 text-terminal">
+                          <Badge variant="outline" className="text-[9px] border-terminal/20 text-terminal rounded-full px-2">
                             {selected.priority === "critical" ? "98" : selected.priority === "high" ? "95" : "90"}%
                           </Badge>
                         </div>
-                        <p className="font-mono text-xs text-foreground">
+                        <p className="text-[12px] text-foreground">
                           Severity: <span className={selected.priority === "critical" ? "text-rose" : selected.priority === "high" ? "text-amber" : "text-terminal"}>
                             {selected.priority}
                           </span>
                         </p>
                       </div>
 
-                      {/* Decision interactions */}
                       {decisionTree.length > 0 && (
-                        <div className="rounded-lg border border-cyan/30 bg-cyan/5 p-3 space-y-2">
+                        <div className="rounded-xl border border-cyan/20 bg-cyan/5 p-3 space-y-2">
                           <div className="flex items-center gap-2 mb-1">
                             <div className="h-2 w-2 rounded-full bg-cyan" />
-                            <span className="font-mono text-[10px] font-bold text-cyan">AGENT_INTERACTIONS</span>
+                            <span className="text-[10px] font-semibold text-cyan tracking-wide uppercase">Agent Interactions</span>
                           </div>
                           {decisionTree.map((d, idx) => (
-                            <div key={idx} className="flex items-center gap-2 px-2 py-1.5 rounded bg-muted/30">
-                              <Badge variant="outline" className="font-mono text-[8px] px-1 py-0">{d.type}</Badge>
-                              <span className="font-mono text-[10px] text-foreground truncate flex-1">{d.message.slice(0, 60)}</span>
-                              <span className="font-mono text-[9px] text-muted-foreground shrink-0">{d.tokens}t</span>
+                            <div key={idx} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/20">
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-full border-border/50">{d.type}</Badge>
+                              <span className="text-[11px] text-foreground truncate flex-1">{d.message.slice(0, 60)}</span>
+                              <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{d.tokens}t</span>
                             </div>
                           ))}
                         </div>
                       )}
 
-                      <div className="rounded-lg border border-border bg-muted/20 p-3">
+                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3">
                         <div className="flex items-center gap-2 mb-1.5">
                           <div className="h-2 w-2 rounded-full bg-muted-foreground" />
-                          <span className="font-mono text-[10px] font-bold text-muted-foreground">OUTPUT</span>
+                          <span className="text-[10px] font-semibold text-muted-foreground tracking-wide uppercase">Output</span>
                         </div>
                         <div className="grid grid-cols-3 gap-2 mt-2 text-center">
                           <div>
-                            <p className="font-mono text-[9px] text-muted-foreground">Tokens</p>
-                            <p className="font-mono text-sm font-bold text-foreground">{selected.tokens}</p>
+                            <p className="text-[10px] text-muted-foreground">Tokens</p>
+                            <p className="text-sm font-bold text-foreground tabular-nums">{selected.tokens}</p>
                           </div>
                           <div>
-                            <p className="font-mono text-[9px] text-muted-foreground">Custo</p>
-                            <p className="font-mono text-sm font-bold text-terminal">${selected.cost.toFixed(2)}</p>
+                            <p className="text-[10px] text-muted-foreground">Custo</p>
+                            <p className="text-sm font-bold text-terminal tabular-nums">${selected.cost.toFixed(2)}</p>
                           </div>
                           <div>
-                            <p className="font-mono text-[9px] text-muted-foreground">Duração</p>
-                            <p className="font-mono text-sm font-bold text-foreground">{selected.duration}</p>
+                            <p className="text-[10px] text-muted-foreground">Duração</p>
+                            <p className="text-sm font-bold text-foreground">{selected.duration}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex gap-3 mt-6">
-                      <Button variant="outline" className="flex-1 gap-2 font-mono text-xs border-rose/30 text-rose hover:bg-rose/10">
+                      <Button variant="outline" className="flex-1 gap-2 text-[12px] border-rose/20 text-rose hover:bg-rose/10 rounded-xl">
                         <X className="h-3.5 w-3.5" /> Interromper
                       </Button>
-                      <Button className="flex-1 gap-2 font-mono text-xs bg-terminal hover:bg-terminal/80 text-background">
+                      <Button className="flex-1 gap-2 text-[12px] bg-terminal hover:bg-terminal/80 text-background rounded-xl">
                         <Puzzle className="h-3.5 w-3.5" /> Detalhes
                       </Button>
                     </div>
@@ -483,18 +484,18 @@ const TimelinePage = () => {
 
                   <TabsContent value="artifacts" className="mt-4">
                     <div className="space-y-2">
-                      <div className="rounded-lg border border-border bg-muted/30 p-3 flex items-center gap-3">
+                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3 flex items-center gap-3">
                         <FileJson className="h-4 w-4 text-cyan" />
                         <div>
-                          <p className="font-mono text-xs text-foreground">decision_log.json</p>
-                          <p className="font-mono text-[9px] text-muted-foreground">Árvore de decisão</p>
+                          <p className="text-[12px] text-foreground font-medium">decision_log.json</p>
+                          <p className="text-[10px] text-muted-foreground">Árvore de decisão</p>
                         </div>
                       </div>
-                      <div className="rounded-lg border border-border bg-muted/30 p-3 flex items-center gap-3">
+                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3 flex items-center gap-3">
                         <FileJson className="h-4 w-4 text-terminal" />
                         <div>
-                          <p className="font-mono text-xs text-foreground">output_response.md</p>
-                          <p className="font-mono text-[9px] text-muted-foreground">Resposta do agente</p>
+                          <p className="text-[12px] text-foreground font-medium">output_response.md</p>
+                          <p className="text-[10px] text-muted-foreground">Resposta do agente</p>
                         </div>
                       </div>
                     </div>

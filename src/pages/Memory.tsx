@@ -198,7 +198,7 @@ const Memory = () => {
             </Badge>
           </div>
 
-          <p className="font-mono text-[10px] text-muted-foreground">{filteredMem.length} resultado(s)</p>
+          <p className="text-[10px] text-muted-foreground font-medium">{filteredMem.length} resultado(s)</p>
 
           <ScrollArea className="h-[calc(100vh-480px)]">
             <div className="space-y-2">
@@ -209,54 +209,54 @@ const Memory = () => {
                 return (
                   <Card
                     key={entry.id}
-                    className={`border-border bg-card hover:border-muted-foreground/30 transition-colors cursor-pointer ${isSelected ? "ring-1 ring-terminal/40 border-terminal/30" : ""}`}
+                    className={`border-border/50 bg-card surface-elevated hover:border-border transition-all duration-200 cursor-pointer ${isSelected ? "ring-1 ring-terminal/20 border-terminal/30" : ""}`}
                     onClick={() => setSelectedEntry(isSelected ? null : entry)}
                   >
                     <CardContent className="p-3 space-y-2">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm">{tc.emoji}</span>
-                          <Badge variant="outline" className={`font-mono text-[8px] px-1.5 py-0 border ${tc.color}`}>{tc.label}</Badge>
-                          <span className="font-mono text-[10px] text-muted-foreground">{agent?.emoji} {agent?.name}</span>
+                          <Badge variant="outline" className={`text-[9px] px-1.5 py-0 border rounded-full font-medium ${tc.color}`}>{tc.label}</Badge>
+                          <span className="text-[11px] text-muted-foreground">{agent?.emoji} {agent?.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-16">
                             <Progress value={entry.confidence ?? 0} className="h-1" />
                           </div>
-                          <span className={`font-mono text-[10px] font-semibold ${(entry.confidence ?? 0) >= 95 ? "text-terminal" : (entry.confidence ?? 0) >= 85 ? "text-amber" : "text-rose"}`}>{entry.confidence}%</span>
+                          <span className={`text-[10px] font-semibold tabular-nums ${(entry.confidence ?? 0) >= 95 ? "text-terminal" : (entry.confidence ?? 0) >= 85 ? "text-amber" : "text-rose"}`}>{entry.confidence}%</span>
                         </div>
                       </div>
-                      <p className="font-mono text-[11px] text-foreground">{entry.content}</p>
+                      <p className="text-[12px] text-foreground leading-relaxed">{entry.content}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex gap-1 flex-wrap">
                           {(entry.tags ?? []).map((tag) => (
                             <span
                               key={tag}
-                              className="font-mono text-[8px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-terminal/10 hover:text-terminal cursor-pointer transition-colors"
+                              className="text-[9px] px-1.5 py-0.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-terminal/10 hover:text-terminal cursor-pointer transition-colors"
                               onClick={(e) => { e.stopPropagation(); setSearchQuery(tag); }}
                             >
                               #{tag}
                             </span>
                           ))}
                         </div>
-                        <span className="font-mono text-[9px] text-muted-foreground">{entry.access_count}x · {new Date(entry.created_at).toLocaleDateString("pt-BR")}</span>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">{entry.access_count}x · {new Date(entry.created_at).toLocaleDateString("pt-BR")}</span>
                       </div>
 
                       {/* Expanded detail */}
                       {isSelected && (
-                        <div className="mt-2 pt-2 border-t border-border space-y-2">
+                        <div className="mt-2 pt-2 border-t border-border/30 space-y-2">
                           <div className="grid grid-cols-3 gap-2 text-center">
                             <div>
-                              <p className="font-mono text-[9px] text-muted-foreground">Acessos</p>
-                              <p className="font-mono text-sm font-bold text-foreground">{entry.access_count}</p>
+                              <p className="text-[10px] text-muted-foreground">Acessos</p>
+                              <p className="text-sm font-bold text-foreground tabular-nums">{entry.access_count}</p>
                             </div>
                             <div>
-                              <p className="font-mono text-[9px] text-muted-foreground">Confiança</p>
-                              <p className="font-mono text-sm font-bold text-foreground">{entry.confidence}%</p>
+                              <p className="text-[10px] text-muted-foreground">Confiança</p>
+                              <p className="text-sm font-bold text-foreground tabular-nums">{entry.confidence}%</p>
                             </div>
                             <div>
-                              <p className="font-mono text-[9px] text-muted-foreground">Último acesso</p>
-                              <p className="font-mono text-sm font-bold text-foreground">{entry.last_accessed ? new Date(entry.last_accessed).toLocaleDateString("pt-BR") : "—"}</p>
+                              <p className="text-[10px] text-muted-foreground">Último acesso</p>
+                              <p className="text-sm font-bold text-foreground">{entry.last_accessed ? new Date(entry.last_accessed).toLocaleDateString("pt-BR") : "—"}</p>
                             </div>
                           </div>
                         </div>
@@ -273,19 +273,19 @@ const Memory = () => {
         <TabsContent value="connections" className="mt-4">
           <ScrollArea className="h-[calc(100vh-380px)]">
             <div className="space-y-3">
-              <p className="font-mono text-xs text-muted-foreground">{agentConnections.length} conexões via tags compartilhadas</p>
+              <p className="text-[11px] text-muted-foreground font-medium">{agentConnections.length} conexões via tags compartilhadas</p>
               {agentConnections.map((conn, idx) => (
-                <Card key={idx} className="border-border bg-card">
+                <Card key={idx} className="border-border/50 bg-card surface-elevated">
                   <CardContent className="p-3 space-y-2">
-                    <div className="flex items-center gap-2 font-mono text-sm">
+                    <div className="flex items-center gap-2 text-[13px]">
                       <span className="font-semibold text-terminal">{conn.from}</span>
                       <span className="text-muted-foreground">↔</span>
                       <span className="font-semibold text-cyan">{conn.to}</span>
-                      <Badge variant="outline" className="ml-auto font-mono text-[10px] border-violet/30 text-violet">{conn.shared.length} tags</Badge>
+                      <Badge variant="outline" className="ml-auto text-[10px] border-violet/20 text-violet rounded-full font-medium">{conn.shared.length} tags</Badge>
                     </div>
                     <div className="flex gap-1 flex-wrap">
                       {conn.shared.map((tag) => (
-                        <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 rounded bg-violet/10 text-violet">#{tag}</span>
+                        <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet/10 text-violet">#{tag}</span>
                       ))}
                     </div>
                   </CardContent>
@@ -302,13 +302,13 @@ const Memory = () => {
         <TabsContent value="tags" className="mt-4">
           <ScrollArea className="h-[calc(100vh-380px)]">
             <div className="space-y-3">
-              <p className="font-mono text-xs text-muted-foreground">{tagMap.length} tags encontradas</p>
+              <p className="text-[11px] text-muted-foreground font-medium">{tagMap.length} tags encontradas</p>
               <div className="flex flex-wrap gap-2">
                 {tagMap.map(([tag, count]) => (
                   <Badge
                     key={tag}
                     variant="outline"
-                    className="font-mono text-xs px-3 py-1.5 border-border hover:border-terminal/30 hover:bg-terminal/5 cursor-pointer transition-colors"
+                    className="text-[12px] px-3 py-1.5 border-border/50 hover:border-terminal/30 hover:bg-terminal/5 cursor-pointer transition-colors rounded-full"
                     onClick={() => { setSearchQuery(tag); }}
                   >
                     #{tag} <span className="ml-1.5 text-muted-foreground">({count})</span>
@@ -368,17 +368,17 @@ const Memory = () => {
           <ScrollArea className="h-[calc(100vh-380px)]">
             <div className="space-y-2">
               {mis.map((m) => (
-                <Card key={m.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
-                  <CardContent className="p-3 space-y-2">
+                <Card key={m.id} className="border-border/50 bg-card surface-elevated hover:border-border transition-all duration-200">
+                  <CardContent className="p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <p className="font-mono text-sm font-semibold text-foreground">{m.name}</p>
-                      <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 border ${statusColor[m.status] ?? "text-muted-foreground"}`}>{m.status}</Badge>
+                      <p className="text-[13px] font-semibold text-foreground tracking-tight">{m.name}</p>
+                      <Badge variant="outline" className={`text-[10px] px-2 py-0.5 border rounded-full font-medium ${statusColor[m.status] ?? "text-muted-foreground"}`}>{m.status}</Badge>
                     </div>
-                    {m.description && <p className="font-mono text-[10px] text-muted-foreground">{m.description}</p>}
+                    {m.description && <p className="text-[11px] text-muted-foreground">{m.description}</p>}
                     <div className="space-y-1">
-                      <div className="flex items-center justify-between font-mono text-[10px]">
+                      <div className="flex items-center justify-between text-[10px]">
                         <span className="text-muted-foreground">Progresso</span>
-                        <span className="text-foreground font-semibold">{m.progress ?? 0}%</span>
+                        <span className="text-foreground font-semibold tabular-nums">{m.progress ?? 0}%</span>
                       </div>
                       <Progress value={m.progress ?? 0} className="h-1.5" />
                     </div>
@@ -397,16 +397,16 @@ const Memory = () => {
                 const from = (i as any).from as any;
                 const to = (i as any).to as any;
                 return (
-                  <Card key={i.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
+                  <Card key={i.id} className="border-border/50 bg-card surface-elevated hover:border-border transition-all duration-200">
                     <CardContent className="p-3 space-y-1">
-                      <div className="flex items-center gap-2 font-mono text-[10px]">
+                      <div className="flex items-center gap-2 text-[11px]">
                         <span className="text-foreground">{from?.emoji} {from?.name}</span>
                         <span className="text-muted-foreground">→</span>
                         <span className="text-foreground">{to?.emoji} {to?.name}</span>
-                        <Badge variant="outline" className="font-mono text-[8px] px-1 py-0 border ml-auto">{i.type}</Badge>
+                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border/50 ml-auto rounded-full">{i.type}</Badge>
                       </div>
-                      <p className="font-mono text-[11px] text-muted-foreground">{i.message}</p>
-                      <div className="flex items-center gap-3 font-mono text-[9px] text-muted-foreground">
+                      <p className="text-[12px] text-muted-foreground">{i.message}</p>
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground tabular-nums">
                         <span>{i.tokens} tokens</span>
                         <span>{i.latency}</span>
                       </div>
