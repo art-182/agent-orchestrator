@@ -59,6 +59,64 @@ const Finances = () => {
 
       <BillingCards />
 
+      {/* Financial Summary Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border-border/50 bg-card surface-elevated">
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <TrendingUp className="h-4 w-4 text-terminal" />
+              <span className="text-sm font-medium">Tendência Semanal</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {dailyCosts.length >= 7
+                ? (() => {
+                    const last7 = dailyCosts.slice(-7);
+                    const prev7 = dailyCosts.slice(-14, -7);
+                    const sumLast = last7.reduce((s, c) => s + c.total, 0);
+                    const sumPrev = prev7.reduce((s, c) => s + c.total, 0);
+                    const pctChange = sumPrev > 0 ? ((sumLast - sumPrev) / sumPrev * 100).toFixed(1) : "0";
+                    return `Gasto dos últimos 7 dias: $${sumLast.toFixed(2)} (${Number(pctChange) >= 0 ? "+" : ""}${pctChange}% vs semana anterior)`;
+                  })()
+                : `Total acumulado: $${dailyCosts.reduce((s, c) => s + c.total, 0).toFixed(2)} em ${dailyCosts.length} dias registrados`
+              }
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50 bg-card surface-elevated">
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Users className="h-4 w-4 text-cyan" />
+              <span className="text-sm font-medium">Eficiência dos Agentes</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {agentCosts.length > 0
+                ? `${agentCosts.length} agentes · Custo médio/tarefa: $${(agentCosts.reduce((s, a) => s + a.costPerTask, 0) / agentCosts.length).toFixed(3)} · Total tarefas: ${agentCosts.reduce((s, a) => s + a.tasks, 0).toLocaleString()}`
+                : "Sem dados de agentes ainda"
+              }
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50 bg-card surface-elevated">
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <BarChart3 className="h-4 w-4 text-violet" />
+              <span className="text-sm font-medium">Distribuição de Custos</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {dailyCosts.length > 0
+                ? (() => {
+                    const totals = { openai: 0, anthropic: 0, google: 0 };
+                    dailyCosts.forEach(c => { totals.openai += c.openai; totals.anthropic += c.anthropic; totals.google += c.google; });
+                    const sum = totals.openai + totals.anthropic + totals.google;
+                    return `OpenAI: ${(totals.openai / sum * 100).toFixed(0)}% · Anthropic: ${(totals.anthropic / sum * 100).toFixed(0)}% · Google: ${(totals.google / sum * 100).toFixed(0)}%`;
+                  })()
+                : "Sem dados de custos ainda"
+              }
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
       <Tabs defaultValue="overview" className="mt-2">
         <TabsList className="bg-muted/30 border border-border/30 rounded-xl p-1">
           <TabsTrigger value="overview" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Visão Geral</TabsTrigger>
