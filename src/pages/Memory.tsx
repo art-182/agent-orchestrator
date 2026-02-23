@@ -223,7 +223,7 @@ const Memory = () => {
                           <div className="w-16">
                             <Progress value={entry.confidence ?? 0} className="h-1" />
                           </div>
-                          <span className={`font-mono text-[10px] font-semibold ${(entry.confidence ?? 0) >= 95 ? "text-terminal" : (entry.confidence ?? 0) >= 85 ? "text-amber" : "text-rose"}`}>{entry.confidence}%</span>
+                          <span className={`text-[10px] font-semibold tabular-nums ${(entry.confidence ?? 0) >= 95 ? "text-terminal" : (entry.confidence ?? 0) >= 85 ? "text-amber" : "text-rose"}`}>{entry.confidence}%</span>
                         </div>
                       </div>
                       <p className="font-mono text-[11px] text-foreground">{entry.content}</p>
