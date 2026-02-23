@@ -321,7 +321,7 @@ const TimelinePage = () => {
                                 )}
                               </button>
                             </TooltipTrigger>
-                            <TooltipContent className="font-mono text-xs space-y-1">
+                            <TooltipContent className="text-xs space-y-1">
                               <p className="font-semibold">{task.name}</p>
                               <p className="text-muted-foreground">{task.priority} · {statusLabel[task.status]} · {task.durationHours}h</p>
                               {task.tokens && <p className="text-muted-foreground">{task.tokens} tokens · ${(task.cost ?? 0).toFixed(2)}</p>}
