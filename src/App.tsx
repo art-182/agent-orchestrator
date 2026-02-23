@@ -25,7 +25,19 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route element={<AppLayout><Routes><Route path="/" element={<CommandCenter />} /><Route path="/agents" element={<Agents />} /><Route path="/interactions" element={<Interactions />} /><Route path="/missions" element={<Missions />} /><Route path="/tasks" element={<Tasks />} /><Route path="/deliverables" element={<Deliverables />} /><Route path="/timeline" element={<TimelinePage />} /><Route path="/memory" element={<Memory />} /><Route path="/finances" element={<Finances />} /><Route path="/traces" element={<Traces />} /><Route path="*" element={<NotFound />} /></Routes></AppLayout>} path="/*" />
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<CommandCenter />} />
+            <Route path="/agents" element={<Agents />} />
+            <Route path="/interactions" element={<Interactions />} />
+            <Route path="/missions" element={<Missions />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/deliverables" element={<Deliverables />} />
+            <Route path="/timeline" element={<TimelinePage />} />
+            <Route path="/memory" element={<Memory />} />
+            <Route path="/finances" element={<Finances />} />
+            <Route path="/traces" element={<Traces />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

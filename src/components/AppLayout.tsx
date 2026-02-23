@@ -1,3 +1,4 @@
+import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useEffect, useState } from "react";
@@ -29,7 +30,7 @@ function LiveClock() {
   );
 }
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default function AppLayout() {
   const location = useLocation();
   const label = routeLabels[location.pathname] ?? "Revenue OS";
 
@@ -46,7 +47,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <LiveClock />
             </div>
           </header>
-          <main className="flex-1 p-6">{children}</main>
+          <main className="flex-1 p-6">
+            <Outlet />
+          </main>
         </SidebarInset>
       </div>
     </SidebarProvider>
