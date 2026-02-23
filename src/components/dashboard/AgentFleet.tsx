@@ -53,7 +53,7 @@ const AgentFleet = () => {
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-5 pt-2">
+      <CardContent className="p-5 pt-2 flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
           {list.map((agent) => {
             const status = (agent.status as AgentStatus) ?? "online";

@@ -30,7 +30,7 @@ const ActiveMissions = () => {
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-5 pt-2 space-y-2.5">
+      <CardContent className="p-5 pt-2 space-y-2.5 flex-1">
         {active.length === 0 && (
           <p className="text-[13px] text-muted-foreground text-center py-8">Nenhuma missão ativa</p>
         )}

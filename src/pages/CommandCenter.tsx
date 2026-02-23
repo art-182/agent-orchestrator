@@ -57,22 +57,22 @@ const CommandCenter = () => {
       </StaggerContainer>
 
       {/* Fleet + Quick Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 auto-rows-fr">
+        <div className="lg:col-span-2 flex">
           <AgentFleet />
         </div>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <QuickStats />
           <ProviderStatus />
         </div>
       </div>
 
       {/* Live Feed + Active Missions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 auto-rows-fr">
+        <div className="lg:col-span-2 flex">
           <LiveFeed />
         </div>
-        <div>
+        <div className="flex">
           <ActiveMissions />
         </div>
       </div>
