@@ -20,6 +20,7 @@ const items = [
   { title: "Timeline", url: "/timeline", icon: GanttChart },
   { title: "Memória", url: "/memory", icon: Brain },
   { title: "Finanças", url: "/finances", icon: DollarSign },
+  { title: "ROI", url: "/roi", icon: TrendingUp },
   { title: "Traces", url: "/traces", icon: Activity },
 ];
 

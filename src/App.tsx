@@ -37,6 +37,7 @@ const App = () => (
             <Route path="/memory" element={<Memory />} />
             <Route path="/finances" element={<Finances />} />
             <Route path="/traces" element={<Traces />} />
+            <Route path="/roi" element={<ROIDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
