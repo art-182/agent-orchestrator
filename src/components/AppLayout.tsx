@@ -26,7 +26,7 @@ function LiveClock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span className="font-mono text-sm text-terminal tabular-nums tracking-tight">
+    <span className="text-[13px] text-terminal/80 tabular-nums tracking-tight font-medium">
       {time.toLocaleTimeString("pt-BR", { hour12: false })}
     </span>
   );
@@ -42,11 +42,18 @@ export default function AppLayout() {
       <div className="flex min-h-svh w-full">
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-14 items-center gap-3 border-b border-border px-5">
+          <header className="flex h-14 items-center gap-3 border-b border-border/40 px-6 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
             <SidebarTrigger className="text-muted-foreground hover:text-terminal transition-colors" />
-            <span className="text-sm text-muted-foreground">/</span>
-            <span className="text-sm font-medium text-foreground">{label}</span>
-            <div className="ml-auto">
+            <div className="h-4 w-px bg-border/50" />
+            <span className="text-[13px] font-medium text-foreground/90 tracking-tight">{label}</span>
+            <div className="ml-auto flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-terminal animate-pulse-dot" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-terminal" />
+                </span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Live</span>
+              </div>
               <LiveClock />
             </div>
           </header>

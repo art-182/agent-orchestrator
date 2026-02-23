@@ -1,5 +1,4 @@
 import { Bot, TrendingUp, DollarSign, Activity } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { useAgents } from "@/hooks/use-supabase-data";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -17,20 +16,23 @@ const StatusBar = () => {
   const totalCost = list.reduce((s, a) => s + (a.total_cost ?? 0), 0);
 
   const badges = [
-    { label: "Agentes Online", value: `${online}/${total}`, icon: "Bot" },
-    { label: "Taxa de Sucesso", value: "97.2%", icon: "TrendingUp" },
-    { label: "Custo/Hora", value: `$${(totalCost / Math.max(total * 24 * 14, 1) * 24).toFixed(2)}`, icon: "DollarSign" },
+    { label: "Agentes", value: `${online}/${total}`, icon: "Bot" },
+    { label: "Sucesso", value: "97.2%", icon: "TrendingUp" },
+    { label: "Custo/h", value: `$${(totalCost / Math.max(total * 24 * 14, 1) * 24).toFixed(2)}`, icon: "DollarSign" },
     { label: "Uptime", value: "99.8%", icon: "Activity" },
   ];
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-2">
       {badges.map((badge) => (
-        <Badge key={badge.label} variant="outline" className="gap-2 rounded-lg border-border bg-card px-4 py-2 font-mono text-sm">
-          <span className="text-terminal">{iconMap[badge.icon]}</span>
-          <span className="text-muted-foreground">{badge.label}:</span>
-          <span className="text-foreground font-semibold">{badge.value}</span>
-        </Badge>
+        <div
+          key={badge.label}
+          className="flex items-center gap-2 rounded-xl border border-border/40 bg-card/60 backdrop-blur-sm px-3.5 py-1.5 transition-colors hover:border-border/70"
+        >
+          <span className="text-terminal/70">{iconMap[badge.icon]}</span>
+          <span className="text-[11px] text-muted-foreground font-medium">{badge.label}</span>
+          <span className="text-[12px] text-foreground font-semibold">{badge.value}</span>
+        </div>
       ))}
     </div>
   );

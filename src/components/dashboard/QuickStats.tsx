@@ -18,21 +18,21 @@ const QuickStats = () => {
   }, 0);
 
   return (
-    <Card className="border-border bg-card">
+    <Card className="border-border/50 bg-card surface-elevated">
       <CardContent className="p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <span className="font-mono text-sm text-muted-foreground">Custo 7 Dias</span>
+          <span className="text-[13px] text-muted-foreground font-medium">Custo 7 Dias</span>
         </div>
         <div className="h-[52px] -mx-1">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={costData.length > 0 ? costData : [{ v: 0 }]}>
               <defs>
                 <linearGradient id="costMiniGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(160, 51%, 49%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(160, 51%, 49%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(158, 64%, 52%)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="hsl(158, 64%, 52%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <Area type="monotone" dataKey="v" stroke="hsl(160, 51%, 49%)" fill="url(#costMiniGrad)" strokeWidth={1.5} />
+              <Area type="monotone" dataKey="v" stroke="hsl(158, 64%, 52%)" fill="url(#costMiniGrad)" strokeWidth={1.5} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -40,11 +40,11 @@ const QuickStats = () => {
         <div className="space-y-3 pt-1">
           {[
             { label: "Total Tarefas", value: totalTasks.toLocaleString(), color: "text-terminal" },
-            { label: "Taxa Erro Média", value: `${avgError}%`, color: parseFloat(avgError) < 2 ? "text-terminal" : "text-amber" },
-            { label: "Economia Mensal", value: `$${(totalROISavings / 1000).toFixed(1)}K`, color: "text-cyan" },
+            { label: "Taxa Erro", value: `${avgError}%`, color: parseFloat(avgError) < 2 ? "text-terminal" : "text-amber" },
+            { label: "Economia/mês", value: `$${(totalROISavings / 1000).toFixed(1)}K`, color: "text-cyan" },
             { label: "Agentes Ativos", value: `${list.filter((a) => a.status !== "error").length}/${list.length}`, color: "text-foreground" },
           ].map((s) => (
-            <div key={s.label} className="flex items-center justify-between font-mono text-sm">
+            <div key={s.label} className="flex items-center justify-between text-[13px]">
               <span className="text-muted-foreground">{s.label}</span>
               <span className={`font-semibold ${s.color}`}>{s.value}</span>
             </div>

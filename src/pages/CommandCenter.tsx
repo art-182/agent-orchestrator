@@ -1,4 +1,4 @@
-import { LayoutDashboard, Activity, TrendingUp } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import StatusBar from "@/components/dashboard/StatusBar";
 import MetricCard from "@/components/dashboard/MetricCard";
 import LiveFeed from "@/components/dashboard/LiveFeed";
@@ -30,16 +30,21 @@ const CommandCenter = () => {
     { label: "Tarefas Concluídas", value: `${tasksDone}/${totalTasks}`, icon: "ListChecks", sparkline: [8, 12, 15, 11, 18, 22, 19, 25, 21, 27, 24, 30], change: "+12%", trend: "up" },
     { label: "Tokens Consumidos", value: tokensFormatted, icon: "Zap", sparkline: [45, 52, 49, 60, 55, 68, 72, 65, 78, 82, 75, 88], change: "+8%", trend: "up" },
     { label: "Custo Acumulado", value: `$${totalCost.toFixed(2)}`, icon: "DollarSign", sparkline: [2, 5, 8, 12, 15, 19, 22, 27, 31, 36, 41, 47], change: "-5%", trend: "down" },
-    { label: "Horas Economizadas/Sem", value: `${totalHours}h`, icon: "Clock", sparkline: [1, 3, 5, 8, 11, 14, 18, 21, 25, 28, 31, 34], change: "+18%", trend: "up" },
+    { label: "Horas Economizadas", value: `${totalHours}h/sem`, icon: "Clock", sparkline: [1, 3, 5, 8, 11, 14, 18, 21, 25, 28, 31, 34], change: "+18%", trend: "up" },
   ];
 
   return (
     <PageTransition className="space-y-6">
-      {/* Header + Status inline */}
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <LayoutDashboard className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Command Center</h1>
+          <div className="bg-terminal/10 text-terminal p-2 rounded-xl">
+            <LayoutDashboard className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Command Center</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">Visão geral em tempo real do sistema</p>
+          </div>
         </div>
         <StatusBar />
       </div>
@@ -51,19 +56,19 @@ const CommandCenter = () => {
         ))}
       </StaggerContainer>
 
-      {/* Two-column: Fleet + Quick Stats side-by-side */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* Fleet + Quick Stats */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <AgentFleet />
         </div>
-        <div className="space-y-5">
+        <div className="space-y-4">
           <QuickStats />
           <ProviderStatus />
         </div>
       </div>
 
-      {/* Bottom: Live Feed + Active Missions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* Live Feed + Active Missions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <LiveFeed />
         </div>
