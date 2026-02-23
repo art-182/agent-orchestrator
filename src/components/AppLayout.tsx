@@ -35,6 +35,7 @@ function LiveClock() {
 export default function AppLayout() {
   const location = useLocation();
   const label = routeLabels[location.pathname] ?? "Revenue OS";
+  useRealtimeNotifications();
 
   return (
     <SidebarProvider defaultOpen={true}>

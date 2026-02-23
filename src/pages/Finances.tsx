@@ -55,9 +55,29 @@ const Finances = () => {
 
   return (
     <PageTransition className="space-y-6">
-      <div className="flex items-center gap-3">
-        <DollarSign className="h-6 w-6 text-terminal" />
-        <h1 className="font-mono text-xl font-semibold text-foreground">Finanças</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <DollarSign className="h-6 w-6 text-terminal" />
+          <h1 className="font-mono text-xl font-semibold text-foreground">Finanças</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="font-mono text-xs gap-2"
+            onClick={() => exportDailyCostsCSV(dailyCosts)}
+          >
+            <Download className="h-3.5 w-3.5" /> Custos CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="font-mono text-xs gap-2"
+            onClick={() => exportAgentCostsCSV(agentCosts)}
+          >
+            <Download className="h-3.5 w-3.5" /> Agentes CSV
+          </Button>
+        </div>
       </div>
 
       <BillingCards />
