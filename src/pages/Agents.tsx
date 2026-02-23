@@ -1,4 +1,4 @@
-import { useState, useMemo, lazy, Suspense } from "react";
+import { useState, useMemo } from "react";
 import { Bot, Search, Filter } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import AgentDetailSheet from "@/components/agents/AgentDetailSheet";
 import AgentPerformanceTable from "@/components/agents/AgentPerformanceTable";
 import AgentOrgChart from "@/components/agents/AgentOrgChart";
-const SkillsNetworkGraph = lazy(() => import("@/components/agents/SkillsNetworkGraph"));
+// SkillsNetworkGraph removed
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { useAgents } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -99,7 +99,6 @@ const Agents = () => {
       <Tabs defaultValue="overview" className="mt-2">
         <TabsList className="bg-muted/30 border border-border/30 rounded-xl p-1">
           <TabsTrigger value="overview" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Organograma</TabsTrigger>
-          <TabsTrigger value="skills" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Grafo de Skills</TabsTrigger>
           <TabsTrigger value="performance" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Desempenho</TabsTrigger>
         </TabsList>
 
@@ -107,11 +106,8 @@ const Agents = () => {
           <AgentOrgChart agents={filtered} onSelectAgent={setSelectedAgent} />
         </TabsContent>
 
-        <TabsContent value="skills" className="mt-4">
-          <Suspense fallback={<Skeleton className="h-[600px] rounded-xl" />}>
-            <SkillsNetworkGraph agents={agents ?? []} onSelectAgent={setSelectedAgent} />
-          </Suspense>
-        </TabsContent>
+
+
 
         <TabsContent value="performance" className="mt-4">
           <AgentPerformanceTable agents={filtered} />
