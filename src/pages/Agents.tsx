@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { Bot } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AgentCard from "@/components/agents/AgentCard";
 import AgentDetailSheet from "@/components/agents/AgentDetailSheet";
 import AgentPerformanceTable from "@/components/agents/AgentPerformanceTable";
 import AgentOrgChart from "@/components/agents/AgentOrgChart";
-import { mockAgents, statusColorMap } from "@/lib/mock-data";
 import type { Agent } from "@/lib/mock-data";
 
 const Agents = () => {
@@ -16,13 +14,6 @@ const Agents = () => {
       <div className="flex items-center gap-3">
         <Bot className="h-6 w-6 text-terminal" />
         <h1 className="font-mono text-xl font-semibold text-foreground">Agentes</h1>
-      </div>
-
-      {/* Agent Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockAgents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} onClick={() => setSelectedAgent(agent)} />
-        ))}
       </div>
 
       {/* Tabs */}
