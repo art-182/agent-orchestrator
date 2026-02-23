@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import AgentDetailSheet from "@/components/agents/AgentDetailSheet";
 import AgentPerformanceTable from "@/components/agents/AgentPerformanceTable";
 import AgentOrgChart from "@/components/agents/AgentOrgChart";
+import SkillsNetworkGraph from "@/components/agents/SkillsNetworkGraph";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { useAgents } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
