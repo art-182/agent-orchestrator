@@ -198,7 +198,7 @@ const Memory = () => {
             </Badge>
           </div>
 
-          <p className="font-mono text-[10px] text-muted-foreground">{filteredMem.length} resultado(s)</p>
+          <p className="text-[10px] text-muted-foreground font-medium">{filteredMem.length} resultado(s)</p>
 
           <ScrollArea className="h-[calc(100vh-480px)]">
             <div className="space-y-2">
