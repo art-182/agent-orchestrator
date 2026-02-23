@@ -364,28 +364,28 @@ const TimelinePage = () => {
 
       {/* Detail Sheet */}
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <SheetContent className="border-border bg-card w-full sm:max-w-md overflow-y-auto">
+        <SheetContent className="border-border/50 bg-card w-full sm:max-w-md overflow-y-auto">
           {selected && (
             <>
               <SheetHeader>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-cyan/15 text-cyan border-cyan/30 font-mono text-[10px]">
+                  <Badge variant="outline" className="bg-cyan/10 text-cyan border-cyan/20 text-[10px] rounded-full font-medium">
                     {statusLabel[selected.status] ?? selected.status}
                   </Badge>
-                  <Badge variant="outline" className="font-mono text-[10px]">{selected.priority}</Badge>
+                  <Badge variant="outline" className="text-[10px] rounded-full font-medium border-border/50">{selected.priority}</Badge>
                 </div>
-                <SheetTitle className="font-mono text-lg">{selected.name}</SheetTitle>
-                <SheetDescription className="font-mono text-xs">
+                <SheetTitle className="text-lg tracking-tight">{selected.name}</SheetTitle>
+                <SheetDescription className="text-[12px]">
                   {selected.agentEmoji} {selected.agentName} · {selected.missionName} · {selected.durationHours}h
                 </SheetDescription>
               </SheetHeader>
 
               <div className="mt-6">
                 <Tabs defaultValue="tree">
-                  <TabsList className="font-mono w-full">
-                    <TabsTrigger value="tree" className="font-mono text-[10px] flex-1">Decisão</TabsTrigger>
-                    <TabsTrigger value="logs" className="font-mono text-[10px] flex-1">JSON</TabsTrigger>
-                    <TabsTrigger value="artifacts" className="font-mono text-[10px] flex-1">Artifacts</TabsTrigger>
+                  <TabsList className="w-full bg-muted/30 border border-border/30 rounded-xl p-1">
+                    <TabsTrigger value="tree" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Decisão</TabsTrigger>
+                    <TabsTrigger value="logs" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">JSON</TabsTrigger>
+                    <TabsTrigger value="artifacts" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Artifacts</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="tree" className="mt-4">
