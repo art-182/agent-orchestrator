@@ -100,8 +100,8 @@ const Memory = () => {
     return (
       <PageTransition className="space-y-6">
         <div className="flex items-center gap-3">
-          <Brain className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Memória</h1>
+          <div className="bg-terminal/10 text-terminal p-2 rounded-xl"><Brain className="h-5 w-5" /></div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Memória</h1>
         </div>
         <div className="space-y-2">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}</div>
       </PageTransition>
@@ -120,25 +120,26 @@ const Memory = () => {
   ];
 
   return (
-    <PageTransition className="space-y-8">
+    <PageTransition className="space-y-6">
       <div className="flex items-center gap-3">
-        <Brain className="h-7 w-7 text-terminal" />
+        <div className="bg-terminal/10 text-terminal p-2 rounded-xl">
+          <Brain className="h-5 w-5" />
+        </div>
         <div>
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Memória</h1>
-          <p className="text-xs text-muted-foreground">Base de conhecimento contextual · {mem.length} memórias · {avgConfidence}% confiança</p>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Memória</h1>
+          <p className="text-[11px] text-muted-foreground font-medium">Base de conhecimento · {mem.length} memórias · {avgConfidence}% confiança</p>
         </div>
       </div>
 
-      {/* Stats */}
       <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {layers.map((l) => (
           <FadeIn key={l.label}>
-            <Card className="border-border bg-card">
-              <CardContent className="p-3 flex items-center gap-3">
+            <Card className="border-border/50 bg-card surface-elevated">
+              <CardContent className="p-4 flex items-center gap-3">
                 <l.icon className={`h-4 w-4 ${l.color} shrink-0`} />
                 <div>
-                  <p className="font-mono text-[10px] text-muted-foreground">{l.label}</p>
-                  <p className={`font-mono text-lg font-bold ${l.color}`}>{l.value}</p>
+                  <p className="text-[11px] text-muted-foreground font-medium">{l.label}</p>
+                  <p className={`text-lg font-bold ${l.color} tracking-tight`}>{l.value}</p>
                 </div>
               </CardContent>
             </Card>
@@ -147,13 +148,13 @@ const Memory = () => {
       </StaggerContainer>
 
       <Tabs defaultValue="entries">
-        <TabsList className="font-mono flex-wrap h-auto gap-1">
-          <TabsTrigger value="entries" className="font-mono text-[10px]">Memórias</TabsTrigger>
-          <TabsTrigger value="connections" className="font-mono text-[10px]">Conexões</TabsTrigger>
-          <TabsTrigger value="tags" className="font-mono text-[10px]">Tags</TabsTrigger>
-          <TabsTrigger value="agents" className="font-mono text-[10px]">Agentes</TabsTrigger>
-          <TabsTrigger value="missions" className="font-mono text-[10px]">Missões</TabsTrigger>
-          <TabsTrigger value="interactions" className="font-mono text-[10px]">Interações</TabsTrigger>
+        <TabsList className="bg-muted/30 border border-border/30 rounded-xl p-1 flex-wrap h-auto gap-1">
+          <TabsTrigger value="entries" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Memórias</TabsTrigger>
+          <TabsTrigger value="connections" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Conexões</TabsTrigger>
+          <TabsTrigger value="tags" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Tags</TabsTrigger>
+          <TabsTrigger value="agents" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Agentes</TabsTrigger>
+          <TabsTrigger value="missions" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Missões</TabsTrigger>
+          <TabsTrigger value="interactions" className="text-[12px] rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Interações</TabsTrigger>
         </TabsList>
 
         {/* Memory Entries with Search & Filters */}
@@ -166,33 +167,33 @@ const Memory = () => {
                 placeholder="Buscar memórias, tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 font-mono text-xs bg-card border-border"
+                className="pl-9 text-[12px] bg-card border-border/50 rounded-xl"
               />
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[140px] font-mono text-xs bg-card border-border">
+              <SelectTrigger className="w-[140px] text-[12px] bg-card border-border/50 rounded-xl">
                 <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="font-mono text-xs">Todos os tipos</SelectItem>
+                <SelectItem value="all" className="text-[12px]">Todos os tipos</SelectItem>
                 {Object.entries(typeConfig).map(([k, v]) => (
-                  <SelectItem key={k} value={k} className="font-mono text-xs">{v.emoji} {v.label}</SelectItem>
+                  <SelectItem key={k} value={k} className="text-[12px]">{v.emoji} {v.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={agentFilter} onValueChange={setAgentFilter}>
-              <SelectTrigger className="w-[140px] font-mono text-xs bg-card border-border">
+              <SelectTrigger className="w-[140px] text-[12px] bg-card border-border/50 rounded-xl">
                 <SelectValue placeholder="Agente" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="font-mono text-xs">Todos agentes</SelectItem>
+                <SelectItem value="all" className="text-[12px]">Todos agentes</SelectItem>
                 {ags.map((a) => (
-                  <SelectItem key={a.id} value={a.name} className="font-mono text-xs">{a.emoji} {a.name}</SelectItem>
+                  <SelectItem key={a.id} value={a.name} className="text-[12px]">{a.emoji} {a.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Badge variant="outline" className="font-mono text-[10px] px-2 py-1.5 border-border cursor-pointer hover:border-muted-foreground/50" onClick={() => setConfidenceMin(confidenceMin > 0 ? 0 : 85)}>
+            <Badge variant="outline" className="text-[11px] px-2.5 py-1.5 border-border/50 cursor-pointer hover:border-border rounded-full font-medium" onClick={() => setConfidenceMin(confidenceMin > 0 ? 0 : 85)}>
               {confidenceMin > 0 ? `≥${confidenceMin}%` : "Confiança"}
             </Badge>
           </div>

@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { GitBranch, Zap } from "lucide-react";
+import { GitBranch } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,9 +11,6 @@ import { useQueryClient } from "@tanstack/react-query";
 
 const statusEmoji: Record<string, string> = { online: "🟢", busy: "⚡", idle: "😴", error: "🔴" };
 const statusLabel: Record<string, string> = { online: "communicating", busy: "working", idle: "idle", error: "error" };
-const statusBorder: Record<string, string> = {
-  online: "border-terminal/60", busy: "border-amber/60", idle: "border-muted-foreground/40", error: "border-rose/60",
-};
 
 interface NodePos {
   id: string; emoji: string; name: string; status: string; x: number; y: number;
@@ -32,7 +28,6 @@ const Interactions = () => {
   const [liveAgents, setLiveAgents] = useState<Record<string, string>>({});
   const [pulsingEdges, setPulsingEdges] = useState<Set<string>>(new Set());
 
-  // Always-on realtime
   useEffect(() => {
     const channel = supabase
       .channel("interactions-live")
@@ -43,7 +38,6 @@ const Interactions = () => {
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "interactions" }, (payload) => {
         const inter = payload.new as any;
-        // Pulse the edge for new interactions
         const edgeKey = `${inter.from_agent}-${inter.to_agent}`;
         setPulsingEdges((prev) => new Set(prev).add(edgeKey));
         setTimeout(() => setPulsingEdges((prev) => { const n = new Set(prev); n.delete(edgeKey); return n; }), 3000);
@@ -125,8 +119,8 @@ const Interactions = () => {
     return (
       <PageTransition className="space-y-6">
         <div className="flex items-center gap-3">
-          <GitBranch className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Interações</h1>
+          <div className="bg-cyan/10 text-cyan p-2 rounded-xl"><GitBranch className="h-5 w-5" /></div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Interações</h1>
         </div>
         <div className="space-y-2">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-20" />)}</div>
       </PageTransition>
@@ -140,15 +134,17 @@ const Interactions = () => {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <GitBranch className="h-7 w-7 text-terminal" />
+          <div className="bg-cyan/10 text-cyan p-2 rounded-xl">
+            <GitBranch className="h-5 w-5" />
+          </div>
           <div>
-            <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Interações</h1>
-            <p className="text-xs text-muted-foreground">Grafo em tempo real · agentes, tarefas e mensagens</p>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Interações</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">Grafo em tempo real · agentes, tarefas e mensagens</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-terminal animate-pulse" />
-          <span className="font-mono text-xs text-terminal">Live</span>
+          <span className="text-[11px] text-terminal font-medium">Live</span>
         </div>
       </div>
 
@@ -160,17 +156,17 @@ const Interactions = () => {
           { label: "Tarefas", value: (tasks ?? []).length.toString(), color: "text-amber" },
         ].map((s) => (
           <FadeIn key={s.label}>
-            <Card className="border-border bg-card">
-              <CardContent className="p-3">
-                <p className="font-mono text-[10px] text-muted-foreground">{s.label}</p>
-                <p className={`font-mono text-lg font-bold ${s.color}`}>{s.value}</p>
+            <Card className="border-border/50 bg-card surface-elevated">
+              <CardContent className="p-4">
+                <p className="text-[11px] text-muted-foreground font-medium">{s.label}</p>
+                <p className={`text-xl font-bold ${s.color} tracking-tight`}>{s.value}</p>
               </CardContent>
             </Card>
           </FadeIn>
         ))}
       </StaggerContainer>
 
-      <div className="border border-border rounded-lg bg-card overflow-hidden">
+      <div className="border border-border/50 rounded-2xl bg-card surface-elevated overflow-hidden">
         <ScrollArea className="h-[calc(100vh-340px)]">
           <div className="overflow-x-auto">
             <svg width={canvasWidth} height={canvasHeight} className="min-w-full">
@@ -178,13 +174,9 @@ const Interactions = () => {
                 <marker id="arrow" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
                   <path d="M 0 0 L 10 3 L 0 6 z" fill="hsl(220, 10%, 30%)" />
                 </marker>
-                {/* Pulse animation for new interactions */}
                 <filter id="glow">
                   <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-                  <feMerge>
-                    <feMergeNode in="coloredBlur" />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
+                  <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
                 </filter>
               </defs>
 
@@ -192,24 +184,16 @@ const Interactions = () => {
                 const fromN = nodes.find((n) => n.id === edge.from);
                 const toN = nodes.find((n) => n.id === edge.to);
                 if (!fromN || !toN) return null;
-
                 const isPulsing = pulsingEdges.has(`${edge.from}-${edge.to}`) || pulsingEdges.has(`${edge.to}-${edge.from}`);
-                const color = edge.type === "hierarchy" ? "hsl(260, 67%, 50%)" : edge.type === "interaction" ? "hsl(210, 80%, 60%)" : edge.label === "completed" ? "hsl(160, 51%, 49%)" : "hsl(45, 93%, 46%)";
+                const color = edge.type === "hierarchy" ? "hsl(260, 67%, 50%)" : edge.type === "interaction" ? "hsl(190, 90%, 55%)" : edge.label === "completed" ? "hsl(158, 64%, 52%)" : "hsl(45, 93%, 46%)";
                 const dashArray = edge.type === "task" ? "6,4" : edge.type === "interaction" ? "4,4" : "none";
-
                 return (
                   <g key={`edge-${idx}`}>
-                    <line
-                      x1={fromN.x} y1={fromN.y} x2={toN.x} y2={toN.y}
-                      stroke={color} strokeWidth={isPulsing ? 3 : 1.5}
-                      strokeDasharray={dashArray} opacity={isPulsing ? 1 : 0.6}
-                      markerEnd={edge.type === "interaction" ? "url(#arrow)" : undefined}
-                      filter={isPulsing ? "url(#glow)" : undefined}
-                    >
+                    <line x1={fromN.x} y1={fromN.y} x2={toN.x} y2={toN.y} stroke={color} strokeWidth={isPulsing ? 3 : 1.5} strokeDasharray={dashArray} opacity={isPulsing ? 1 : 0.5} markerEnd={edge.type === "interaction" ? "url(#arrow)" : undefined} filter={isPulsing ? "url(#glow)" : undefined}>
                       {isPulsing && <animate attributeName="opacity" values="1;0.4;1" dur="1s" repeatCount="3" />}
                     </line>
                     {edge.label && (
-                      <text x={(fromN.x + toN.x) / 2} y={(fromN.y + toN.y) / 2 - 6} textAnchor="middle" fill="hsl(220, 10%, 50%)" fontSize={10} fontFamily="JetBrains Mono, monospace">
+                      <text x={(fromN.x + toN.x) / 2} y={(fromN.y + toN.y) / 2 - 6} textAnchor="middle" fill="hsl(220, 10%, 45%)" fontSize={10} fontFamily="system-ui, -apple-system, sans-serif">
                         {edge.label}
                       </text>
                     )}
@@ -219,32 +203,30 @@ const Interactions = () => {
 
               {nodes.map((node) => {
                 if (node.type === "agent") {
-                  const borderColor = node.status === "online" ? "hsl(160, 51%, 49%)" : node.status === "busy" ? "hsl(45, 93%, 56%)" : node.status === "error" ? "hsl(350, 80%, 55%)" : "hsl(220, 10%, 25%)";
+                  const borderColor = node.status === "online" ? "hsl(158, 64%, 52%)" : node.status === "busy" ? "hsl(45, 93%, 56%)" : node.status === "error" ? "hsl(0, 72%, 51%)" : "hsl(220, 10%, 20%)";
                   const isActive = node.status === "online" || node.status === "busy";
                   return (
                     <g key={node.id}>
-                      {isActive && <rect x={node.x - 67} y={node.y - 42} width={134} height={84} rx={10} fill="none" stroke={borderColor} strokeWidth={1} opacity={0.3}>
-                        <animate attributeName="opacity" values="0.3;0.1;0.3" dur="2s" repeatCount="indefinite" />
+                      {isActive && <rect x={node.x - 67} y={node.y - 42} width={134} height={84} rx={16} fill="none" stroke={borderColor} strokeWidth={1} opacity={0.2}>
+                        <animate attributeName="opacity" values="0.2;0.08;0.2" dur="2s" repeatCount="indefinite" />
                       </rect>}
-                      <rect x={node.x - 65} y={node.y - 40} width={130} height={80} rx={8} fill="hsl(230, 20%, 14%)" stroke={borderColor} strokeWidth={2} />
+                      <rect x={node.x - 65} y={node.y - 40} width={130} height={80} rx={14} fill="hsl(228, 18%, 10%)" stroke={borderColor} strokeWidth={1.5} />
                       <text x={node.x} y={node.y - 8} textAnchor="middle" fontSize={22}>{node.emoji}</text>
-                      <text x={node.x} y={node.y + 12} textAnchor="middle" fill="hsl(220, 20%, 90%)" fontSize={13} fontWeight="bold" fontFamily="JetBrains Mono, monospace">{node.name}</text>
-                      <text x={node.x} y={node.y + 28} textAnchor="middle" fill="hsl(220, 10%, 50%)" fontSize={10} fontFamily="JetBrains Mono, monospace">
+                      <text x={node.x} y={node.y + 12} textAnchor="middle" fill="hsl(220, 20%, 90%)" fontSize={12} fontWeight="600" fontFamily="system-ui, -apple-system, sans-serif">{node.name}</text>
+                      <text x={node.x} y={node.y + 26} textAnchor="middle" fill="hsl(220, 10%, 45%)" fontSize={10} fontFamily="system-ui, -apple-system, sans-serif">
                         {statusEmoji[node.status] ?? "⚪"} {statusLabel[node.status] ?? node.status}
                       </text>
-                      <circle cx={node.x} cy={node.y - 40} r={3} fill="hsl(220, 10%, 30%)" stroke="hsl(220, 10%, 40%)" strokeWidth={1} />
-                      <circle cx={node.x} cy={node.y + 40} r={3} fill="hsl(220, 10%, 30%)" stroke="hsl(220, 10%, 40%)" strokeWidth={1} />
                     </g>
                   );
                 }
                 if (node.type === "task") {
-                  const bg = node.status === "done" ? "hsl(160, 30%, 12%)" : node.status === "in_progress" ? "hsl(45, 30%, 12%)" : "hsl(230, 15%, 12%)";
-                  const borderC = node.status === "done" ? "hsl(160, 51%, 35%)" : node.status === "in_progress" ? "hsl(45, 60%, 40%)" : "hsl(220, 10%, 25%)";
+                  const bg = node.status === "done" ? "hsl(158, 20%, 10%)" : node.status === "in_progress" ? "hsl(45, 20%, 10%)" : "hsl(228, 12%, 10%)";
+                  const borderC = node.status === "done" ? "hsl(158, 64%, 30%)" : node.status === "in_progress" ? "hsl(45, 60%, 35%)" : "hsl(220, 10%, 18%)";
                   return (
                     <g key={node.id}>
-                      <rect x={node.x - 65} y={node.y - 18} width={130} height={36} rx={4} fill={bg} stroke={borderC} strokeWidth={1.5} strokeDasharray="4,3" />
-                      <text x={node.x} y={node.y - 2} textAnchor="middle" fill="hsl(220, 20%, 85%)" fontSize={10} fontFamily="JetBrains Mono, monospace">Task</text>
-                      <text x={node.x} y={node.y + 12} textAnchor="middle" fill="hsl(220, 20%, 75%)" fontSize={10} fontFamily="JetBrains Mono, monospace">
+                      <rect x={node.x - 65} y={node.y - 18} width={130} height={36} rx={10} fill={bg} stroke={borderC} strokeWidth={1} strokeDasharray="4,3" />
+                      <text x={node.x} y={node.y - 2} textAnchor="middle" fill="hsl(220, 20%, 75%)" fontSize={9} fontFamily="system-ui, -apple-system, sans-serif">Task</text>
+                      <text x={node.x} y={node.y + 12} textAnchor="middle" fill="hsl(220, 20%, 65%)" fontSize={10} fontFamily="system-ui, -apple-system, sans-serif">
                         {node.name.length > 16 ? node.name.slice(0, 16) + "…" : node.name}
                       </text>
                     </g>
@@ -253,8 +235,8 @@ const Interactions = () => {
                 if (node.type === "message") {
                   return (
                     <g key={node.id}>
-                      <rect x={node.x - 100} y={node.y - 22} width={200} height={44} rx={6} fill="hsl(210, 30%, 14%)" stroke="hsl(210, 60%, 40%)" strokeWidth={1.5} />
-                      <text x={node.x} y={node.y + 2} textAnchor="middle" fill="hsl(220, 20%, 80%)" fontSize={9} fontFamily="JetBrains Mono, monospace">
+                      <rect x={node.x - 100} y={node.y - 22} width={200} height={44} rx={12} fill="hsl(190, 20%, 10%)" stroke="hsl(190, 60%, 35%)" strokeWidth={1} />
+                      <text x={node.x} y={node.y + 2} textAnchor="middle" fill="hsl(220, 20%, 75%)" fontSize={9} fontFamily="system-ui, -apple-system, sans-serif">
                         {node.name.length > 40 ? node.name.slice(0, 40) + "…" : node.name}
                       </text>
                     </g>
