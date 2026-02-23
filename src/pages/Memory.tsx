@@ -1,19 +1,22 @@
-import { Brain, Database, Users, Target, ListChecks, PackageCheck, MessageSquare, Activity } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Brain, Database, Users, Target, ListChecks, PackageCheck, MessageSquare, Activity, Search, SlidersHorizontal, TrendingUp, Layers } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { useMemoryEntries, useAgents, useMissions, useTasks, useDeliverables, useInteractions, useTraces } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 
-const typeConfig: Record<string, { color: string; label: string }> = {
-  fact: { color: "bg-terminal/15 text-terminal border-terminal/30", label: "Fato" },
-  decision: { color: "bg-violet/15 text-violet border-violet/30", label: "Decisão" },
-  context: { color: "bg-cyan/15 text-cyan border-cyan/30", label: "Contexto" },
-  preference: { color: "bg-amber/15 text-amber border-amber/30", label: "Preferência" },
-  error_pattern: { color: "bg-rose/15 text-rose border-rose/30", label: "Erro" },
+const typeConfig: Record<string, { color: string; label: string; emoji: string }> = {
+  fact: { color: "bg-terminal/15 text-terminal border-terminal/30", label: "Fato", emoji: "📌" },
+  decision: { color: "bg-violet/15 text-violet border-violet/30", label: "Decisão", emoji: "⚖️" },
+  context: { color: "bg-cyan/15 text-cyan border-cyan/30", label: "Contexto", emoji: "🧠" },
+  preference: { color: "bg-amber/15 text-amber border-amber/30", label: "Preferência", emoji: "⭐" },
+  error_pattern: { color: "bg-rose/15 text-rose border-rose/30", label: "Erro", emoji: "🔴" },
 };
 
 const statusColor: Record<string, string> = {
@@ -32,6 +35,12 @@ const Memory = () => {
   const { data: deliverables, isLoading: loadingDeliverables } = useDeliverables();
   const { data: interactions, isLoading: loadingInteractions } = useInteractions();
   const { data: traces, isLoading: loadingTraces } = useTraces();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [agentFilter, setAgentFilter] = useState<string>("all");
+  const [confidenceMin, setConfidenceMin] = useState(0);
+  const [selectedEntry, setSelectedEntry] = useState<any>(null);
 
   const isLoading = loadingMemory || loadingAgents || loadingMissions || loadingTasks || loadingDeliverables || loadingInteractions || loadingTraces;
 
@@ -58,17 +67,56 @@ const Memory = () => {
   const totalAccess = mem.reduce((s, m) => s + (m.access_count ?? 0), 0);
   const avgConfidence = mem.length > 0 ? Math.round(mem.reduce((s, m) => s + (m.confidence ?? 0), 0) / mem.length) : 0;
   const totalTokens = inter.reduce((s, i) => s + (i.tokens ?? 0), 0);
-  const totalCost = ags.reduce((s, a) => s + (a.total_cost ?? 0), 0);
+
+  // Filtered memories
+  const filteredMem = useMemo(() => {
+    return mem.filter((entry) => {
+      if (searchQuery && !entry.content.toLowerCase().includes(searchQuery.toLowerCase()) && !(entry.tags ?? []).some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))) return false;
+      if (typeFilter !== "all" && entry.type !== typeFilter) return false;
+      const agent = entry.agents as any;
+      if (agentFilter !== "all" && agent?.name !== agentFilter) return false;
+      if ((entry.confidence ?? 0) < confidenceMin) return false;
+      return true;
+    });
+  }, [mem, searchQuery, typeFilter, agentFilter, confidenceMin]);
+
+  // Tag frequency map
+  const tagMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    mem.forEach((m) => (m.tags ?? []).forEach((t) => { map[t] = (map[t] ?? 0) + 1; }));
+    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 20);
+  }, [mem]);
+
+  // Connections between agents via shared tags
+  const agentConnections = useMemo(() => {
+    const connections: { from: string; to: string; shared: string[] }[] = [];
+    const agentTags: Record<string, Set<string>> = {};
+    mem.forEach((m) => {
+      const agent = (m.agents as any)?.name;
+      if (agent) {
+        if (!agentTags[agent]) agentTags[agent] = new Set();
+        (m.tags ?? []).forEach((t) => agentTags[agent].add(t));
+      }
+    });
+    const agentNames = Object.keys(agentTags);
+    for (let i = 0; i < agentNames.length; i++) {
+      for (let j = i + 1; j < agentNames.length; j++) {
+        const shared = [...agentTags[agentNames[i]]].filter((t) => agentTags[agentNames[j]].has(t));
+        if (shared.length > 0) connections.push({ from: agentNames[i], to: agentNames[j], shared });
+      }
+    }
+    return connections;
+  }, [mem]);
 
   const layers = [
-    { label: "Agentes", value: ags.length, icon: Users, color: "text-terminal" },
-    { label: "Missões", value: mis.length, icon: Target, color: "text-violet" },
-    { label: "Tarefas", value: tks.length, icon: ListChecks, color: "text-cyan" },
-    { label: "Entregáveis", value: del.length, icon: PackageCheck, color: "text-amber" },
-    { label: "Interações", value: inter.length, icon: MessageSquare, color: "text-foreground" },
-    { label: "Traces", value: trc.length, icon: Activity, color: "text-rose" },
     { label: "Memórias", value: mem.length, icon: Brain, color: "text-terminal" },
-    { label: "Tokens Total", value: totalTokens.toLocaleString(), icon: Database, color: "text-violet" },
+    { label: "Confiança Média", value: `${avgConfidence}%`, icon: TrendingUp, color: avgConfidence >= 90 ? "text-terminal" : "text-amber" },
+    { label: "Acessos Total", value: totalAccess.toLocaleString(), icon: Layers, color: "text-cyan" },
+    { label: "Agentes", value: ags.length, icon: Users, color: "text-violet" },
+    { label: "Missões", value: mis.length, icon: Target, color: "text-foreground" },
+    { label: "Tarefas", value: tks.length, icon: ListChecks, color: "text-cyan" },
+    { label: "Tokens Total", value: totalTokens >= 1000 ? `${(totalTokens / 1000).toFixed(1)}K` : totalTokens.toString(), icon: Database, color: "text-violet" },
+    { label: "Traces", value: trc.length, icon: Activity, color: "text-rose" },
   ];
 
   return (
@@ -77,10 +125,11 @@ const Memory = () => {
         <Brain className="h-7 w-7 text-terminal" />
         <div>
           <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Memória</h1>
-          <p className="text-xs text-muted-foreground">Todas as camadas e contextos do projeto</p>
+          <p className="text-xs text-muted-foreground">Base de conhecimento contextual · {mem.length} memórias · {avgConfidence}% confiança</p>
         </div>
       </div>
 
+      {/* Stats */}
       <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {layers.map((l) => (
           <FadeIn key={l.label}>
@@ -100,44 +149,171 @@ const Memory = () => {
       <Tabs defaultValue="entries">
         <TabsList className="font-mono flex-wrap h-auto gap-1">
           <TabsTrigger value="entries" className="font-mono text-[10px]">Memórias</TabsTrigger>
+          <TabsTrigger value="connections" className="font-mono text-[10px]">Conexões</TabsTrigger>
+          <TabsTrigger value="tags" className="font-mono text-[10px]">Tags</TabsTrigger>
           <TabsTrigger value="agents" className="font-mono text-[10px]">Agentes</TabsTrigger>
           <TabsTrigger value="missions" className="font-mono text-[10px]">Missões</TabsTrigger>
-          <TabsTrigger value="tasks" className="font-mono text-[10px]">Tarefas</TabsTrigger>
-          <TabsTrigger value="deliverables" className="font-mono text-[10px]">Entregáveis</TabsTrigger>
           <TabsTrigger value="interactions" className="font-mono text-[10px]">Interações</TabsTrigger>
-          <TabsTrigger value="traces" className="font-mono text-[10px]">Traces</TabsTrigger>
         </TabsList>
 
-        {/* Memory Entries */}
-        <TabsContent value="entries" className="mt-4">
-          <ScrollArea className="h-[calc(100vh-380px)]">
+        {/* Memory Entries with Search & Filters */}
+        <TabsContent value="entries" className="mt-4 space-y-4">
+          {/* Search & filters bar */}
+          <div className="flex flex-wrap gap-3">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar memórias, tags..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 font-mono text-xs bg-card border-border"
+              />
+            </div>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[140px] font-mono text-xs bg-card border-border">
+                <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="font-mono text-xs">Todos os tipos</SelectItem>
+                {Object.entries(typeConfig).map(([k, v]) => (
+                  <SelectItem key={k} value={k} className="font-mono text-xs">{v.emoji} {v.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={agentFilter} onValueChange={setAgentFilter}>
+              <SelectTrigger className="w-[140px] font-mono text-xs bg-card border-border">
+                <SelectValue placeholder="Agente" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="font-mono text-xs">Todos agentes</SelectItem>
+                {ags.map((a) => (
+                  <SelectItem key={a.id} value={a.name} className="font-mono text-xs">{a.emoji} {a.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Badge variant="outline" className="font-mono text-[10px] px-2 py-1.5 border-border cursor-pointer hover:border-muted-foreground/50" onClick={() => setConfidenceMin(confidenceMin > 0 ? 0 : 85)}>
+              {confidenceMin > 0 ? `≥${confidenceMin}%` : "Confiança"}
+            </Badge>
+          </div>
+
+          <p className="font-mono text-[10px] text-muted-foreground">{filteredMem.length} resultado(s)</p>
+
+          <ScrollArea className="h-[calc(100vh-480px)]">
             <div className="space-y-2">
-              {mem.map((entry) => {
+              {filteredMem.map((entry) => {
                 const tc = typeConfig[entry.type] ?? typeConfig.fact;
                 const agent = entry.agents as any;
+                const isSelected = selectedEntry?.id === entry.id;
                 return (
-                  <Card key={entry.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
+                  <Card
+                    key={entry.id}
+                    className={`border-border bg-card hover:border-muted-foreground/30 transition-colors cursor-pointer ${isSelected ? "ring-1 ring-terminal/40 border-terminal/30" : ""}`}
+                    onClick={() => setSelectedEntry(isSelected ? null : entry)}
+                  >
                     <CardContent className="p-3 space-y-2">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm">{tc.emoji}</span>
                           <Badge variant="outline" className={`font-mono text-[8px] px-1.5 py-0 border ${tc.color}`}>{tc.label}</Badge>
                           <span className="font-mono text-[10px] text-muted-foreground">{agent?.emoji} {agent?.name}</span>
                         </div>
-                        <span className={`font-mono text-[10px] font-semibold ${(entry.confidence ?? 0) >= 95 ? "text-terminal" : (entry.confidence ?? 0) >= 85 ? "text-amber" : "text-rose"}`}>{entry.confidence}%</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16">
+                            <Progress value={entry.confidence ?? 0} className="h-1" />
+                          </div>
+                          <span className={`font-mono text-[10px] font-semibold ${(entry.confidence ?? 0) >= 95 ? "text-terminal" : (entry.confidence ?? 0) >= 85 ? "text-amber" : "text-rose"}`}>{entry.confidence}%</span>
+                        </div>
                       </div>
                       <p className="font-mono text-[11px] text-foreground">{entry.content}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex gap-1 flex-wrap">
                           {(entry.tags ?? []).map((tag) => (
-                            <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{tag}</span>
+                            <span
+                              key={tag}
+                              className="font-mono text-[8px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-terminal/10 hover:text-terminal cursor-pointer transition-colors"
+                              onClick={(e) => { e.stopPropagation(); setSearchQuery(tag); }}
+                            >
+                              #{tag}
+                            </span>
                           ))}
                         </div>
-                        <span className="font-mono text-[9px] text-muted-foreground">{entry.access_count}x acessado</span>
+                        <span className="font-mono text-[9px] text-muted-foreground">{entry.access_count}x · {new Date(entry.created_at).toLocaleDateString("pt-BR")}</span>
                       </div>
+
+                      {/* Expanded detail */}
+                      {isSelected && (
+                        <div className="mt-2 pt-2 border-t border-border space-y-2">
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div>
+                              <p className="font-mono text-[9px] text-muted-foreground">Acessos</p>
+                              <p className="font-mono text-sm font-bold text-foreground">{entry.access_count}</p>
+                            </div>
+                            <div>
+                              <p className="font-mono text-[9px] text-muted-foreground">Confiança</p>
+                              <p className="font-mono text-sm font-bold text-foreground">{entry.confidence}%</p>
+                            </div>
+                            <div>
+                              <p className="font-mono text-[9px] text-muted-foreground">Último acesso</p>
+                              <p className="font-mono text-sm font-bold text-foreground">{entry.last_accessed ? new Date(entry.last_accessed).toLocaleDateString("pt-BR") : "—"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 );
               })}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+
+        {/* Connections tab */}
+        <TabsContent value="connections" className="mt-4">
+          <ScrollArea className="h-[calc(100vh-380px)]">
+            <div className="space-y-3">
+              <p className="font-mono text-xs text-muted-foreground">{agentConnections.length} conexões via tags compartilhadas</p>
+              {agentConnections.map((conn, idx) => (
+                <Card key={idx} className="border-border bg-card">
+                  <CardContent className="p-3 space-y-2">
+                    <div className="flex items-center gap-2 font-mono text-sm">
+                      <span className="font-semibold text-terminal">{conn.from}</span>
+                      <span className="text-muted-foreground">↔</span>
+                      <span className="font-semibold text-cyan">{conn.to}</span>
+                      <Badge variant="outline" className="ml-auto font-mono text-[10px] border-violet/30 text-violet">{conn.shared.length} tags</Badge>
+                    </div>
+                    <div className="flex gap-1 flex-wrap">
+                      {conn.shared.map((tag) => (
+                        <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 rounded bg-violet/10 text-violet">#{tag}</span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {agentConnections.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">Nenhuma conexão encontrada</p>
+              )}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+
+        {/* Tags tab */}
+        <TabsContent value="tags" className="mt-4">
+          <ScrollArea className="h-[calc(100vh-380px)]">
+            <div className="space-y-3">
+              <p className="font-mono text-xs text-muted-foreground">{tagMap.length} tags encontradas</p>
+              <div className="flex flex-wrap gap-2">
+                {tagMap.map(([tag, count]) => (
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="font-mono text-xs px-3 py-1.5 border-border hover:border-terminal/30 hover:bg-terminal/5 cursor-pointer transition-colors"
+                    onClick={() => { setSearchQuery(tag); }}
+                  >
+                    #{tag} <span className="ml-1.5 text-muted-foreground">({count})</span>
+                  </Badge>
+                ))}
+              </div>
             </div>
           </ScrollArea>
         </TabsContent>
@@ -172,7 +348,13 @@ const Memory = () => {
                         </div>
                       ))}
                     </div>
-                    {a.current_task && <p className="font-mono text-[10px] text-muted-foreground truncate">→ {a.current_task}</p>}
+                    {/* Memory count for this agent */}
+                    <div className="flex items-center gap-2 pt-1 border-t border-border/50">
+                      <Brain className="h-3 w-3 text-terminal" />
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {mem.filter((m) => (m.agents as any)?.name === a.name).length} memórias associadas
+                      </span>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -199,71 +381,9 @@ const Memory = () => {
                       </div>
                       <Progress value={m.progress ?? 0} className="h-1.5" />
                     </div>
-                    <div className="flex items-center gap-4 font-mono text-[10px] text-muted-foreground">
-                      <span>Prioridade: <span className="text-foreground">{m.priority}</span></span>
-                      <span>Custo: <span className="text-foreground">${(m.cost ?? 0).toFixed(2)}</span></span>
-                      <span>Tokens: <span className="text-foreground">{(m.tokens_used ?? 0).toLocaleString()}</span></span>
-                    </div>
                   </CardContent>
                 </Card>
               ))}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-
-        {/* Tasks Context */}
-        <TabsContent value="tasks" className="mt-4">
-          <ScrollArea className="h-[calc(100vh-380px)]">
-            <div className="space-y-2">
-              {tks.map((t) => {
-                const agent = (t as any).agents as any;
-                const mission = (t as any).missions as any;
-                return (
-                  <Card key={t.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
-                    <CardContent className="p-3 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <p className="font-mono text-xs font-semibold text-foreground">{t.name}</p>
-                        <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 border ${statusColor[t.status] ?? "text-muted-foreground"}`}>{t.status}</Badge>
-                      </div>
-                      <div className="flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
-                        {agent && <span>{agent.emoji} {agent.name}</span>}
-                        {mission && <span>📌 {mission.name}</span>}
-                        <span>⏱ {t.duration}</span>
-                        <span className="ml-auto">{t.priority}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-
-        {/* Deliverables Context */}
-        <TabsContent value="deliverables" className="mt-4">
-          <ScrollArea className="h-[calc(100vh-380px)]">
-            <div className="space-y-2">
-              {del.map((d) => {
-                const agent = (d as any).agents as any;
-                const mission = (d as any).missions as any;
-                return (
-                  <Card key={d.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
-                    <CardContent className="p-3 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <p className="font-mono text-xs font-semibold text-foreground">{d.name}</p>
-                        <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 border ${statusColor[d.status] ?? "text-muted-foreground"}`}>{d.status}</Badge>
-                      </div>
-                      <p className="font-mono text-[10px] text-muted-foreground">{d.description}</p>
-                      <div className="flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
-                        {agent && <span>{agent.emoji} {agent.name}</span>}
-                        {mission && <span>📌 {mission.name}</span>}
-                        <span>{d.files} arquivos</span>
-                        {(d.lines_changed ?? 0) > 0 && <span className="text-terminal">+{d.lines_changed} linhas</span>}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
             </div>
           </ScrollArea>
         </TabsContent>
@@ -288,32 +408,6 @@ const Memory = () => {
                       <div className="flex items-center gap-3 font-mono text-[9px] text-muted-foreground">
                         <span>{i.tokens} tokens</span>
                         <span>{i.latency}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-
-        {/* Traces Context */}
-        <TabsContent value="traces" className="mt-4">
-          <ScrollArea className="h-[calc(100vh-380px)]">
-            <div className="space-y-2">
-              {trc.map((t) => {
-                const agent = (t as any).agents as any;
-                return (
-                  <Card key={t.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
-                    <CardContent className="p-3 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <p className="font-mono text-xs font-semibold text-foreground">{t.name}</p>
-                        <Badge variant="outline" className={`font-mono text-[10px] px-1.5 py-0 border ${statusColor[t.status] ?? "text-muted-foreground"}`}>{t.status}</Badge>
-                      </div>
-                      <div className="flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
-                        {agent && <span>{agent.emoji} {agent.name}</span>}
-                        <span>⏱ {t.duration}</span>
-                        {t.error && <span className="text-rose">⚠ {t.error}</span>}
                       </div>
                     </CardContent>
                   </Card>
