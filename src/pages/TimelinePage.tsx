@@ -390,75 +390,74 @@ const TimelinePage = () => {
 
                   <TabsContent value="tree" className="mt-4">
                     <div className="space-y-3">
-                      <div className="rounded-lg border border-border bg-muted/30 p-3">
+                      <div className="rounded-xl border border-border/30 bg-muted/20 p-3">
                         <div className="flex items-center gap-2 mb-1.5">
                           <div className="h-2 w-2 rounded-full bg-foreground" />
-                          <span className="font-mono text-[10px] font-bold text-muted-foreground">INPUT_RECEIVED</span>
+                          <span className="text-[10px] font-semibold text-muted-foreground tracking-wide uppercase">Input Received</span>
                         </div>
-                        <p className="font-mono text-xs text-foreground">"{selected.name}"</p>
+                        <p className="text-[12px] text-foreground">"{selected.name}"</p>
                       </div>
 
-                      <div className="rounded-lg border border-violet/30 bg-violet/5 p-3">
+                      <div className="rounded-xl border border-violet/20 bg-violet/5 p-3">
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-violet" />
-                            <span className="font-mono text-[10px] font-bold text-violet">INTENT_CLASSIFICATION</span>
+                            <span className="text-[10px] font-semibold text-violet tracking-wide uppercase">Intent Classification</span>
                           </div>
-                          <Badge variant="outline" className="font-mono text-[8px] border-terminal/30 text-terminal">
+                          <Badge variant="outline" className="text-[9px] border-terminal/20 text-terminal rounded-full px-2">
                             {selected.priority === "critical" ? "98" : selected.priority === "high" ? "95" : "90"}%
                           </Badge>
                         </div>
-                        <p className="font-mono text-xs text-foreground">
+                        <p className="text-[12px] text-foreground">
                           Severity: <span className={selected.priority === "critical" ? "text-rose" : selected.priority === "high" ? "text-amber" : "text-terminal"}>
                             {selected.priority}
                           </span>
                         </p>
                       </div>
 
-                      {/* Decision interactions */}
                       {decisionTree.length > 0 && (
-                        <div className="rounded-lg border border-cyan/30 bg-cyan/5 p-3 space-y-2">
+                        <div className="rounded-xl border border-cyan/20 bg-cyan/5 p-3 space-y-2">
                           <div className="flex items-center gap-2 mb-1">
                             <div className="h-2 w-2 rounded-full bg-cyan" />
-                            <span className="font-mono text-[10px] font-bold text-cyan">AGENT_INTERACTIONS</span>
+                            <span className="text-[10px] font-semibold text-cyan tracking-wide uppercase">Agent Interactions</span>
                           </div>
                           {decisionTree.map((d, idx) => (
-                            <div key={idx} className="flex items-center gap-2 px-2 py-1.5 rounded bg-muted/30">
-                              <Badge variant="outline" className="font-mono text-[8px] px-1 py-0">{d.type}</Badge>
-                              <span className="font-mono text-[10px] text-foreground truncate flex-1">{d.message.slice(0, 60)}</span>
-                              <span className="font-mono text-[9px] text-muted-foreground shrink-0">{d.tokens}t</span>
+                            <div key={idx} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/20">
+                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-full border-border/50">{d.type}</Badge>
+                              <span className="text-[11px] text-foreground truncate flex-1">{d.message.slice(0, 60)}</span>
+                              <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{d.tokens}t</span>
                             </div>
                           ))}
                         </div>
                       )}
 
-                      <div className="rounded-lg border border-border bg-muted/20 p-3">
+                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3">
                         <div className="flex items-center gap-2 mb-1.5">
                           <div className="h-2 w-2 rounded-full bg-muted-foreground" />
-                          <span className="font-mono text-[10px] font-bold text-muted-foreground">OUTPUT</span>
+                          <span className="text-[10px] font-semibold text-muted-foreground tracking-wide uppercase">Output</span>
                         </div>
                         <div className="grid grid-cols-3 gap-2 mt-2 text-center">
                           <div>
-                            <p className="font-mono text-[9px] text-muted-foreground">Tokens</p>
-                            <p className="font-mono text-sm font-bold text-foreground">{selected.tokens}</p>
+                            <p className="text-[10px] text-muted-foreground">Tokens</p>
+                            <p className="text-sm font-bold text-foreground tabular-nums">{selected.tokens}</p>
                           </div>
                           <div>
-                            <p className="font-mono text-[9px] text-muted-foreground">Custo</p>
-                            <p className="font-mono text-sm font-bold text-terminal">${selected.cost.toFixed(2)}</p>
+                            <p className="text-[10px] text-muted-foreground">Custo</p>
+                            <p className="text-sm font-bold text-terminal tabular-nums">${selected.cost.toFixed(2)}</p>
                           </div>
                           <div>
-                            <p className="font-mono text-[9px] text-muted-foreground">Duração</p>
-                            <p className="font-mono text-sm font-bold text-foreground">{selected.duration}</p>
+                            <p className="text-[10px] text-muted-foreground">Duração</p>
+                            <p className="text-sm font-bold text-foreground">{selected.duration}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex gap-3 mt-6">
-                      <Button variant="outline" className="flex-1 gap-2 font-mono text-xs border-rose/30 text-rose hover:bg-rose/10">
+                      <Button variant="outline" className="flex-1 gap-2 text-[12px] border-rose/20 text-rose hover:bg-rose/10 rounded-xl">
                         <X className="h-3.5 w-3.5" /> Interromper
                       </Button>
-                      <Button className="flex-1 gap-2 font-mono text-xs bg-terminal hover:bg-terminal/80 text-background">
+                      <Button className="flex-1 gap-2 text-[12px] bg-terminal hover:bg-terminal/80 text-background rounded-xl">
                         <Puzzle className="h-3.5 w-3.5" /> Detalhes
                       </Button>
                     </div>
