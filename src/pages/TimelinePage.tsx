@@ -315,7 +315,7 @@ const TimelinePage = () => {
                                 })}
                               >
                                 <div className={`h-2 w-2 rounded-full ${sc} shrink-0`} />
-                                <span className="font-mono text-[10px] text-foreground truncate">{task.name}</span>
+                                <span className="text-[10px] text-foreground truncate">{task.name}</span>
                                 {task.status === "in_progress" && (
                                   <span className="ml-auto shrink-0 h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
                                 )}
