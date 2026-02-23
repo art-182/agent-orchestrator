@@ -10,6 +10,7 @@ import ProjectionChart from "@/components/finances/ProjectionChart";
 import ToolCostTable from "@/components/finances/ToolCostTable";
 import SkillCostTable from "@/components/finances/SkillCostTable";
 import ProjectionDetails from "@/components/finances/ProjectionDetails";
+import ProviderLimitsView from "@/components/finances/ProviderLimitsView";
 import {
   mockBillingSummary,
   mockDailyCosts,
@@ -20,6 +21,9 @@ import {
   mockMonthlyProjections,
   mockToolCosts,
   mockSkillCosts,
+  mockProviderLimits,
+  mockRateLimitEvents,
+  mockCostAnomalies,
 } from "@/lib/finance-data";
 
 const Finances = () => (
