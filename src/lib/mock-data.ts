@@ -10,6 +10,22 @@ export interface AgentSkill {
   connections: string[]; // names of connected skills
 }
 
+export interface AgentROI {
+  hoursPerWeekSaved: number;
+  costPerHourHuman: number;
+  weeklySavings: number;
+  monthlySavings: number;
+  roiMultiplier: number;
+  tasksAutomated: number;
+  automationRate: number; // percentage
+  avgTaskTimeHuman: string;
+  avgTaskTimeAgent: string;
+  speedup: string;
+  qualityScore: number; // 0-100
+  incidentsPrevented: number;
+  revenueImpact: string;
+}
+
 export interface Agent {
   id: string;
   name: string;
@@ -29,6 +45,7 @@ export interface Agent {
   recentTasks: { name: string; status: "done" | "running" | "error"; duration: string }[];
   skills: AgentSkill[];
   soulMd: string;
+  roi: AgentROI;
 }
 
 export interface FeedEvent {
