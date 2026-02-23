@@ -58,10 +58,10 @@ const BillingCards = () => {
   ];
 
   const metrics = dbMetrics.length > 0 ? [...dbMetrics, ...extras] : [
-    { label: "Custo Hoje", value: "$31.40", change: "+12%", trend: "up" as const, icon: <DollarSign className="h-4 w-4" />, accent: "text-rose", size: "md" as const },
-    { label: "Custo Semana", value: "$198.54", change: "-5%", trend: "down" as const, icon: <BarChart3 className="h-4 w-4" />, accent: "text-terminal", size: "md" as const },
-    { label: "Custo Mês", value: "$527.78", change: "+8%", trend: "up" as const, icon: <TrendingUp className="h-4 w-4" />, accent: "text-amber", size: "md" as const },
-    { label: "Tokens Totais", value: "2.1M", change: "+15%", trend: "up" as const, icon: <Zap className="h-4 w-4" />, accent: "text-cyan", size: "md" as const },
+    { label: "Custo Hoje", value: "$31.40", change: "+12%", trend: "up" as const, icon: <DollarSign className="h-4 w-4" />, accent: "text-rose", size: "md" as const } as BentoMetric,
+    { label: "Custo Semana", value: "$198.54", change: "-5%", trend: "down" as const, icon: <BarChart3 className="h-4 w-4" />, accent: "text-terminal", size: "md" as const } as BentoMetric,
+    { label: "Custo Mês", value: "$527.78", change: "+8%", trend: "up" as const, icon: <TrendingUp className="h-4 w-4" />, accent: "text-amber", size: "md" as const } as BentoMetric,
+    { label: "Tokens Totais", value: "2.1M", change: "+15%", trend: "up" as const, icon: <Zap className="h-4 w-4" />, accent: "text-cyan", size: "md" as const } as BentoMetric,
     ...extras,
   ];
 
