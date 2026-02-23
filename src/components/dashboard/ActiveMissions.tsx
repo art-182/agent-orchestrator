@@ -18,7 +18,7 @@ const ActiveMissions = () => {
   const active = (missions ?? []).filter((m) => m.status !== "done").slice(0, 5);
 
   return (
-    <Card className="border-border/50 bg-card surface-elevated">
+    <Card className="border-border/50 bg-card surface-elevated flex-1 flex flex-col">
       <CardHeader className="p-5 pb-3">
         <CardTitle className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
           <div className="bg-terminal/10 text-terminal p-1.5 rounded-lg">
@@ -30,7 +30,7 @@ const ActiveMissions = () => {
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-5 pt-2 space-y-2.5">
+      <CardContent className="p-5 pt-2 space-y-2.5 flex-1">
         {active.length === 0 && (
           <p className="text-[13px] text-muted-foreground text-center py-8">Nenhuma missão ativa</p>
         )}

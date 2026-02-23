@@ -23,7 +23,7 @@ const LiveFeed = () => {
   const list = (interactions ?? []).slice(0, 20);
 
   return (
-    <Card className="border-border/50 bg-card surface-elevated">
+    <Card className="border-border/50 bg-card surface-elevated flex-1 flex flex-col">
       <CardHeader className="p-5 pb-3">
         <CardTitle className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
           <div className="bg-terminal/10 text-terminal p-1.5 rounded-lg">
@@ -36,8 +36,8 @@ const LiveFeed = () => {
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <ScrollArea className="h-[360px] px-5 pb-5">
+      <CardContent className="p-0 flex-1 flex flex-col">
+        <ScrollArea className="flex-1 min-h-[300px] px-5 pb-5">
           <div className="space-y-0.5">
             {list.map((inter) => {
               const fromAgent = inter.from as any;

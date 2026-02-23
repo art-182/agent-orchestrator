@@ -18,7 +18,7 @@ const QuickStats = () => {
   }, 0);
 
   return (
-    <Card className="border-border/50 bg-card surface-elevated">
+    <Card className="border-border/50 bg-card surface-elevated flex-1 flex flex-col">
       <CardContent className="p-5 space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-[13px] text-muted-foreground font-medium">Custo 7 Dias</span>

@@ -36,7 +36,7 @@ const AgentFleet = () => {
   };
 
   return (
-    <Card className="border-border/50 bg-card surface-elevated">
+    <Card className="border-border/50 bg-card surface-elevated flex-1 flex flex-col">
       <CardHeader className="p-5 pb-3">
         <CardTitle className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
           <div className="bg-terminal/10 text-terminal p-1.5 rounded-lg">
@@ -53,7 +53,7 @@ const AgentFleet = () => {
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-5 pt-2">
+      <CardContent className="p-5 pt-2 flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
           {list.map((agent) => {
             const status = (agent.status as AgentStatus) ?? "online";
