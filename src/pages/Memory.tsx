@@ -167,33 +167,33 @@ const Memory = () => {
                 placeholder="Buscar memórias, tags..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 font-mono text-xs bg-card border-border"
+                className="pl-9 text-[12px] bg-card border-border/50 rounded-xl"
               />
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[140px] font-mono text-xs bg-card border-border">
+              <SelectTrigger className="w-[140px] text-[12px] bg-card border-border/50 rounded-xl">
                 <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="font-mono text-xs">Todos os tipos</SelectItem>
+                <SelectItem value="all" className="text-[12px]">Todos os tipos</SelectItem>
                 {Object.entries(typeConfig).map(([k, v]) => (
-                  <SelectItem key={k} value={k} className="font-mono text-xs">{v.emoji} {v.label}</SelectItem>
+                  <SelectItem key={k} value={k} className="text-[12px]">{v.emoji} {v.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={agentFilter} onValueChange={setAgentFilter}>
-              <SelectTrigger className="w-[140px] font-mono text-xs bg-card border-border">
+              <SelectTrigger className="w-[140px] text-[12px] bg-card border-border/50 rounded-xl">
                 <SelectValue placeholder="Agente" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="font-mono text-xs">Todos agentes</SelectItem>
+                <SelectItem value="all" className="text-[12px]">Todos agentes</SelectItem>
                 {ags.map((a) => (
-                  <SelectItem key={a.id} value={a.name} className="font-mono text-xs">{a.emoji} {a.name}</SelectItem>
+                  <SelectItem key={a.id} value={a.name} className="text-[12px]">{a.emoji} {a.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Badge variant="outline" className="font-mono text-[10px] px-2 py-1.5 border-border cursor-pointer hover:border-muted-foreground/50" onClick={() => setConfidenceMin(confidenceMin > 0 ? 0 : 85)}>
+            <Badge variant="outline" className="text-[11px] px-2.5 py-1.5 border-border/50 cursor-pointer hover:border-border rounded-full font-medium" onClick={() => setConfidenceMin(confidenceMin > 0 ? 0 : 85)}>
               {confidenceMin > 0 ? `≥${confidenceMin}%` : "Confiança"}
             </Badge>
           </div>
