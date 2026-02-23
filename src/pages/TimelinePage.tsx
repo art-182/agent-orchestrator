@@ -260,7 +260,7 @@ const TimelinePage = () => {
                               <Milestone className="h-4 w-4 text-violet" />
                             </div>
                           </TooltipTrigger>
-                          <TooltipContent className="font-mono text-xs">
+                          <TooltipContent className="text-xs">
                             <p className="font-semibold">{ms.name}</p>
                             <p className="text-muted-foreground">{ms.progress}% · {ms.status}</p>
                           </TooltipContent>
