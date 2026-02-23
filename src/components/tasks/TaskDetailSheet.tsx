@@ -2,10 +2,18 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, Play, Clock, AlertTriangle, User, GitBranch, Brain, Zap, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CheckCircle2, Play, Clock, AlertTriangle, User, GitBranch, Brain, Zap, ArrowRight, Pencil, Trash2, Save, X } from "lucide-react";
 import { useInteractions, useMemoryEntries, useTraces } from "@/hooks/use-supabase-data";
+import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 
 type TaskStatus = "done" | "in_progress" | "todo" | "blocked";
+type TaskPriority = "critical" | "high" | "medium" | "low";
 
 const statusConfig: Record<TaskStatus, { color: string; icon: React.ReactNode; label: string }> = {
   done: { color: "bg-terminal/15 text-terminal border-terminal/30", icon: <CheckCircle2 className="h-4 w-4" />, label: "Concluído" },
@@ -14,7 +22,6 @@ const statusConfig: Record<TaskStatus, { color: string; icon: React.ReactNode; l
   blocked: { color: "bg-rose/15 text-rose border-rose/30", icon: <AlertTriangle className="h-4 w-4" />, label: "Bloqueado" },
 };
 
-// BMAD stages mapping
 const bmadStages = [
   { key: "briefing", label: "Briefing", description: "Definição do escopo e requisitos" },
   { key: "mapping", label: "Mapping", description: "Mapeamento de dependências e arquitetura" },
@@ -40,23 +47,77 @@ const TaskDetailSheet = ({ task, open, onOpenChange }: TaskDetailSheetProps) => 
   const { data: interactions } = useInteractions();
   const { data: memoryEntries } = useMemoryEntries();
   const { data: traces } = useTraces();
+  const queryClient = useQueryClient();
+
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editStatus, setEditStatus] = useState<TaskStatus>("todo");
+  const [editPriority, setEditPriority] = useState<TaskPriority>("medium");
+
+  const startEditing = () => {
+    if (!task) return;
+    setEditName(task.name);
+    setEditStatus(task.status as TaskStatus);
+    setEditPriority(task.priority as TaskPriority);
+    setEditing(true);
+  };
+
+  const cancelEditing = () => setEditing(false);
+
+  const updateMutation = useMutation({
+    mutationFn: async (updates: { name: string; status: string; priority: string }) => {
+      const { error } = await supabase
+        .from("tasks")
+        .update({ name: updates.name, status: updates.status, priority: updates.priority })
+        .eq("id", task.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      setEditing(false);
+      toast.success("Tarefa atualizada");
+    },
+    onError: () => toast.error("Erro ao atualizar tarefa"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("tasks").delete().eq("id", task.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      onOpenChange(false);
+      toast.success("Tarefa excluída");
+    },
+    onError: () => toast.error("Erro ao excluir tarefa"),
+  });
+
+  const quickStatusChange = useMutation({
+    mutationFn: async (newStatus: string) => {
+      const { error } = await supabase.from("tasks").update({ status: newStatus }).eq("id", task.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Status atualizado");
+    },
+    onError: () => toast.error("Erro ao atualizar status"),
+  });
 
   if (!task) return null;
 
   const sc = statusConfig[(task.status as TaskStatus) ?? "todo"];
   const bmadIdx = getBmadStage(task.status);
 
-  // Related interactions (from the task's agent)
   const relatedInteractions = (interactions ?? [])
     .filter((i) => i.from_agent === task.agent_id || i.to_agent === task.agent_id)
     .slice(0, 8);
 
-  // Related memory entries
   const relatedMemory = (memoryEntries ?? [])
     .filter((m) => m.source_agent === task.agent_id)
     .slice(0, 5);
 
-  // Related traces
   const relatedTraces = (traces ?? [])
     .filter((t) => t.agent_id === task.agent_id)
     .slice(0, 5);
@@ -65,20 +126,111 @@ const TaskDetailSheet = ({ task, open, onOpenChange }: TaskDetailSheetProps) => 
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg border-border bg-card overflow-hidden">
         <SheetHeader className="pb-4">
-          <div className="flex items-center gap-2">
-            {sc.icon}
-            <Badge variant="outline" className={`rounded-lg px-2.5 py-1 text-xs border font-mono ${sc.color}`}>
-              {sc.label}
-            </Badge>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {sc.icon}
+              <Badge variant="outline" className={`rounded-lg px-2.5 py-1 text-xs border font-mono ${sc.color}`}>
+                {sc.label}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-1">
+              {!editing && (
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={startEditing}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-rose"
+                onClick={() => {
+                  if (confirm("Excluir esta tarefa?")) deleteMutation.mutate();
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <SheetTitle className="font-mono text-xl text-foreground">{task.name}</SheetTitle>
-          <SheetDescription className="text-sm text-muted-foreground">
-            {task.agents?.emoji} {task.agents?.name} · {task.missions?.name}
-          </SheetDescription>
+
+          {editing ? (
+            <div className="space-y-3 pt-2">
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="font-mono text-base bg-muted/30 border-border"
+                placeholder="Nome da tarefa"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <Select value={editStatus} onValueChange={(v) => setEditStatus(v as TaskStatus)}>
+                  <SelectTrigger className="font-mono text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">Pendente</SelectItem>
+                    <SelectItem value="in_progress">Em Progresso</SelectItem>
+                    <SelectItem value="done">Concluído</SelectItem>
+                    <SelectItem value="blocked">Bloqueado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={editPriority} onValueChange={(v) => setEditPriority(v as TaskPriority)}>
+                  <SelectTrigger className="font-mono text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1 gap-1.5 bg-terminal text-primary-foreground hover:bg-terminal/90 font-mono text-xs"
+                  onClick={() => updateMutation.mutate({ name: editName, status: editStatus, priority: editPriority })}
+                  disabled={updateMutation.isPending}
+                >
+                  <Save className="h-3.5 w-3.5" /> Salvar
+                </Button>
+                <Button size="sm" variant="outline" className="gap-1.5 font-mono text-xs" onClick={cancelEditing}>
+                  <X className="h-3.5 w-3.5" /> Cancelar
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <SheetTitle className="font-mono text-xl text-foreground">{task.name}</SheetTitle>
+              <SheetDescription className="text-sm text-muted-foreground">
+                {task.agents?.emoji} {task.agents?.name} · {task.missions?.name}
+              </SheetDescription>
+            </>
+          )}
         </SheetHeader>
 
         <ScrollArea className="h-[calc(100vh-180px)] pr-2">
           <div className="space-y-6">
+            {/* Quick Status Change */}
+            {!editing && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-2">Alterar status rapidamente:</p>
+                <div className="flex gap-2 flex-wrap">
+                  {(["todo", "in_progress", "done", "blocked"] as TaskStatus[]).map((s) => {
+                    const cfg = statusConfig[s];
+                    const isActive = task.status === s;
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => !isActive && quickStatusChange.mutate(s)}
+                        disabled={isActive || quickStatusChange.isPending}
+                        className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 font-mono text-xs transition-all ${isActive ? cfg.color + " border font-semibold" : "border-border text-muted-foreground hover:border-muted-foreground/50"}`}
+                      >
+                        {cfg.icon} {cfg.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <Separator />
+
             {/* Task Metadata */}
             <div className="grid grid-cols-2 gap-4">
               {[
@@ -108,7 +260,6 @@ const TaskDetailSheet = ({ task, open, onOpenChange }: TaskDetailSheetProps) => 
                   const isDone = idx < bmadIdx;
                   const dotColor = isDone ? "bg-terminal" : isActive ? "bg-cyan animate-pulse-dot" : "bg-muted-foreground/30";
                   const textColor = isDone ? "text-terminal" : isActive ? "text-cyan" : "text-muted-foreground";
-
                   return (
                     <div key={stage.key} className="flex items-start gap-3 relative">
                       <div className="flex flex-col items-center">

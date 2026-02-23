@@ -7,6 +7,7 @@ import { PageTransition } from "@/components/animations/MotionPrimitives";
 import { useTasks } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import TaskDetailSheet from "@/components/tasks/TaskDetailSheet";
+import CreateTaskDialog from "@/components/tasks/CreateTaskDialog";
 
 type TaskStatus = "done" | "in_progress" | "todo" | "blocked";
 type TaskPriority = "critical" | "high" | "medium" | "low";
@@ -71,6 +72,7 @@ const Tasks = () => {
               {baseTasks[0]?.missions?.name ?? missionFilter}
             </Badge>
           )}
+          <CreateTaskDialog />
         </div>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
