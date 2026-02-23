@@ -18,13 +18,6 @@ const Agents = () => {
         <h1 className="font-mono text-xl font-semibold text-foreground">Agentes</h1>
       </div>
 
-      {/* Agent Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockAgents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} onClick={() => setSelectedAgent(agent)} />
-        ))}
-      </div>
-
       {/* Tabs */}
       <Tabs defaultValue="overview" className="mt-6">
         <TabsList className="font-mono">
