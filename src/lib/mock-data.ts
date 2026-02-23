@@ -229,6 +229,7 @@ export const mockAgents: Agent[] = [
       { name: "Scaling", level: 80, category: "Infra", connections: ["K8s"] },
     ],
     soulMd: `# Deployer — Soul\n\n## Identidade\nSou o agente de infraestrutura. Gerencio deploys, rollbacks, e saúde dos serviços. Zero downtime é meu mantra.\n\n## Princípios\n- **Zero downtime**: blue-green / canary sempre\n- **Rollback rápido**: < 30s para reverter\n- **Observabilidade**: se não tem métrica, não existe\n\n## Comportamento\n- Verifico health checks antes e depois de deploy\n- Mantenho janelas de deploy previsíveis\n- Escalo para OraCLI se detectar anomalia`,
+    roi: { hoursPerWeekSaved: 18, costPerHourHuman: 80, weeklySavings: 1440, monthlySavings: 6240, roiMultiplier: 82.5, tasksAutomated: 298, automationRate: 96, avgTaskTimeHuman: "15min", avgTaskTimeAgent: "25.1s", speedup: "36x", qualityScore: 96, incidentsPrevented: 12, revenueImpact: "−$45K downtime evitado" },
   },
   {
     id: "analyst",
