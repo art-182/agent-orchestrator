@@ -42,6 +42,7 @@ const Finances = () => (
         <TabsTrigger value="overview" className="font-mono text-xs">Visão Geral</TabsTrigger>
         <TabsTrigger value="tokens" className="font-mono text-xs">Tokens</TabsTrigger>
         <TabsTrigger value="tools" className="font-mono text-xs">Tools & Skills</TabsTrigger>
+        <TabsTrigger value="providers" className="font-mono text-xs">Providers & Limites</TabsTrigger>
         <TabsTrigger value="projections" className="font-mono text-xs">Projeções</TabsTrigger>
       </TabsList>
 
