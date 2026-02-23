@@ -209,7 +209,7 @@ const Memory = () => {
                 return (
                   <Card
                     key={entry.id}
-                    className={`border-border bg-card hover:border-muted-foreground/30 transition-colors cursor-pointer ${isSelected ? "ring-1 ring-terminal/40 border-terminal/30" : ""}`}
+                    className={`border-border/50 bg-card surface-elevated hover:border-border transition-all duration-200 cursor-pointer ${isSelected ? "ring-1 ring-terminal/20 border-terminal/30" : ""}`}
                     onClick={() => setSelectedEntry(isSelected ? null : entry)}
                   >
                     <CardContent className="p-3 space-y-2">
