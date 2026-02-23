@@ -9,6 +9,7 @@ import ModelPricingTable from "@/components/finances/ModelPricingTable";
 import ProjectionChart from "@/components/finances/ProjectionChart";
 import ToolCostTable from "@/components/finances/ToolCostTable";
 import SkillCostTable from "@/components/finances/SkillCostTable";
+import ProjectionDetails from "@/components/finances/ProjectionDetails";
 import {
   mockBillingSummary,
   mockDailyCosts,
