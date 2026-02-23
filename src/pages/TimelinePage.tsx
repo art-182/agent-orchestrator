@@ -343,21 +343,21 @@ const TimelinePage = () => {
         {Object.entries(statusColor).map(([k, c]) => (
           <div key={k} className="flex items-center gap-1.5">
             <div className={`h-2.5 w-2.5 rounded-full ${c}`} />
-            <span className="font-mono text-[10px] text-muted-foreground">{statusLabel[k] ?? k}</span>
+            <span className="text-[10px] text-muted-foreground">{statusLabel[k] ?? k}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5 ml-2">
           <div className="h-3 w-px bg-rose/50" />
-          <span className="font-mono text-[10px] text-rose/60">Agora</span>
+          <span className="text-[10px] text-rose/60">Agora</span>
         </div>
         <div className="flex items-center gap-1.5 ml-2">
           <Milestone className="h-3 w-3 text-violet" />
-          <span className="font-mono text-[10px] text-violet/60">Milestone</span>
+          <span className="text-[10px] text-violet/60">Milestone</span>
         </div>
         {showDependencies && (
           <div className="flex items-center gap-1.5 ml-2">
             <div className="h-px w-4 bg-violet/50 border-t border-dashed border-violet/40" />
-            <span className="font-mono text-[10px] text-violet/60">Dependência</span>
+            <span className="text-[10px] text-violet/60">Dependência</span>
           </div>
         )}
       </div>
