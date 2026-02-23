@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -34,6 +35,7 @@ function LiveClock() {
 export default function AppLayout() {
   const location = useLocation();
   const label = routeLabels[location.pathname] ?? "Revenue OS";
+  useRealtimeNotifications();
 
   return (
     <SidebarProvider defaultOpen={true}>
