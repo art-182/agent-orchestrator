@@ -35,14 +35,28 @@ const Deliverables = () => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  const list = deliverables ?? [];
+
   const filtered = useMemo(() => {
-    return (deliverables ?? []).filter((d) => {
+    return list.filter((d) => {
       if (search && !d.name.toLowerCase().includes(search.toLowerCase())) return false;
       if (typeFilter !== "all" && d.type !== typeFilter) return false;
       if (statusFilter !== "all" && d.status !== statusFilter) return false;
       return true;
     });
-  }, [deliverables, search, typeFilter, statusFilter]);
+  }, [list, search, typeFilter, statusFilter]);
+
+  const delivered = list.filter((d) => d.status === "delivered").length;
+  const totalFiles = list.reduce((s, d) => s + (d.files ?? 0), 0);
+  const totalLines = list.reduce((s, d) => s + (d.lines_changed ?? 0), 0);
+  const deliveryRate = list.length > 0 ? Math.round((delivered / list.length) * 100) : 0;
+
+  // Type distribution
+  const typeDist = useMemo(() => {
+    const map: Record<string, number> = {};
+    list.forEach((d) => { map[d.type] = (map[d.type] ?? 0) + 1; });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [list]);
 
   if (isLoading) {
     return (
@@ -57,19 +71,6 @@ const Deliverables = () => {
       </PageTransition>
     );
   }
-
-  const list = deliverables ?? [];
-  const delivered = list.filter((d) => d.status === "delivered").length;
-  const totalFiles = list.reduce((s, d) => s + (d.files ?? 0), 0);
-  const totalLines = list.reduce((s, d) => s + (d.lines_changed ?? 0), 0);
-  const deliveryRate = list.length > 0 ? Math.round((delivered / list.length) * 100) : 0;
-
-  // Type distribution
-  const typeDist = useMemo(() => {
-    const map: Record<string, number> = {};
-    list.forEach((d) => { map[d.type] = (map[d.type] ?? 0) + 1; });
-    return Object.entries(map).sort((a, b) => b[1] - a[1]);
-  }, [list]);
 
   return (
     <PageTransition className="space-y-8">
