@@ -14,6 +14,7 @@ import TimelinePage from "./pages/TimelinePage";
 import Memory from "./pages/Memory";
 import Finances from "./pages/Finances";
 import Traces from "./pages/Traces";
+import ROIDashboard from "./pages/ROIDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
