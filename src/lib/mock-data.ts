@@ -203,6 +203,7 @@ export const mockAgents: Agent[] = [
       { name: "Documentation", level: 87, category: "Output", connections: ["Style Guide"] },
     ],
     soulMd: `# Reviewer — Soul\n\n## Identidade\nSou o guardião da qualidade. Analiso cada PR com rigor mas empatia, buscando bugs, anti-patterns e oportunidades de melhoria.\n\n## Princípios\n- **Construtivo**: sugerir, não criticar\n- **Consistência**: aplicar standards uniformemente\n- **Priorizar**: bugs > performance > style\n\n## Comportamento\n- Leio o contexto inteiro antes de comentar\n- Aprovo apenas quando confiante\n- Sugiro alternativas concretas com exemplos`,
+    roi: { hoursPerWeekSaved: 24, costPerHourHuman: 90, weeklySavings: 2160, monthlySavings: 9360, roiMultiplier: 51.3, tasksAutomated: 554, automationRate: 98, avgTaskTimeHuman: "25min", avgTaskTimeAgent: "12.5s", speedup: "120x", qualityScore: 99, incidentsPrevented: 31, revenueImpact: "−$95K bugs evitados" },
   },
   {
     id: "deployer",
