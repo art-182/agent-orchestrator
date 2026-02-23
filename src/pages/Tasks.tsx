@@ -1,4 +1,4 @@
-import { ListChecks, CheckCircle2, Play, Clock, AlertTriangle, Filter } from "lucide-react";
+import { ListChecks, CheckCircle2, Play, Clock, AlertTriangle, Filter, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -12,25 +12,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  DndContext,
-  DragOverlay,
-  closestCorners,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
-  useDroppable,
+  DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors,
+  type DragEndEvent, type DragStartEvent, useDroppable,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 type TaskStatus = "done" | "in_progress" | "todo" | "blocked";
 
-const statusConfig: Record<TaskStatus, { color: string; icon: React.ReactNode; label: string }> = {
-  done: { color: "bg-terminal/15 text-terminal border-terminal/30", icon: <CheckCircle2 className="h-4 w-4" />, label: "Concluído" },
-  in_progress: { color: "bg-cyan/15 text-cyan border-cyan/30", icon: <Play className="h-4 w-4" />, label: "Em Progresso" },
-  todo: { color: "bg-muted text-muted-foreground border-border", icon: <Clock className="h-4 w-4" />, label: "Pendente" },
-  blocked: { color: "bg-rose/15 text-rose border-rose/30", icon: <AlertTriangle className="h-4 w-4" />, label: "Bloqueado" },
+const statusConfig: Record<TaskStatus, { color: string; dotColor: string; icon: React.ReactNode; label: string }> = {
+  done: { color: "text-terminal", dotColor: "bg-terminal", icon: <CheckCircle2 className="h-4 w-4 text-terminal" />, label: "Concluído" },
+  in_progress: { color: "text-cyan", dotColor: "bg-cyan", icon: <Play className="h-4 w-4 text-cyan" />, label: "Em Progresso" },
+  todo: { color: "text-muted-foreground", dotColor: "bg-muted-foreground/50", icon: <Clock className="h-4 w-4 text-muted-foreground" />, label: "Pendente" },
+  blocked: { color: "text-rose", dotColor: "bg-rose", icon: <AlertTriangle className="h-4 w-4 text-rose" />, label: "Bloqueado" },
 };
 
 const columns: { key: TaskStatus; label: string }[] = [
@@ -43,7 +36,7 @@ const columns: { key: TaskStatus; label: string }[] = [
 function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <div ref={setNodeRef} className={`space-y-3 min-h-[120px] rounded-lg p-2 transition-colors ${isOver ? "bg-terminal/5 ring-1 ring-terminal/20" : ""}`}>
+    <div ref={setNodeRef} className={`space-y-2.5 min-h-[140px] rounded-2xl p-2.5 transition-all duration-200 ${isOver ? "bg-terminal/5 ring-1 ring-terminal/15" : ""}`}>
       {children}
     </div>
   );
@@ -68,32 +61,22 @@ const Tasks = () => {
     setActiveId(null);
     const { active, over } = event;
     if (!over) return;
-
     const taskId = active.id as string;
     const newStatus = over.id as string;
     const task = (tasks ?? []).find((t) => t.id === taskId);
     if (!task || task.status === newStatus) return;
-
-    // Optimistic update
-    queryClient.setQueryData(["tasks"], (old: any[]) =>
-      old?.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
-    );
-
+    queryClient.setQueryData(["tasks"], (old: any[]) => old?.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
     const { error } = await supabase.from("tasks").update({ status: newStatus }).eq("id", taskId);
-    if (error) {
-      toast.error("Erro ao mover tarefa");
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-    } else {
-      toast.success(`Tarefa movida para ${statusConfig[newStatus as TaskStatus]?.label ?? newStatus}`);
-    }
+    if (error) { toast.error("Erro ao mover tarefa"); queryClient.invalidateQueries({ queryKey: ["tasks"] }); }
+    else { toast.success(`Tarefa → ${statusConfig[newStatus as TaskStatus]?.label ?? newStatus}`); }
   }, [tasks, queryClient]);
 
   if (isLoading) {
     return (
       <PageTransition className="space-y-8">
         <div className="flex items-center gap-3">
-          <ListChecks className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Tarefas</h1>
+          <div className="bg-cyan/10 text-cyan p-2 rounded-xl"><ListChecks className="h-5 w-5" /></div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Tarefas</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-48" />)}
@@ -109,53 +92,53 @@ const Tasks = () => {
   const activeTask = allTasks.find((t) => t.id === activeId);
 
   return (
-    <PageTransition className="space-y-8">
+    <PageTransition className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <ListChecks className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Tarefas</h1>
+          <div className="bg-cyan/10 text-cyan p-2 rounded-xl">
+            <ListChecks className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Tarefas</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">{allTasks.length} tarefas · {allTasks.filter(t => t.status === 'done').length} concluídas</p>
+          </div>
           {missionFilter && (
-            <Badge variant="outline" className="font-mono text-xs px-2.5 py-1 border-violet/30 bg-violet/10 text-violet rounded-lg">
+            <Badge variant="outline" className="text-[10px] px-2.5 py-0.5 border-violet/20 bg-violet/8 text-violet rounded-full font-medium">
               {baseTasks[0]?.missions?.name ?? missionFilter}
             </Badge>
           )}
-          <CreateTaskDialog />
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <div className="flex gap-1.5 flex-wrap">
-            <Badge
-              variant="outline"
-              className={`font-mono text-xs px-2.5 py-1 cursor-pointer border rounded-lg transition-all ${filter === "all" ? "bg-terminal/15 text-terminal border-terminal/30" : "border-border text-muted-foreground hover:border-muted-foreground/50"}`}
-              onClick={() => setFilter("all")}
-            >
-              Todos
-            </Badge>
-            {agents.map((a) => (
-              <Badge
-                key={a}
-                variant="outline"
-                className={`font-mono text-xs px-2.5 py-1 cursor-pointer border rounded-lg transition-all ${filter === a ? "bg-terminal/15 text-terminal border-terminal/30" : "border-border text-muted-foreground hover:border-muted-foreground/50"}`}
+        <div className="flex items-center gap-3">
+          <CreateTaskDialog />
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {["all", ...agents].map((a) => (
+              <button
+                key={a ?? "all"}
+                className={`text-[11px] px-3 py-1.5 rounded-full border transition-all duration-200 font-medium ${
+                  filter === a
+                    ? "bg-terminal/10 text-terminal border-terminal/20"
+                    : "border-border/40 text-muted-foreground hover:text-foreground hover:border-border"
+                }`}
                 onClick={() => setFilter(a!)}
               >
-                {a}
-              </Badge>
+                {a === "all" ? "Todos" : a}
+              </button>
             ))}
           </div>
         </div>
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {columns.map((col) => {
             const colTasks = filteredTasks.filter((t) => t.status === col.key);
             const sc = statusConfig[col.key];
             return (
               <div key={col.key} className="space-y-3">
-                <div className="flex items-center gap-2 px-1">
-                  {sc.icon}
-                  <span className="font-mono text-sm font-semibold text-foreground">{col.label}</span>
-                  <span className="font-mono text-xs text-muted-foreground">({colTasks.length})</span>
+                <div className="flex items-center gap-2.5 px-1">
+                  <span className={`h-2 w-2 rounded-full ${sc.dotColor}`} />
+                  <span className="text-[13px] font-semibold text-foreground tracking-tight">{col.label}</span>
+                  <span className="text-[11px] text-muted-foreground font-medium ml-auto">{colTasks.length}</span>
                 </div>
                 <DroppableColumn id={col.key}>
                   <SortableContext items={colTasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
@@ -164,8 +147,8 @@ const Tasks = () => {
                     ))}
                   </SortableContext>
                   {colTasks.length === 0 && (
-                    <div className="rounded-xl border border-dashed border-border p-6 text-center">
-                      <p className="text-sm text-muted-foreground">Arraste tarefas aqui</p>
+                    <div className="rounded-2xl border border-dashed border-border/40 p-8 text-center">
+                      <p className="text-[12px] text-muted-foreground/50 font-medium">Arraste tarefas aqui</p>
                     </div>
                   )}
                 </DroppableColumn>
@@ -175,18 +158,14 @@ const Tasks = () => {
         </div>
         <DragOverlay>
           {activeTask ? (
-            <div className="opacity-90 rotate-2 scale-105">
+            <div className="opacity-90 rotate-1 scale-105 shadow-2xl">
               <TaskKanbanCard task={activeTask} onClick={() => {}} />
             </div>
           ) : null}
         </DragOverlay>
       </DndContext>
 
-      <TaskDetailSheet
-        task={selectedTask}
-        open={!!selectedTask}
-        onOpenChange={(open) => !open && setSelectedTask(null)}
-      />
+      <TaskDetailSheet task={selectedTask} open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)} />
     </PageTransition>
   );
 };

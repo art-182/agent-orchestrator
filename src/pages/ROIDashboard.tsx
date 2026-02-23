@@ -9,6 +9,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface AgentROI { hoursPerWeekSaved: number; costPerHourHuman: number; weeklySavings: number; monthlySavings: number; roiMultiplier: number; tasksAutomated: number; automationRate: number; avgTaskTimeHuman: string; avgTaskTimeAgent: string; speedup: string; qualityScore: number; incidentsPrevented: number; revenueImpact: string; }
 
+const chartStyle = {
+  bg: "hsl(228, 18%, 6%)",
+  border: "hsl(228, 12%, 12%)",
+  grid: "hsl(228, 12%, 10%)",
+  text: "hsl(220, 10%, 45%)",
+  terminal: "hsl(158, 64%, 52%)",
+  cyan: "hsl(190, 90%, 55%)",
+  rose: "hsl(0, 72%, 51%)",
+};
+
 const ROIDashboard = () => {
   const { data: agents, isLoading } = useAgents();
 
@@ -16,8 +26,8 @@ const ROIDashboard = () => {
     return (
       <PageTransition className="space-y-6">
         <div className="flex items-center gap-3">
-          <TrendingUp className="h-6 w-6 text-terminal" />
-          <h1 className="font-mono text-xl font-semibold text-foreground">ROI & Investimento</h1>
+          <div className="bg-terminal/10 text-terminal p-2 rounded-xl"><TrendingUp className="h-5 w-5" /></div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">ROI & Investimento</h1>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">{[1,2,3,4,5].map(i => <Skeleton key={i} className="h-24" />)}</div>
       </PageTransition>
@@ -53,34 +63,43 @@ const ROIDashboard = () => {
   const agentROIChart = agentROIs.map((r) => ({ name: `${r.emoji} ${r.name}`, roi: r.roiMultiplier, savings: r.monthlySavings })).sort((a, b) => b.roi - a.roi);
 
   const costDistribution = [
-    { name: "Operação Humana (equivalente)", value: totalMonthlySavings + totalOperatingCost, color: "hsl(350, 80%, 55%)" },
-    { name: "Custo IA Atual", value: totalOperatingCost, color: "hsl(160, 51%, 49%)" },
+    { name: "Operação Humana", value: totalMonthlySavings + totalOperatingCost, color: chartStyle.rose },
+    { name: "Custo IA", value: totalOperatingCost, color: chartStyle.terminal },
+  ];
+
+  const statCards = [
+    { icon: DollarSign, label: "Economia Mensal", value: `$${(totalMonthlySavings / 1000).toFixed(1)}K`, color: "text-terminal", bg: "bg-terminal/10", sub: `$${(annualSavings / 1000).toFixed(0)}K/ano` },
+    { icon: TrendingUp, label: "ROI Médio", value: `${avgROI.toFixed(1)}x`, color: "text-cyan", bg: "bg-cyan/10", sub: "retorno sobre custo IA" },
+    { icon: Clock, label: "Horas Poupadas", value: `${totalHoursWeek}h/sem`, color: "text-violet", bg: "bg-violet/10", sub: `${(totalHoursWeek * 4).toFixed(0)}h/mês` },
+    { icon: ShieldCheck, label: "Incidentes Evitados", value: totalIncidents.toString(), color: "text-amber", bg: "bg-amber/10", sub: "últimos 30 dias" },
+    { icon: Target, label: "Payback", value: `${paybackDays}d`, color: "text-terminal", bg: "bg-terminal/10", sub: "para ROI positivo" },
   ];
 
   return (
     <PageTransition>
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <TrendingUp className="h-6 w-6 text-terminal" />
-          <h1 className="font-mono text-xl font-semibold text-foreground">ROI & Investimento</h1>
-          <Badge variant="outline" className="font-mono text-[10px] px-2 py-0 border-terminal/30 bg-terminal/10 text-terminal">Live</Badge>
+          <div className="bg-terminal/10 text-terminal p-2 rounded-xl">
+            <TrendingUp className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">ROI & Investimento</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">Análise de retorno sobre investimento em IA</p>
+          </div>
+          <Badge variant="outline" className="text-[10px] px-2.5 py-0.5 border-terminal/20 bg-terminal/8 text-terminal rounded-full font-medium ml-2">Live</Badge>
         </div>
 
-        <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {[
-            { icon: DollarSign, label: "Economia Mensal", value: `$${(totalMonthlySavings / 1000).toFixed(1)}K`, color: "text-terminal", sub: `$${(annualSavings / 1000).toFixed(0)}K/ano` },
-            { icon: TrendingUp, label: "ROI Médio", value: `${avgROI.toFixed(1)}x`, color: "text-cyan", sub: "retorno sobre custo IA" },
-            { icon: Clock, label: "Horas Poupadas/Sem", value: `${totalHoursWeek}h`, color: "text-violet", sub: `${(totalHoursWeek * 4).toFixed(0)}h/mês` },
-            { icon: ShieldCheck, label: "Incidentes Evitados", value: totalIncidents.toString(), color: "text-amber", sub: "últimos 30 dias" },
-            { icon: Target, label: "Payback Period", value: `${paybackDays}d`, color: "text-terminal", sub: "para ROI positivo" },
-          ].map((m) => (
+        <StaggerContainer className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {statCards.map((m) => (
             <FadeIn key={m.label}>
-              <Card className="border-border bg-card">
-                <CardContent className="p-4 space-y-1">
-                  <m.icon className={`h-4 w-4 ${m.color}`} />
-                  <p className={`font-mono text-2xl font-bold ${m.color}`}>{m.value}</p>
-                  <p className="font-mono text-[10px] text-muted-foreground">{m.label}</p>
-                  <p className="font-mono text-[9px] text-muted-foreground">{m.sub}</p>
+              <Card className="border-border/50 bg-card surface-elevated">
+                <CardContent className="p-4 space-y-2">
+                  <div className={`${m.bg} ${m.color} p-1.5 rounded-lg w-fit`}>
+                    <m.icon className="h-3.5 w-3.5" />
+                  </div>
+                  <p className={`text-2xl font-bold ${m.color} tracking-tight leading-none`}>{m.value}</p>
+                  <p className="text-[11px] text-muted-foreground font-medium">{m.label}</p>
+                  <p className="text-[10px] text-muted-foreground/60">{m.sub}</p>
                 </CardContent>
               </Card>
             </FadeIn>
@@ -90,18 +109,18 @@ const ROIDashboard = () => {
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             { label: "Taxa de Automação", value: avgAutomation, color: "text-terminal", sub: `${totalAutomated.toLocaleString()} tarefas automatizadas` },
-            { label: "Quality Score", value: avgQuality, color: "text-cyan", sub: "Média ponderada de todos os agentes" },
+            { label: "Quality Score", value: avgQuality, color: "text-cyan", sub: "Média ponderada dos agentes" },
             { label: "Custo IA vs Humano", value: totalMonthlySavings + totalOperatingCost > 0 ? +((totalOperatingCost / (totalMonthlySavings + totalOperatingCost)) * 100).toFixed(1) : 0, color: "text-violet", sub: `$${totalOperatingCost.toFixed(2)} IA vs $${(totalMonthlySavings + totalOperatingCost).toLocaleString()} humano` },
           ].map((m) => (
             <FadeIn key={m.label}>
-              <Card className="border-border bg-card">
+              <Card className="border-border/50 bg-card surface-elevated">
                 <CardContent className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-muted-foreground">{m.label}</span>
-                    <span className={`font-mono text-sm font-bold ${m.color}`}>{typeof m.value === "number" ? `${m.value}%` : m.value}</span>
+                    <span className="text-[12px] text-muted-foreground font-medium">{m.label}</span>
+                    <span className={`text-[13px] font-bold ${m.color}`}>{typeof m.value === "number" ? `${m.value}%` : m.value}</span>
                   </div>
-                  <Progress value={typeof m.value === "number" ? m.value : 0} className="h-2" />
-                  <p className="font-mono text-[9px] text-muted-foreground">{m.sub}</p>
+                  <Progress value={typeof m.value === "number" ? m.value : 0} className="h-1.5" />
+                  <p className="text-[10px] text-muted-foreground/60">{m.sub}</p>
                 </CardContent>
               </Card>
             </FadeIn>
@@ -109,43 +128,43 @@ const ROIDashboard = () => {
         </StaggerContainer>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="border-border bg-card lg:col-span-2">
-            <CardHeader className="pb-2"><CardTitle className="font-mono text-sm text-foreground">Economia Acumulada (6 meses)</CardTitle></CardHeader>
+          <Card className="border-border/50 bg-card surface-elevated lg:col-span-2">
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-semibold text-foreground tracking-tight">Economia Acumulada</CardTitle></CardHeader>
             <CardContent>
               <div className="h-[240px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={monthlySavingsData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                    <defs><linearGradient id="savingsGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(160, 51%, 49%)" stopOpacity={0.3} /><stop offset="95%" stopColor="hsl(160, 51%, 49%)" stopOpacity={0} /></linearGradient></defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(230, 15%, 14%)" />
-                    <XAxis dataKey="month" tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(220, 10%, 50%)" }} axisLine={{ stroke: "hsl(230, 15%, 14%)" }} tickLine={false} />
-                    <YAxis tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(220, 10%, 50%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} />
-                    <Tooltip contentStyle={{ backgroundColor: "hsl(230, 22%, 5%)", border: "1px solid hsl(230, 15%, 14%)", borderRadius: "8px", fontFamily: "JetBrains Mono", fontSize: 11 }} formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]} />
-                    <Area type="monotone" dataKey="savings" name="Economia" stroke="hsl(160, 51%, 49%)" fill="url(#savingsGrad)" strokeWidth={2} />
+                    <defs><linearGradient id="savingsGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={chartStyle.terminal} stopOpacity={0.25} /><stop offset="95%" stopColor={chartStyle.terminal} stopOpacity={0} /></linearGradient></defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartStyle.grid} />
+                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: chartStyle.text }} axisLine={{ stroke: chartStyle.grid }} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: chartStyle.text }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}K`} />
+                    <Tooltip contentStyle={{ backgroundColor: chartStyle.bg, border: `1px solid ${chartStyle.border}`, borderRadius: "12px", fontSize: 11 }} formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]} />
+                    <Area type="monotone" dataKey="savings" name="Economia" stroke={chartStyle.terminal} fill="url(#savingsGrad)" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-2"><CardTitle className="font-mono text-sm text-foreground">Custo IA vs Equivalente Humano</CardTitle></CardHeader>
+          <Card className="border-border/50 bg-card surface-elevated">
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-semibold text-foreground tracking-tight">IA vs Humano</CardTitle></CardHeader>
             <CardContent>
               <div className="flex flex-col items-center gap-4">
                 <div className="h-[160px] w-[160px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie data={costDistribution} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                      <Pie data={costDistribution} cx="50%" cy="50%" innerRadius={48} outerRadius={72} paddingAngle={4} dataKey="value" strokeWidth={0}>
                         {costDistribution.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                       </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: "hsl(230, 22%, 5%)", border: "1px solid hsl(230, 15%, 14%)", borderRadius: "8px", fontFamily: "JetBrains Mono", fontSize: 11 }} formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]} />
+                      <Tooltip contentStyle={{ backgroundColor: chartStyle.bg, border: `1px solid ${chartStyle.border}`, borderRadius: "12px", fontSize: 11 }} formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="space-y-1.5 text-center">
+                <div className="space-y-2">
                   {costDistribution.map((c) => (
-                    <div key={c.name} className="flex items-center gap-2">
+                    <div key={c.name} className="flex items-center gap-2.5">
                       <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c.color }} />
-                      <span className="font-mono text-[10px] text-foreground">{c.name}</span>
+                      <span className="text-[11px] text-foreground/80 font-medium">{c.name}</span>
                     </div>
                   ))}
                 </div>
@@ -154,17 +173,17 @@ const ROIDashboard = () => {
           </Card>
         </div>
 
-        <Card className="border-border bg-card">
-          <CardHeader className="pb-2"><CardTitle className="font-mono text-sm text-foreground">ROI por Agente</CardTitle></CardHeader>
+        <Card className="border-border/50 bg-card surface-elevated">
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-semibold text-foreground tracking-tight">ROI por Agente</CardTitle></CardHeader>
           <CardContent>
             <div className="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={agentROIChart} layout="vertical" margin={{ top: 0, right: 10, left: 20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(230, 15%, 14%)" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(220, 10%, 50%)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}x`} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fontFamily: "JetBrains Mono", fill: "hsl(220, 10%, 50%)" }} axisLine={false} tickLine={false} width={110} />
-                  <Tooltip contentStyle={{ backgroundColor: "hsl(230, 22%, 5%)", border: "1px solid hsl(230, 15%, 14%)", borderRadius: "8px", fontFamily: "JetBrains Mono", fontSize: 11 }} />
-                  <Bar dataKey="roi" name="ROI" fill="hsl(187, 80%, 53%)" radius={[0, 4, 4, 0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartStyle.grid} horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: chartStyle.text }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}x`} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: chartStyle.text }} axisLine={false} tickLine={false} width={110} />
+                  <Tooltip contentStyle={{ backgroundColor: chartStyle.bg, border: `1px solid ${chartStyle.border}`, borderRadius: "12px", fontSize: 11 }} />
+                  <Bar dataKey="roi" name="ROI" fill={chartStyle.cyan} radius={[0, 6, 6, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -174,20 +193,20 @@ const ROIDashboard = () => {
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {agentROIs.map((r) => (
             <FadeIn key={r.name}>
-              <Card className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
+              <Card className="border-border/50 bg-card surface-elevated glow-line transition-all duration-300">
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-sm font-semibold text-foreground">{r.emoji} {r.name}</span>
-                    <span className="font-mono text-lg font-bold text-terminal">{r.roiMultiplier}x</span>
+                    <span className="text-[13px] font-semibold text-foreground">{r.emoji} {r.name}</span>
+                    <span className="text-lg font-bold text-terminal">{r.roiMultiplier}x</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div><p className="font-mono text-[9px] text-muted-foreground">Economia/Mês</p><p className="font-mono text-xs font-bold text-terminal">${r.monthlySavings.toLocaleString()}</p></div>
-                    <div><p className="font-mono text-[9px] text-muted-foreground">Horas/Semana</p><p className="font-mono text-xs font-bold text-foreground">{r.hoursPerWeekSaved}h</p></div>
-                    <div><p className="font-mono text-[9px] text-muted-foreground">Speedup</p><p className="font-mono text-xs font-bold text-cyan">{r.speedup}</p></div>
-                    <div><p className="font-mono text-[9px] text-muted-foreground">Impacto</p><p className="font-mono text-xs font-bold text-violet">{r.revenueImpact}</p></div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><p className="text-[10px] text-muted-foreground">Economia/Mês</p><p className="text-[13px] font-bold text-terminal">${r.monthlySavings.toLocaleString()}</p></div>
+                    <div><p className="text-[10px] text-muted-foreground">Horas/Sem</p><p className="text-[13px] font-bold text-foreground">{r.hoursPerWeekSaved}h</p></div>
+                    <div><p className="text-[10px] text-muted-foreground">Speedup</p><p className="text-[13px] font-bold text-cyan">{r.speedup}</p></div>
+                    <div><p className="text-[10px] text-muted-foreground">Impacto</p><p className="text-[13px] font-bold text-violet">{r.revenueImpact}</p></div>
                   </div>
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between font-mono text-[9px]"><span className="text-muted-foreground">Automação</span><span className="text-terminal">{r.automationRate}%</span></div>
+                    <div className="flex items-center justify-between text-[10px]"><span className="text-muted-foreground">Automação</span><span className="text-terminal font-medium">{r.automationRate}%</span></div>
                     <Progress value={r.automationRate} className="h-1" />
                   </div>
                 </CardContent>
@@ -196,16 +215,19 @@ const ROIDashboard = () => {
           ))}
         </StaggerContainer>
 
-        <Card className="border-border bg-card border-terminal/20">
+        <Card className="border-terminal/15 bg-card surface-elevated">
           <CardHeader className="pb-2">
-            <CardTitle className="font-mono text-sm text-terminal flex items-center gap-2"><ArrowUpRight className="h-4 w-4" />Resumo para Investidores</CardTitle>
+            <CardTitle className="text-sm font-semibold text-terminal flex items-center gap-2 tracking-tight">
+              <ArrowUpRight className="h-4 w-4" />
+              Resumo para Investidores
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div><p className="font-mono text-[10px] text-muted-foreground">Economia Anual Projetada</p><p className="font-mono text-xl font-bold text-terminal">${(annualSavings / 1000).toFixed(0)}K</p></div>
-              <div><p className="font-mono text-[10px] text-muted-foreground">Custo Operacional IA/Mês</p><p className="font-mono text-xl font-bold text-foreground">${totalOperatingCost.toFixed(2)}</p></div>
-              <div><p className="font-mono text-[10px] text-muted-foreground">ROI Médio do Sistema</p><p className="font-mono text-xl font-bold text-cyan">{avgROI.toFixed(1)}x</p></div>
-              <div><p className="font-mono text-[10px] text-muted-foreground">FTEs Equivalentes</p><p className="font-mono text-xl font-bold text-violet">{(totalHoursWeek / 40).toFixed(1)}</p></div>
+              <div><p className="text-[10px] text-muted-foreground font-medium">Economia Anual</p><p className="text-xl font-bold text-terminal tracking-tight">${(annualSavings / 1000).toFixed(0)}K</p></div>
+              <div><p className="text-[10px] text-muted-foreground font-medium">Custo IA/Mês</p><p className="text-xl font-bold text-foreground tracking-tight">${totalOperatingCost.toFixed(2)}</p></div>
+              <div><p className="text-[10px] text-muted-foreground font-medium">ROI do Sistema</p><p className="text-xl font-bold text-cyan tracking-tight">{avgROI.toFixed(1)}x</p></div>
+              <div><p className="text-[10px] text-muted-foreground font-medium">FTEs Equivalentes</p><p className="text-xl font-bold text-violet tracking-tight">{(totalHoursWeek / 40).toFixed(1)}</p></div>
             </div>
           </CardContent>
         </Card>
