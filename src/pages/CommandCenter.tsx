@@ -15,11 +15,11 @@ const CommandCenter = () => (
 
     <StatusBar />
 
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {mockDashboardMetrics.map((m) => (
-        <MetricCard key={m.label} metric={m} />
+        <FadeIn key={m.label}><MetricCard metric={m} /></FadeIn>
       ))}
-    </div>
+    </StaggerContainer>
 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
