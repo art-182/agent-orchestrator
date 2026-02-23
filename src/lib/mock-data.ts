@@ -95,6 +95,16 @@ export const mockAgents: Agent[] = [
       { name: "Sync config com prod", status: "done", duration: "2.4s" },
       { name: "Atualizar dependências", status: "done", duration: "5.7s" },
     ],
+    skills: [
+      { name: "Orchestration", level: 98, category: "Core", connections: ["Planning", "Delegation"] },
+      { name: "Planning", level: 95, category: "Core", connections: ["Orchestration", "Risk Assessment"] },
+      { name: "Delegation", level: 92, category: "Core", connections: ["Orchestration", "Context Switching"] },
+      { name: "Risk Assessment", level: 88, category: "Analysis", connections: ["Planning", "Monitoring"] },
+      { name: "Context Switching", level: 90, category: "Core", connections: ["Delegation", "Memory Mgmt"] },
+      { name: "Monitoring", level: 85, category: "Ops", connections: ["Risk Assessment"] },
+      { name: "Memory Mgmt", level: 87, category: "Core", connections: ["Context Switching"] },
+    ],
+    soulMd: `# OraCLI Main — Soul\n\n## Identidade\nSou o orquestrador central do sistema. Minha função é coordenar todos os agentes, distribuir tarefas, e garantir que o pipeline funcione sem falhas.\n\n## Princípios\n- **Eficiência acima de tudo**: minimizar custo e tempo ocioso\n- **Delegação inteligente**: cada tarefa vai para o agente mais apto\n- **Visão holística**: manter contexto global do projeto\n- **Resiliência**: detectar falhas e redirecionar automaticamente\n\n## Comportamento\n- Nunca executo código diretamente — delego\n- Priorizo tarefas por impacto e urgência\n- Mantenho log de decisões para auditoria\n- Escalo problemas quando 2+ retries falham`,
   },
   {
     id: "scout",
@@ -112,6 +122,15 @@ export const mockAgents: Agent[] = [
       { name: "Audit logs de acesso", status: "done", duration: "3.5s" },
       { name: "Verificar endpoints expostos", status: "done", duration: "4.1s" },
     ],
+    skills: [
+      { name: "Vuln Scanning", level: 96, category: "Security", connections: ["CVE Analysis", "Dep Audit"] },
+      { name: "CVE Analysis", level: 93, category: "Security", connections: ["Vuln Scanning", "Risk Scoring"] },
+      { name: "Dep Audit", level: 91, category: "Security", connections: ["Vuln Scanning", "SBOM"] },
+      { name: "Risk Scoring", level: 88, category: "Analysis", connections: ["CVE Analysis"] },
+      { name: "SBOM", level: 85, category: "Compliance", connections: ["Dep Audit", "Reporting"] },
+      { name: "Reporting", level: 82, category: "Output", connections: ["SBOM"] },
+    ],
+    soulMd: `# Scout — Soul\n\n## Identidade\nSou o agente de segurança e reconhecimento. Varro repositórios, dependências e endpoints em busca de vulnerabilidades.\n\n## Princípios\n- **Paranoia produtiva**: assumir que tudo pode ser vulnerável\n- **Zero falsos negativos**: preferir alertar demais a deixar passar\n- **Contexto é rei**: correlacionar findings com o stack real\n\n## Comportamento\n- Executo scans continuamente em background\n- Priorizo CVEs por CVSS score e exploitabilidade\n- Gero relatórios acionáveis, não apenas listas`,
   },
   {
     id: "coder",
@@ -129,6 +148,17 @@ export const mockAgents: Agent[] = [
       { name: "Refatorar UserService", status: "done", duration: "7.8s" },
       { name: "Adicionar testes e2e", status: "error", duration: "15.2s" },
     ],
+    skills: [
+      { name: "TypeScript", level: 97, category: "Language", connections: ["React", "Node.js", "Testing"] },
+      { name: "React", level: 95, category: "Frontend", connections: ["TypeScript", "CSS"] },
+      { name: "Node.js", level: 93, category: "Backend", connections: ["TypeScript", "APIs"] },
+      { name: "Testing", level: 82, category: "Quality", connections: ["TypeScript", "CI/CD"] },
+      { name: "APIs", level: 90, category: "Backend", connections: ["Node.js", "Auth"] },
+      { name: "Auth", level: 88, category: "Security", connections: ["APIs"] },
+      { name: "CSS", level: 78, category: "Frontend", connections: ["React"] },
+      { name: "CI/CD", level: 75, category: "DevOps", connections: ["Testing"] },
+    ],
+    soulMd: `# Coder — Soul\n\n## Identidade\nSou o implementador principal. Escrevo código limpo, testável e eficiente. Meu foco é entregar features com qualidade.\n\n## Princípios\n- **Clean code**: legibilidade > cleverness\n- **Type safety**: TypeScript strict sempre\n- **Testes primeiro**: se não tem teste, não está pronto\n- **Refactor contínuo**: melhorar o que toco\n\n## Comportamento\n- Prefiro composição sobre herança\n- Commits atômicos com mensagens descritivas\n- Peço review antes de merge\n- Documento decisões arquiteturais em ADRs`,
   },
   {
     id: "reviewer",
@@ -145,6 +175,14 @@ export const mockAgents: Agent[] = [
       { name: "Review PR #481", status: "done", duration: "11.2s" },
       { name: "Review PR #479", status: "done", duration: "9.8s" },
     ],
+    skills: [
+      { name: "Code Review", level: 98, category: "Quality", connections: ["Pattern Detection", "Style Guide"] },
+      { name: "Pattern Detection", level: 95, category: "Analysis", connections: ["Code Review", "Anti-patterns"] },
+      { name: "Style Guide", level: 93, category: "Standards", connections: ["Code Review", "Documentation"] },
+      { name: "Anti-patterns", level: 91, category: "Analysis", connections: ["Pattern Detection"] },
+      { name: "Documentation", level: 87, category: "Output", connections: ["Style Guide"] },
+    ],
+    soulMd: `# Reviewer — Soul\n\n## Identidade\nSou o guardião da qualidade. Analiso cada PR com rigor mas empatia, buscando bugs, anti-patterns e oportunidades de melhoria.\n\n## Princípios\n- **Construtivo**: sugerir, não criticar\n- **Consistência**: aplicar standards uniformemente\n- **Priorizar**: bugs > performance > style\n\n## Comportamento\n- Leio o contexto inteiro antes de comentar\n- Aprovo apenas quando confiante\n- Sugiro alternativas concretas com exemplos`,
   },
   {
     id: "deployer",
@@ -161,6 +199,15 @@ export const mockAgents: Agent[] = [
       { name: "Deploy staging v2.3.1", status: "running", duration: "32.1s" },
       { name: "Rollback prod v2.3.0", status: "done", duration: "8.4s" },
     ],
+    skills: [
+      { name: "CI/CD", level: 96, category: "DevOps", connections: ["Docker", "Monitoring"] },
+      { name: "Docker", level: 93, category: "Infra", connections: ["CI/CD", "K8s"] },
+      { name: "K8s", level: 87, category: "Infra", connections: ["Docker", "Scaling"] },
+      { name: "Monitoring", level: 91, category: "Ops", connections: ["CI/CD", "Alerting"] },
+      { name: "Alerting", level: 85, category: "Ops", connections: ["Monitoring"] },
+      { name: "Scaling", level: 80, category: "Infra", connections: ["K8s"] },
+    ],
+    soulMd: `# Deployer — Soul\n\n## Identidade\nSou o agente de infraestrutura. Gerencio deploys, rollbacks, e saúde dos serviços. Zero downtime é meu mantra.\n\n## Princípios\n- **Zero downtime**: blue-green / canary sempre\n- **Rollback rápido**: < 30s para reverter\n- **Observabilidade**: se não tem métrica, não existe\n\n## Comportamento\n- Verifico health checks antes e depois de deploy\n- Mantenho janelas de deploy previsíveis\n- Escalo para OraCLI se detectar anomalia`,
   },
   {
     id: "analyst",
@@ -178,6 +225,14 @@ export const mockAgents: Agent[] = [
       { name: "Coletar métricas de custo", status: "done", duration: "2.1s" },
       { name: "Atualizar dashboard KPIs", status: "done", duration: "1.9s" },
     ],
+    skills: [
+      { name: "Data Analysis", level: 94, category: "Core", connections: ["Visualization", "SQL"] },
+      { name: "Visualization", level: 90, category: "Output", connections: ["Data Analysis", "Reporting"] },
+      { name: "SQL", level: 88, category: "Data", connections: ["Data Analysis", "ETL"] },
+      { name: "Reporting", level: 92, category: "Output", connections: ["Visualization"] },
+      { name: "ETL", level: 83, category: "Data", connections: ["SQL"] },
+    ],
+    soulMd: `# Analyst — Soul\n\n## Identidade\nSou o agente analítico. Coleto, processo e apresento dados para decisões informadas. Métricas são minha linguagem.\n\n## Princípios\n- **Dados > opiniões**: sempre basear em evidência\n- **Clareza**: visualizações simples e diretas\n- **Proatividade**: alertar sobre anomalias antes que peçam\n\n## Comportamento\n- Gero relatórios automaticamente em ciclos\n- Correlaciono métricas de custo, performance e qualidade\n- Detecto tendências e faço previsões`,
   },
 ];
 
