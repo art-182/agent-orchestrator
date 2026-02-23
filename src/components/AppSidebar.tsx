@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Bot, GitBranch, Rocket, ListChecks,
-  PackageCheck, GanttChart, Brain, DollarSign, Activity, Terminal
+  PackageCheck, GanttChart, Brain, DollarSign, Activity, Terminal, TrendingUp
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import RealtimeIndicator from "@/components/RealtimeIndicator";
@@ -20,6 +20,7 @@ const items = [
   { title: "Timeline", url: "/timeline", icon: GanttChart },
   { title: "Memória", url: "/memory", icon: Brain },
   { title: "Finanças", url: "/finances", icon: DollarSign },
+  { title: "ROI", url: "/roi", icon: TrendingUp },
   { title: "Traces", url: "/traces", icon: Activity },
 ];
 
