@@ -484,18 +484,18 @@ const TimelinePage = () => {
 
                   <TabsContent value="artifacts" className="mt-4">
                     <div className="space-y-2">
-                      <div className="rounded-lg border border-border bg-muted/30 p-3 flex items-center gap-3">
+                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3 flex items-center gap-3">
                         <FileJson className="h-4 w-4 text-cyan" />
                         <div>
-                          <p className="font-mono text-xs text-foreground">decision_log.json</p>
-                          <p className="font-mono text-[9px] text-muted-foreground">Árvore de decisão</p>
+                          <p className="text-[12px] text-foreground font-medium">decision_log.json</p>
+                          <p className="text-[10px] text-muted-foreground">Árvore de decisão</p>
                         </div>
                       </div>
-                      <div className="rounded-lg border border-border bg-muted/30 p-3 flex items-center gap-3">
+                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3 flex items-center gap-3">
                         <FileJson className="h-4 w-4 text-terminal" />
                         <div>
-                          <p className="font-mono text-xs text-foreground">output_response.md</p>
-                          <p className="font-mono text-[9px] text-muted-foreground">Resposta do agente</p>
+                          <p className="text-[12px] text-foreground font-medium">output_response.md</p>
+                          <p className="text-[10px] text-muted-foreground">Resposta do agente</p>
                         </div>
                       </div>
                     </div>

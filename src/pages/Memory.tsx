@@ -397,16 +397,16 @@ const Memory = () => {
                 const from = (i as any).from as any;
                 const to = (i as any).to as any;
                 return (
-                  <Card key={i.id} className="border-border bg-card hover:border-muted-foreground/30 transition-colors">
+                  <Card key={i.id} className="border-border/50 bg-card surface-elevated hover:border-border transition-all duration-200">
                     <CardContent className="p-3 space-y-1">
-                      <div className="flex items-center gap-2 font-mono text-[10px]">
+                      <div className="flex items-center gap-2 text-[11px]">
                         <span className="text-foreground">{from?.emoji} {from?.name}</span>
                         <span className="text-muted-foreground">→</span>
                         <span className="text-foreground">{to?.emoji} {to?.name}</span>
-                        <Badge variant="outline" className="font-mono text-[8px] px-1 py-0 border ml-auto">{i.type}</Badge>
+                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border/50 ml-auto rounded-full">{i.type}</Badge>
                       </div>
-                      <p className="font-mono text-[11px] text-muted-foreground">{i.message}</p>
-                      <div className="flex items-center gap-3 font-mono text-[9px] text-muted-foreground">
+                      <p className="text-[12px] text-muted-foreground">{i.message}</p>
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground tabular-nums">
                         <span>{i.tokens} tokens</span>
                         <span>{i.latency}</span>
                       </div>
