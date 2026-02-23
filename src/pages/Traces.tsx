@@ -22,7 +22,7 @@ const statusIcon: Record<TraceStatus, React.ReactNode> = {
 };
 
 const statusColor: Record<TraceStatus, string> = {
-  success: "border-terminal/30", error: "border-rose/30", warning: "border-amber/30", timeout: "border-rose/30",
+  success: "border-terminal/20", error: "border-rose/20", warning: "border-amber/20", timeout: "border-rose/20",
 };
 
 const spanBarColor: Record<TraceStatus, string> = {
@@ -53,8 +53,8 @@ const Traces = () => {
     return (
       <PageTransition className="space-y-6">
         <div className="flex items-center gap-3">
-          <Activity className="h-7 w-7 text-terminal" />
-          <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Traces & Erros</h1>
+          <div className="bg-rose/10 text-rose p-2 rounded-xl"><Activity className="h-5 w-5" /></div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Traces & Erros</h1>
         </div>
         <div className="space-y-2">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-16" />)}</div>
       </PageTransition>
@@ -72,13 +72,15 @@ const Traces = () => {
     <PageTransition className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <Activity className="h-7 w-7 text-terminal" />
+          <div className="bg-rose/10 text-rose p-2 rounded-xl">
+            <Activity className="h-5 w-5" />
+          </div>
           <div>
-            <h1 className="font-mono text-2xl font-semibold text-foreground tracking-tight">Traces & Erros</h1>
-            <p className="text-xs text-muted-foreground">{all.length} traces · {successRate}% sucesso</p>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Traces & Erros</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">{all.length} traces · {successRate}% sucesso</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" className="font-mono text-xs gap-1.5 h-8" onClick={() => queryClient.invalidateQueries({ queryKey: ["traces"] })}>
+        <Button variant="outline" size="sm" className="text-[11px] gap-1.5 rounded-xl border-border/50 hover:border-border" onClick={() => queryClient.invalidateQueries({ queryKey: ["traces"] })}>
           <RefreshCw className="h-3.5 w-3.5" /> Atualizar
         </Button>
       </div>
@@ -92,37 +94,34 @@ const Traces = () => {
           { label: "Spans Médio", value: avgSpans.toString(), color: "text-cyan" },
         ].map((s) => (
           <FadeIn key={s.label}>
-            <Card className="border-border bg-card">
-              <CardContent className="p-3">
-                <p className="font-mono text-[10px] text-muted-foreground">{s.label}</p>
-                <p className={`font-mono text-xl font-bold ${s.color}`}>{s.value}</p>
+            <Card className="border-border/50 bg-card surface-elevated">
+              <CardContent className="p-4">
+                <p className="text-[11px] text-muted-foreground font-medium">{s.label}</p>
+                <p className={`text-xl font-bold ${s.color} tracking-tight`}>{s.value}</p>
               </CardContent>
             </Card>
           </FadeIn>
         ))}
       </StaggerContainer>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar traces..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 font-mono text-xs bg-card border-border" />
+          <Input placeholder="Buscar traces..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 text-[12px] bg-card border-border/50 rounded-xl" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[140px] font-mono text-xs bg-card border-border">
+          <SelectTrigger className="w-[140px] text-[12px] bg-card border-border/50 rounded-xl">
             <Filter className="h-3.5 w-3.5 mr-1.5" />
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" className="font-mono text-xs">Todos</SelectItem>
+            <SelectItem value="all" className="text-[12px]">Todos</SelectItem>
             {(Object.keys(statusLabel) as TraceStatus[]).map((k) => (
-              <SelectItem key={k} value={k} className="font-mono text-xs">{statusLabel[k]}</SelectItem>
+              <SelectItem key={k} value={k} className="text-[12px]">{statusLabel[k]}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
-
-      <p className="font-mono text-[10px] text-muted-foreground">{list.length} resultado(s)</p>
 
       <TooltipProvider>
         <ScrollArea className="h-[calc(100vh-420px)]">
@@ -137,63 +136,62 @@ const Traces = () => {
               return (
                 <Card
                   key={trace.id}
-                  className={`border-border bg-card cursor-pointer transition-all hover:border-muted-foreground/30 ${statusColor[(trace.status as TraceStatus) ?? "success"]} ${isExpanded ? "ring-1 ring-terminal/20" : ""}`}
+                  className={`border-border/50 bg-card surface-elevated cursor-pointer transition-all duration-200 hover:border-border ${statusColor[(trace.status as TraceStatus) ?? "success"]} ${isExpanded ? "ring-1 ring-terminal/20" : ""}`}
                   onClick={() => setExpanded(isExpanded ? null : trace.id)}
                 >
-                  <CardContent className="p-3 space-y-2">
+                  <CardContent className="p-4 space-y-2">
                     <div className="flex items-center gap-2">
                       {statusIcon[(trace.status as TraceStatus) ?? "success"]}
-                      <span className="font-mono text-xs font-semibold text-foreground flex-1">{trace.name}</span>
-                      <span className="font-mono text-[10px] text-muted-foreground">{agent?.emoji} {agent?.name}</span>
-                      <Badge variant="outline" className="font-mono text-[9px] px-1.5 py-0 border-border">{trace.duration}</Badge>
+                      <span className="text-[13px] font-semibold text-foreground flex-1 tracking-tight">{trace.name}</span>
+                      <span className="text-[11px] text-muted-foreground">{agent?.emoji} {agent?.name}</span>
+                      <Badge variant="outline" className="text-[10px] px-2 py-0.5 border-border/50 rounded-full font-medium">{trace.duration}</Badge>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="flex items-center gap-1">
                             <Layers className="h-3 w-3 text-muted-foreground" />
-                            <span className="font-mono text-[9px] text-muted-foreground">{spans.length}</span>
+                            <span className="text-[10px] text-muted-foreground font-medium">{spans.length}</span>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="font-mono text-xs">{spans.length} spans · {totalTokens > 0 ? `${(totalTokens / 1000).toFixed(1)}K tokens` : "sem tokens"}</TooltipContent>
+                        <TooltipContent className="text-xs">{spans.length} spans · {totalTokens > 0 ? `${(totalTokens / 1000).toFixed(1)}K tokens` : "sem tokens"}</TooltipContent>
                       </Tooltip>
-                      <ChevronRight className={`h-3 w-3 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                      <ChevronRight className={`h-3 w-3 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} />
                     </div>
 
                     {trace.error && (
-                      <div className="rounded bg-rose/10 border border-rose/20 px-2 py-1.5">
-                        <p className="font-mono text-[10px] text-rose">{trace.error}</p>
+                      <div className="rounded-xl bg-rose/8 border border-rose/15 px-3 py-2">
+                        <p className="text-[11px] text-rose">{trace.error}</p>
                       </div>
                     )}
 
                     {isExpanded && spans.length > 0 && (
-                      <div className="space-y-1 pt-2 border-t border-border">
-                        {/* Waterfall header */}
+                      <div className="space-y-1 pt-3 border-t border-border/30">
                         <div className="flex items-center gap-2 px-1 pb-1">
-                          <span className="font-mono text-[9px] text-muted-foreground w-28">Span</span>
-                          <span className="font-mono text-[9px] text-muted-foreground flex-1">Waterfall</span>
-                          <span className="font-mono text-[9px] text-muted-foreground w-14 text-right">Duração</span>
-                          <span className="font-mono text-[9px] text-muted-foreground w-14 text-right">Tokens</span>
+                          <span className="text-[10px] text-muted-foreground w-28 font-medium">Span</span>
+                          <span className="text-[10px] text-muted-foreground flex-1 font-medium">Waterfall</span>
+                          <span className="text-[10px] text-muted-foreground w-14 text-right font-medium">Duração</span>
+                          <span className="text-[10px] text-muted-foreground w-14 text-right font-medium">Tokens</span>
                         </div>
                         {spans.map((span: any, i: number) => {
                           const ms = parseFloat(span.duration) * 1000 || 0;
                           const pct = (ms / maxMs) * 100;
-                          const offset = i * 8; // waterfall offset
+                          const offset = i * 8;
                           return (
                             <Tooltip key={i}>
                               <TooltipTrigger asChild>
-                                <div className="flex items-center gap-2 hover:bg-muted/20 rounded px-1 py-0.5 transition-colors">
+                                <div className="flex items-center gap-2 hover:bg-muted/20 rounded-lg px-1 py-0.5 transition-colors">
                                   {statusIcon[(span.status as TraceStatus) ?? "success"]}
-                                  <span className="font-mono text-[10px] text-foreground w-28 truncate">{span.name}</span>
-                                  <div className="flex-1 h-4 bg-muted/30 rounded-sm overflow-hidden relative">
+                                  <span className="text-[11px] text-foreground w-28 truncate">{span.name}</span>
+                                  <div className="flex-1 h-4 bg-muted/20 rounded-md overflow-hidden relative">
                                     <div
-                                      className={`absolute top-0.5 h-3 rounded-sm ${spanBarColor[(span.status as TraceStatus) ?? "success"]} transition-all`}
+                                      className={`absolute top-0.5 h-3 rounded-md ${spanBarColor[(span.status as TraceStatus) ?? "success"]} transition-all`}
                                       style={{ width: `${Math.max(pct, 4)}%`, left: `${Math.min(offset, 40)}%` }}
                                     />
                                   </div>
-                                  <span className="font-mono text-[9px] text-muted-foreground w-14 text-right">{span.duration}</span>
-                                  <span className="font-mono text-[9px] text-cyan w-14 text-right">{span.tokens ? `${(span.tokens / 1000).toFixed(1)}K` : "—"}</span>
+                                  <span className="text-[10px] text-muted-foreground w-14 text-right tabular-nums">{span.duration}</span>
+                                  <span className="text-[10px] text-cyan w-14 text-right tabular-nums">{span.tokens ? `${(span.tokens / 1000).toFixed(1)}K` : "—"}</span>
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent className="font-mono text-xs space-y-1">
+                              <TooltipContent className="text-xs space-y-1">
                                 <p className="font-semibold">{span.name}</p>
                                 <p className="text-muted-foreground">{span.status} · {span.duration} · {span.model ?? "—"}</p>
                               </TooltipContent>
@@ -204,7 +202,7 @@ const Traces = () => {
                     )}
 
                     {isExpanded && (
-                      <div className="flex items-center gap-4 pt-2 border-t border-border font-mono text-[10px] text-muted-foreground">
+                      <div className="flex items-center gap-4 pt-2 border-t border-border/30 text-[11px] text-muted-foreground">
                         <span>Total: {totalTokens > 0 ? `${(totalTokens / 1000).toFixed(1)}K tokens` : "—"}</span>
                         <span>{spans.length} spans</span>
                         <span>{new Date(trace.created_at).toLocaleString("pt-BR")}</span>
