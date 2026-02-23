@@ -273,19 +273,19 @@ const Memory = () => {
         <TabsContent value="connections" className="mt-4">
           <ScrollArea className="h-[calc(100vh-380px)]">
             <div className="space-y-3">
-              <p className="font-mono text-xs text-muted-foreground">{agentConnections.length} conexões via tags compartilhadas</p>
+              <p className="text-[11px] text-muted-foreground font-medium">{agentConnections.length} conexões via tags compartilhadas</p>
               {agentConnections.map((conn, idx) => (
-                <Card key={idx} className="border-border bg-card">
+                <Card key={idx} className="border-border/50 bg-card surface-elevated">
                   <CardContent className="p-3 space-y-2">
-                    <div className="flex items-center gap-2 font-mono text-sm">
+                    <div className="flex items-center gap-2 text-[13px]">
                       <span className="font-semibold text-terminal">{conn.from}</span>
                       <span className="text-muted-foreground">↔</span>
                       <span className="font-semibold text-cyan">{conn.to}</span>
-                      <Badge variant="outline" className="ml-auto font-mono text-[10px] border-violet/30 text-violet">{conn.shared.length} tags</Badge>
+                      <Badge variant="outline" className="ml-auto text-[10px] border-violet/20 text-violet rounded-full font-medium">{conn.shared.length} tags</Badge>
                     </div>
                     <div className="flex gap-1 flex-wrap">
                       {conn.shared.map((tag) => (
-                        <span key={tag} className="font-mono text-[8px] px-1.5 py-0.5 rounded bg-violet/10 text-violet">#{tag}</span>
+                        <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet/10 text-violet">#{tag}</span>
                       ))}
                     </div>
                   </CardContent>
