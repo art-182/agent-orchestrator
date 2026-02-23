@@ -78,6 +78,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', system-ui, sans-serif;
     letter-spacing: -0.017em;
     line-height: 1.5;
+    font-size: 0.9rem;
   }
 
   .font-mono {
@@ -89,6 +90,11 @@
   h1, h2, h3 {
     letter-spacing: -0.035em;
     font-feature-settings: 'ss01', 'ss02';
+  }
+
+  /* Global minimum font size override for tiny text */
+  p, span, td, th, label, a, li, div {
+    min-font-size: 13px;
   }
 }
 
