@@ -1,3 +1,4 @@
+import { parseJsonb } from "@/lib/parse-jsonb";
 import { Card, CardContent } from "@/components/ui/card";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { useAgents, useDailyCosts } from "@/hooks/use-supabase-data";
@@ -7,13 +8,13 @@ const QuickStats = () => {
   const { data: costs } = useDailyCosts();
 
   const list = agents ?? [];
-  const costData = (costs ?? []).slice(-7).map((c) => ({ v: c.total ?? 0 }));
+  const costData = (costs ?? []).slice(-7).map((c) => ({ v: c.google ?? 0 }));
 
   const totalTasks = list.reduce((s, a) => s + (a.tasks_completed ?? 0), 0);
   const avgError = list.length > 0 ? (list.reduce((s, a) => s + (a.error_rate ?? 0), 0) / list.length).toFixed(1) : "0";
 
   const totalROISavings = list.reduce((s, a) => {
-    const roi = a.roi as any;
+    const roi = parseJsonb<any>(a.roi, {});
     return s + (roi?.monthlySavings ?? 0);
   }, 0);
 
