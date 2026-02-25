@@ -77,6 +77,8 @@ export interface ROISummary {
   avgQualityScore: number;
   /** Average automation rate */
   avgAutomationRate: number;
+  /** Weighted average human hourly rate */
+  avgHumanHourRate: number;
   /** Total traces */
   totalCalls: number;
   /** Total tasks done */
@@ -234,6 +236,7 @@ export function useRealTimeROI(): ROISummary {
       roiMultiplier,
       avgQualityScore: avgQuality,
       avgAutomationRate: avgAutomation,
+      avgHumanHourRate: weightedRate,
       totalCalls: traceList.length,
       totalTasksDone: agentMetrics.reduce((s, a) => s + a.tasksDone, 0),
       agents: agentMetrics,
