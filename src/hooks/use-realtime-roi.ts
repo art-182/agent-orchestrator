@@ -212,11 +212,15 @@ export function useRealTimeROI(): ROISummary {
     const monthlyCost = dailyCostAvg * 30;
     const roiMultiplier = monthlyCost > 0 ? monthlyValue / monthlyCost : 0;
 
-    const avgQuality = agentMetrics.length > 0
-      ? Math.round(agentMetrics.reduce((s, a) => s + a.qualityScore, 0) / agentMetrics.length)
+    // Only include agents WITH traces in quality/automation averages
+    // Agents with 0 traces shouldn't drag the average down
+    const agentsWithTraces = agentMetrics.filter(a => a.calls > 0);
+    const avgQuality = agentsWithTraces.length > 0
+      ? Math.round(agentsWithTraces.reduce((s, a) => s + a.qualityScore, 0) / agentsWithTraces.length)
       : 0;
-    const avgAutomation = agentMetrics.length > 0
-      ? Math.round(agentMetrics.reduce((s, a) => s + a.automationRate, 0) / agentMetrics.length)
+    const agentsWithTasks = agentMetrics.filter(a => a.tasksDone > 0);
+    const avgAutomation = agentsWithTasks.length > 0
+      ? Math.round(agentsWithTasks.reduce((s, a) => s + a.automationRate, 0) / agentsWithTasks.length)
       : 0;
 
     const dataMaturity: ROISummary["dataMaturity"] =
