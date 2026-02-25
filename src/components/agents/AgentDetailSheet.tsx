@@ -1,3 +1,4 @@
+import { parseJsonb } from "@/lib/parse-jsonb";
 import { useMemo } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Tables, Json } from "@/integrations/supabase/types";
+import { useDailyCosts, useAgents } from "@/hooks/use-supabase-data";
 
 type DbAgent = Tables<"agents">;
 type AgentStatus = "online" | "busy" | "idle" | "error";
@@ -39,7 +41,7 @@ const SkillsGraph = ({ skills }: { skills: AgentSkill[] }) => {
   return (
     <div className="relative w-full">
       <svg width="320" height="280" className="mx-auto" viewBox="0 0 320 280">
-        {nodes.map((node) => node.skill.connections.map((cn) => { const t = nameToPos.get(cn); if (!t || cn < node.skill.name) return null; return <line key={`${node.skill.name}-${cn}`} x1={node.x} y1={node.y} x2={t.x} y2={t.y} stroke="hsl(230, 15%, 20%)" strokeWidth={1} opacity={0.6} />; }))}
+        {nodes.map((node) => (node.skill.connections ?? []).map((cn) => { const t = nameToPos.get(cn); if (!t || cn < node.skill.name) return null; return <line key={`${node.skill.name}-${cn}`} x1={node.x} y1={node.y} x2={t.x} y2={t.y} stroke="hsl(230, 15%, 20%)" strokeWidth={1} opacity={0.6} />; }))}
         {nodes.map((node) => { const lr = 6 + (node.skill.level / 100) * 14; const color = categoryColor[node.skill.category] ?? "text-muted-foreground"; const fill = hslMap[color] ?? "hsl(220, 10%, 50%)"; return (<g key={node.skill.name}><circle cx={node.x} cy={node.y} r={lr} fill={fill} opacity={0.2} stroke={fill} strokeWidth={1.5} /><circle cx={node.x} cy={node.y} r={3} fill={fill} /><text x={node.x} y={node.y + lr + 12} textAnchor="middle" fill="hsl(220, 20%, 85%)" fontSize={9} fontFamily="system-ui, -apple-system, sans-serif">{node.skill.name}</text><text x={node.x} y={node.y + lr + 22} textAnchor="middle" fill="hsl(220, 10%, 50%)" fontSize={8} fontFamily="system-ui, -apple-system, sans-serif">{node.skill.level}%</text></g>); })}
       </svg>
     </div>
@@ -106,12 +108,12 @@ const AgentROIView = ({ roi, agent }: { roi: AgentROI; agent: DbAgent }) => (
       <div className="space-y-2">
         <p className="text-[12px] font-semibold text-foreground">Métricas para Investidores</p>
         {[
-          { label: "Custo Operacional (agente)", value: `$${(agent.total_cost ?? 0).toFixed(2)}/mês` },
+          { label: "Custo Operacional (agente)", value: `$${agentCostShare.toFixed(2)}/mês` },
           { label: "Custo Equivalente (humano)", value: `$${(roi.hoursPerWeekSaved * roi.costPerHourHuman * 4.33).toFixed(0)}/mês` },
           { label: "Economia Anual Projetada", value: `$${(roi.monthlySavings * 12).toLocaleString()}` },
           { label: "Incidentes Prevenidos", value: `${roi.incidentsPrevented} este mês` },
           { label: "Payback Period", value: roi.roiMultiplier > 20 ? "< 2 dias" : roi.roiMultiplier > 10 ? "< 1 semana" : "< 2 semanas" },
-          { label: "Custo por Tarefa", value: `$${((agent.total_cost ?? 0) / Math.max(roi.tasksAutomated, 1)).toFixed(3)}` },
+          { label: "Custo por Tarefa", value: `$${(agentCostShare / Math.max(roi.tasksAutomated, 1)).toFixed(3)}` },
         ].map((m) => (
           <div key={m.label} className="flex items-center justify-between text-[12px] py-1 border-b border-border/20 last:border-0">
             <span className="text-muted-foreground">{m.label}</span>
@@ -132,8 +134,30 @@ interface AgentDetailSheetProps {
 const AgentDetailSheet = ({ agent, open, onOpenChange }: AgentDetailSheetProps) => {
   if (!agent) return null;
 
-  const skills = (agent.skills as unknown as AgentSkill[]) ?? [];
-  const roi = agent.roi as unknown as AgentROI | null;
+  const rawSkills = parseJsonb<any[]>(agent.skills, []);
+  // Normalize skills: handle both string arrays and object arrays
+  const skills: AgentSkill[] = (rawSkills ?? []).map((s: any) => {
+    if (typeof s === "string") {
+      return { name: s, level: 80, category: "Core", connections: [] };
+    }
+    return {
+      name: s.name ?? "?",
+      level: s.level ?? 50,
+      category: s.category ?? "Core",
+      connections: Array.isArray(s.connections) ? s.connections : [],
+    };
+  });
+  const roi = parseJsonb<AgentROI | null>(agent.roi, null);
+
+  // Compute cost share from daily_costs (not agent.total_cost which is only set for oracli)
+  const { data: dailyCosts } = useDailyCosts();
+  const { data: allAgents } = useAgents();
+  const agentCostShare = useMemo(() => {
+    const totalCost = (dailyCosts ?? []).reduce((s, c) => s + (c.google ?? 0), 0);
+    const totalTasks = (allAgents ?? []).reduce((s, a) => s + (a.tasks_completed ?? 0), 0);
+    const myTasks = agent.tasks_completed ?? 0;
+    return totalTasks > 0 ? totalCost * (myTasks / totalTasks) : 0;
+  }, [dailyCosts, allAgents, agent]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
