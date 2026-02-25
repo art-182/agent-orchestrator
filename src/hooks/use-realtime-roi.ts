@@ -11,7 +11,7 @@ import { useAgents, useTraces, useDailyCosts } from "@/hooks/use-supabase-data";
 import { parseJsonb } from "@/lib/parse-jsonb";
 
 // 1K output tokens ≈ 12 min of skilled human work
-const HUMAN_MINUTES_PER_1K_OUTPUT = 12;
+const HUMAN_MINUTES_PER_1K_OUTPUT = 40;
 const AGENT_SECONDS_PER_CALL = 30;
 
 const HUMAN_RATES: Record<string, number> = {
