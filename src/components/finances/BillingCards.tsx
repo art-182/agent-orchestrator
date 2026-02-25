@@ -26,8 +26,12 @@ const BillingCards = () => {
   const { data: traces } = useTraces();
   const { data: tools } = useToolCosts();
 
-  const totalCost = (costs ?? []).reduce((s, c) => s + (c.total ?? 0), 0);
-  const todayCost = (costs ?? []).length > 0 ? (costs![costs!.length - 1]?.total ?? 0) : 0;
+  // Operational cost = ONLY google column (Antigravity = subscription, anthropic calls are $0)
+  const totalCost = (costs ?? []).reduce((s, c) => s + (c.google ?? 0), 0);
+  const todayCost = (() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return (costs ?? []).filter(c => c.date === today).reduce((s, c) => s + (c.google ?? 0), 0);
+  })();
   const days = new Set((costs ?? []).map(c => c.date)).size || 1;
   const dailyAvg = totalCost / days;
   const projectedMonthly = dailyAvg * 30;
@@ -65,21 +69,20 @@ const BillingCards = () => {
   const costPer1k = totalTokens > 0 ? (totalCost / totalTokens) * 1000 : 0;
   const ioRatio = totalOut > 0 ? (totalIn / totalOut).toFixed(1) : "—";
 
-  // Provider distribution — computed from daily_costs columns (real-time)
+  // Provider distribution — only operational costs (google)
+  // Antigravity (anthropic column) = subscription, not per-inference
   const provGoogle = (costs ?? []).reduce((s, c) => s + (c.google ?? 0), 0);
-  const provAnthropic = (costs ?? []).reduce((s, c) => s + (c.anthropic ?? 0), 0);
-  const provOpenAI = (costs ?? []).reduce((s, c) => s + (c.openai ?? 0), 0);
   const provList = [
     { name: "Google", value: provGoogle, color: "hsl(45, 93%, 56%)" },
-    { name: "Anthropic", value: provAnthropic, color: "hsl(260, 67%, 70%)" },
-    { name: "OpenAI", value: provOpenAI, color: "hsl(160, 51%, 49%)" },
   ].filter(p => p.value > 0);
   const provTotal = provList.reduce((s, p) => s + p.value, 0);
   const provDist = provList.map(p => ({
-    name: p.name.substring(0, 3),
+    name: p.name,
     pct: provTotal > 0 ? Math.round(p.value / provTotal * 100) : 0,
   })).slice(0, 3);
-  const distStr = provDist.map(p => `${p.name} ${p.pct}%`).join(" · ");
+  const distStr = provDist.length > 0
+    ? provDist.map(p => `${p.name} ${p.pct}%`).join(" · ")
+    : "Google 100%";
 
   // Top model
   const topModel = pricing && pricing.length > 0
@@ -91,7 +94,7 @@ const BillingCards = () => {
 
   // Trend (simplified)
   const trend = days >= 2 && costs && costs.length >= 2
-    ? ((costs[costs.length - 1]?.total ?? 0) - (costs[costs.length - 2]?.total ?? 0))
+    ? ((costs[costs.length - 1]?.google ?? 0) - (costs[costs.length - 2]?.google ?? 0))
     : 0;
   const trendStr = `${trend >= 0 ? "↑" : "↓"} ${Math.abs(trend).toFixed(0)}%`;
 
