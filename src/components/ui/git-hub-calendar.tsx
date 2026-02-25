@@ -62,20 +62,15 @@ const GitHubCalendar = ({
             const dayStr = day.toISOString().slice(0, 10);
             const contribution = contributions.find((c) => c.date === dayStr);
             const color = contribution ? getColor(contribution.count) : colors[0];
-            const isFuture = day > today;
 
             return (
               <div
                 key={index}
-                className={`w-3 h-3 rounded-[4px] transition-all ${
-                  isFuture
-                    ? "opacity-20 cursor-default"
-                    : "cursor-pointer hover:ring-1 hover:ring-white/40"
-                }`}
-                style={{ backgroundColor: isFuture ? colors[0] : color }}
-                title={`${format(day, "PPP")}: ${contribution?.count || 0} tarefas`}
+                className="w-3 h-3 rounded-[4px] cursor-pointer hover:ring-1 hover:ring-white/40 transition-all"
+                style={{ backgroundColor: color }}
+                title={`${format(day, "PPP")}: ${contribution?.count || 0} contributions`}
                 onClick={() => {
-                  if (!isFuture && onDayClick) {
+                  if (onDayClick) {
                     onDayClick({ date: dayStr, count: contribution?.count || 0 });
                   }
                 }}
@@ -91,79 +86,50 @@ const GitHubCalendar = ({
   };
 
   const renderMonthLabels = () => {
-    const months: JSX.Element[] = [];
-    let currentWeekStart = startOfWeek(startDate, { weekStartsOn: 0 });
-    let lastMonth = -1;
+    const months = [];
+    let currentMonth = startDate;
 
-    for (let i = 0; i < weeks; i++) {
-      const month = currentWeekStart.getMonth();
-      if (month !== lastMonth) {
-        months.push(
-          <span
-            key={`${month}-${i}`}
-            className="text-[10px] text-muted-foreground absolute"
-            style={{ left: i * 16 }}
-          >
-            {format(currentWeekStart, "MMM")}
-          </span>
-        );
-        lastMonth = month;
-      }
-      currentWeekStart = addDays(currentWeekStart, 7);
+    for (let i = 0; i < 12; i++) {
+      months.push(
+        <span key={i} className="text-xs text-gray-500">
+          {format(currentMonth, "MMM")}
+        </span>
+      );
+      currentMonth = addDays(currentMonth, 30);
     }
     return months;
   };
 
-  const dayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-  const totalContributions = contributions.reduce((sum, c) => sum + c.count, 0);
+  const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-start gap-2 overflow-x-auto">
-        {/* Day labels */}
-        <div className="flex flex-col gap-1 pt-5 shrink-0">
-          {dayLabels.map((label, i) => (
-            <div key={i} className="h-3 flex items-center">
-              {i % 2 === 1 ? (
-                <span className="text-[10px] text-muted-foreground pr-2 leading-none">{label}</span>
-              ) : (
-                <span className="text-[10px] pr-2 leading-none invisible">{label}</span>
-              )}
-            </div>
+    <div className="p-4 border rounded-lg">
+      <div className="flex">
+        <div className="flex flex-col justify-between mt-5.5 mr-2">
+          {dayLabels.map((day, index) => (
+            <span key={index} className="text-xs text-gray-500 h-3">
+              {day}
+            </span>
           ))}
         </div>
-
-        {/* Calendar grid */}
-        <div className="flex-1 min-w-0">
-          {/* Month labels */}
-          <div className="relative h-5 mb-0.5" style={{ width: weeks * 16 }}>
-            {renderMonthLabels()}
-          </div>
-          {/* Weeks */}
+        <div>
+          <div className="flex w-full justify-between gap-4 mb-2">{renderMonthLabels()}</div>
           <div className="flex gap-1">{renderWeeks()}</div>
         </div>
       </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-1">
-        <span className="text-[10px] text-muted-foreground">
-          {totalContributions} tarefas no último ano
-        </span>
-        <div className="flex items-center gap-1">
-          <span className="text-[10px] text-muted-foreground">Menos</span>
-          {colors.map((c, i) => (
-            <div
-              key={i}
-              className="w-3 h-3 rounded-[4px]"
-              style={{ backgroundColor: c }}
-            />
-          ))}
-          <span className="text-[10px] text-muted-foreground">Mais</span>
-        </div>
+      <div className="mt-4 justify-center flex gap-2 text-xs items-center">
+        <span>Less</span>
+        {colors.map((color, index) => (
+          <div
+            key={index}
+            className="w-3 h-3 rounded-[4px]"
+            style={{ backgroundColor: color }}
+          />
+        ))}
+        <span>More</span>
       </div>
     </div>
   );
 };
 
-export default GitHubCalendar;
+export { GitHubCalendar };
