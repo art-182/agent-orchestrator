@@ -5,6 +5,7 @@ import { exportDailyCostsCSV, exportAgentCostsCSV } from "@/lib/export-utils";
 import BillingCards from "@/components/finances/BillingCards";
 import CostChart from "@/components/finances/CostChart";
 import DailyConsumptionChart from "@/components/finances/DailyConsumptionChart";
+import ModelObservability from "@/components/finances/ModelObservability";
 import AgentCostTable from "@/components/finances/AgentCostTable";
 import ProviderPieChart from "@/components/finances/ProviderPieChart";
 import TokenUsageChart from "@/components/finances/TokenUsageChart";
@@ -173,7 +174,7 @@ const Finances = () => {
         <TabsContent value="overview" className="mt-4 space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <CostChart data={dailyCosts} />
-            <DailyConsumptionChart data={dailyTokens} />
+            <ModelObservability />
           </div>
           <ProviderPieChart data={providerBreakdown} />
           <AgentCostTable data={agentCosts} />
