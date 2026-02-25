@@ -1,4 +1,4 @@
-import { PackageCheck, FileCode, FileText, Shield, TestTube, ExternalLink, Search, Filter, BarChart3 } from "lucide-react";
+import { PackageCheck, FileCode, FileText, Shield, TestTube, ExternalLink, Search, Filter, BarChart3, ListTodo } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { useState, useMemo } from "react";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
-import { useDeliverables } from "@/hooks/use-supabase-data";
+import { useDeliverables, useTasks } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type DeliverableType = "code" | "report" | "config" | "test" | "doc";
@@ -31,6 +31,7 @@ const statusConfig: Record<DeliverableStatus, { color: string; label: string }> 
 
 const Deliverables = () => {
   const { data: deliverables, isLoading } = useDeliverables();
+  const { data: allTasks } = useTasks();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -163,6 +164,11 @@ const Deliverables = () => {
           const url = (d as any).url as string | undefined;
           const hasUrl = url && url.length > 0;
 
+          // Find related tasks by mission_id
+          const relatedTasks = d.mission_id && allTasks
+            ? allTasks.filter(t => t.mission_id === d.mission_id && t.agent_id === d.agent_id).slice(0, 3)
+            : [];
+
           return (
             <Card key={d.id} className="border-border/50 bg-card surface-elevated glow-line transition-all duration-300 group">
               <CardContent className="p-5 space-y-3">
@@ -197,6 +203,22 @@ const Deliverables = () => {
                   <div className="pt-2 border-t border-border/30">
                     <Progress value={50} className="h-1.5" />
                     <p className="text-[10px] text-muted-foreground mt-1">Em desenvolvimento</p>
+                  </div>
+                )}
+
+                {/* Related tasks */}
+                {relatedTasks.length > 0 && (
+                  <div className="pt-2 border-t border-border/30 space-y-1">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <ListTodo className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-[10px] text-muted-foreground font-medium">Tarefas relacionadas</span>
+                    </div>
+                    {relatedTasks.map(t => (
+                      <div key={t.id} className="flex items-center gap-1.5 text-[10px]">
+                        <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${t.status === "done" ? "bg-terminal" : t.status === "in_progress" ? "bg-cyan" : "bg-muted-foreground/40"}`} />
+                        <span className="text-foreground/80 truncate">{t.name}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
 
