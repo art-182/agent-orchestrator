@@ -11,7 +11,7 @@ import {
   useTraces, useToolCosts
 } from "@/hooks/use-supabase-data";
 import { parseJsonb } from "@/lib/parse-jsonb";
-import { calculateROI } from "@/lib/roi-calculator";
+import { useRealTimeROI } from "@/hooks/use-realtime-roi";
 
 const fmt = (n: number, d = 2) => n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}K` : n.toFixed(d);
 const fmtDollar = (n: number) => n >= 1000 ? `$${(n / 1000).toFixed(1)}K` : `$${n.toFixed(4)}`;
@@ -57,9 +57,9 @@ const BillingCards = () => {
   const costPerTask = totalTasks > 0 ? totalCost / totalTasks : 0;
   const totalSessions = snapshots?.length ?? 4;
 
-  // ROI metrics — centralized calculation
-  const roiCalc = calculateROI(agentList, costs ?? []);
-  const totalHoursSaved = roiCalc.totalHoursPerWeek;
+  // ROI metrics — centralized real-time calculation
+  const roiCalc = useRealTimeROI();
+  const totalHoursSaved = roiCalc.totalHoursSaved;
 
   // Cache metrics
   const totalCache = (tokens ?? []).reduce((s, t) => s + Number(t.total ?? 0) - Number(t.input ?? 0) - Number(t.output ?? 0), 0);
