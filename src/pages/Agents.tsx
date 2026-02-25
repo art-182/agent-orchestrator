@@ -9,7 +9,7 @@ import AgentPerformanceTable from "@/components/agents/AgentPerformanceTable";
 import AgentOrgChart from "@/components/agents/AgentOrgChart";
 // SkillsNetworkGraph removed
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
-import { useAgents } from "@/hooks/use-supabase-data";
+import { useAgents, useDailyCosts } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -20,6 +20,7 @@ const Agents = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const { data: agents, isLoading } = useAgents();
+  const { data: dailyCosts } = useDailyCosts();
 
   const filtered = useMemo(() => {
     return (agents ?? []).filter((a) => {
@@ -43,7 +44,7 @@ const Agents = () => {
 
   const all = agents ?? [];
   const online = all.filter((a) => a.status === "online").length;
-  const totalCost = all.reduce((s, a) => s + (a.total_cost ?? 0), 0);
+  const totalCost = (dailyCosts ?? []).reduce((s, c) => s + (c.google ?? 0), 0);
   const totalTasks = all.reduce((s, a) => s + (a.tasks_completed ?? 0), 0);
   const avgError = all.length > 0 ? (all.reduce((s, a) => s + (a.error_rate ?? 0), 0) / all.length).toFixed(1) : "0";
 
