@@ -8,25 +8,49 @@ const statusColor: Record<string, string> = {
   down: "bg-rose",
 };
 
+/**
+ * Provider cost mapping:
+ *   Google / Google CLI  → daily_costs.google (real cost, API key)
+ *   Antigravity          → $0 (subscription, no per-inference cost)
+ *   Vercel AI Gateway    → $0 (configured, not used)
+ *   Minimax              → $0 (configured, not used)
+ */
+const providerCostKey: Record<string, "google" | null> = {
+  "Google":              "google",
+  "Google CLI":          "google",
+  "Antigravity":          null,
+  "Vercel AI Gateway":    null,
+  "Minimax":              null,
+};
+
+const providerTag: Record<string, string> = {
+  "Antigravity":        "Assinatura",
+  "Vercel AI Gateway":  "Não utilizado",
+  "Minimax":            "Não utilizado",
+};
+
 const ProviderStatus = () => {
   const { data: providers } = useProviderLimits();
   const { data: costs } = useDailyCosts();
 
-  // Real cost by provider from daily_costs columns
-  const totalGoogle = (costs ?? []).reduce((s, c) => s + (c.google ?? 0), 0);
-  const totalAnthropic = (costs ?? []).reduce((s, c) => s + (c.anthropic ?? 0), 0);
-  const totalOpenAI = (costs ?? []).reduce((s, c) => s + (c.openai ?? 0), 0);
-  const totalCost = totalGoogle + totalAnthropic + totalOpenAI;
+  // Operational cost = only google
+  const operationalCost = Math.round(
+    (costs ?? []).reduce((s, c) => s + (c.google ?? 0), 0) * 100
+  ) / 100;
 
   const providerList = (providers ?? []).map(p => {
     const uptime = p.uptime ?? 99;
     const status = uptime >= 99.5 ? "healthy" : uptime >= 95 ? "degraded" : "down";
+    const key = providerCostKey[p.provider ?? ""];
+    const cost = key ? operationalCost : 0;
+    const tag = providerTag[p.provider ?? ""];
     return {
       name: p.provider ?? "?",
+      tier: p.tier ?? "",
       status,
       latency: p.avg_latency ?? 0,
-      dailySpent: p.daily_spent ?? 0,
-      monthlySpent: p.monthly_spent ?? 0,
+      cost,
+      tag,
     };
   });
 
@@ -40,7 +64,7 @@ const ProviderStatus = () => {
             </div>
             Providers
           </div>
-          <span className="text-[11px] text-muted-foreground font-normal tabular-nums">${totalCost.toFixed(2)} total</span>
+          <span className="text-[11px] text-muted-foreground font-normal tabular-nums">${operationalCost.toFixed(2)} operacional</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-5 pt-2">
@@ -51,11 +75,13 @@ const ProviderStatus = () => {
                 <span className={`h-2 w-2 rounded-full ${statusColor[p.status]} ${p.status !== "down" ? "animate-pulse-dot" : ""}`} />
                 <div>
                   <span className="text-[13px] text-foreground/90 font-medium">{p.name}</span>
-                  <span className="text-[10px] text-muted-foreground ml-2 tabular-nums">${p.monthlySpent.toFixed(2)}</span>
+                  <span className="text-[10px] text-muted-foreground ml-2 tabular-nums">
+                    {p.tag ? p.tag : p.cost > 0 ? `$${p.cost.toFixed(2)}` : "$0"}
+                  </span>
                 </div>
               </div>
               <span className={`text-[12px] tabular-nums font-medium ${p.latency > 1000 ? "text-amber" : "text-muted-foreground"}`}>
-                {p.latency}ms
+                {p.latency > 0 ? `${p.latency}ms` : "—"}
               </span>
             </div>
           ))}
