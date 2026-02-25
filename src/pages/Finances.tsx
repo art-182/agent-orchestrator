@@ -55,9 +55,28 @@ const Finances = () => {
   })();
 
   const providerBreakdown = (() => {
-    const g = dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0);
-    const a = dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0);
-    const o = dailyCosts.reduce((s, c) => s + (c.openai ?? 0), 0);
+    // Use provider_limits for the 4 routing providers
+    const limits = dbProviderLimits ?? [];
+    const provColors: Record<string, string> = {
+      "Antigravity": "hsl(200, 80%, 55%)",
+      "Google": "hsl(45, 93%, 56%)",
+      "Vercel AI Gateway": "hsl(260, 67%, 70%)",
+      "Google CLI": "hsl(160, 51%, 49%)",
+    };
+    if (limits.length > 0) {
+      return limits
+        .map(p => ({
+          name: p.provider ?? "?",
+          value: Math.round((p.monthly_spent ?? 0) * 100) / 100,
+          color: provColors[p.provider ?? ""] ?? "hsl(0, 0%, 50%)",
+        }))
+        .filter(p => p.value > 0)
+        .sort((a, b) => b.value - a.value);
+    }
+    // Fallback to daily_costs columns
+    const g = Math.round(dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0) * 100) / 100;
+    const a = Math.round(dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0) * 100) / 100;
+    const o = Math.round(dailyCosts.reduce((s, c) => s + (c.openai ?? 0), 0) * 100) / 100;
     return [
       { name: "Google", value: g, color: "hsl(45, 93%, 56%)" },
       { name: "Anthropic", value: a, color: "hsl(260, 67%, 70%)" },
