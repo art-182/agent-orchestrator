@@ -40,7 +40,8 @@ const Finances = () => {
   }));
 
   const agentCosts: AgentCost[] = (() => {
-    const totalFromDailyCosts = dailyCosts.reduce((s, c) => s + c.total, 0);
+    // Operational cost = only google (Antigravity/anthropic = subscription)
+    const totalFromDailyCosts = dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0);
     const agentList = agents ?? [];
     const totalTasks = agentList.reduce((s, a) => s + (a.tasks_completed ?? 0), 0);
     return agentList.filter(a => a.id !== "ceo").map((a) => {
