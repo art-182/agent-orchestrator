@@ -55,13 +55,13 @@ const Finances = () => {
   })();
 
   const providerBreakdown = (() => {
-    // Use provider_limits for the 4 routing providers
+    // Use provider_limits for cost centers (proxies with $0 are filtered out)
     const limits = dbProviderLimits ?? [];
     const provColors: Record<string, string> = {
-      "Antigravity": "hsl(200, 80%, 55%)",
+      "Anthropic": "hsl(260, 67%, 70%)",
       "Google": "hsl(45, 93%, 56%)",
-      "Vercel AI Gateway": "hsl(260, 67%, 70%)",
-      "Google CLI": "hsl(160, 51%, 49%)",
+      "Antigravity": "hsl(200, 80%, 55%)",
+      "Vercel AI Gateway": "hsl(170, 60%, 45%)",
     };
     if (limits.length > 0) {
       return limits
@@ -76,11 +76,9 @@ const Finances = () => {
     // Fallback to daily_costs columns
     const g = Math.round(dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0) * 100) / 100;
     const a = Math.round(dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0) * 100) / 100;
-    const o = Math.round(dailyCosts.reduce((s, c) => s + (c.openai ?? 0), 0) * 100) / 100;
     return [
-      { name: "Google", value: g, color: "hsl(45, 93%, 56%)" },
       { name: "Anthropic", value: a, color: "hsl(260, 67%, 70%)" },
-      { name: "OpenAI", value: o, color: "hsl(160, 51%, 49%)" },
+      { name: "Google", value: g, color: "hsl(45, 93%, 56%)" },
     ].filter(p => p.value > 0);
   })();
 
