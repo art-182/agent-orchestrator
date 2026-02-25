@@ -1,5 +1,5 @@
 import { Bot, TrendingUp, DollarSign, Activity } from "lucide-react";
-import { useAgents } from "@/hooks/use-supabase-data";
+import { useAgents, useTraces, useProviderLimits, useDailyCosts } from "@/hooks/use-supabase-data";
 
 const iconMap: Record<string, React.ReactNode> = {
   Bot: <Bot className="h-3.5 w-3.5" />,
@@ -10,16 +10,36 @@ const iconMap: Record<string, React.ReactNode> = {
 
 const StatusBar = () => {
   const { data: agents } = useAgents();
+  const { data: traces } = useTraces();
+  const { data: providers } = useProviderLimits();
+  const { data: costs } = useDailyCosts();
+
   const list = agents ?? [];
   const online = list.filter((a) => a.status !== "error").length;
   const total = list.length;
-  const totalCost = list.reduce((s, a) => s + (a.total_cost ?? 0), 0);
+
+  // Real cost from daily_costs
+  const totalCost = (costs ?? []).reduce((s, c) => s + (c.total ?? 0), 0);
+  const days = new Set((costs ?? []).map(c => c.date)).size || 1;
+  const costPerHour = totalCost / (days * 24);
+
+  // Real success rate from traces
+  const traceList = traces ?? [];
+  const successRate = traceList.length > 0
+    ? (traceList.filter(t => t.status === "success").length / traceList.length * 100).toFixed(1)
+    : "100";
+
+  // Real uptime from providers (average)
+  const provList = providers ?? [];
+  const avgUptime = provList.length > 0
+    ? (provList.reduce((s, p) => s + (p.uptime ?? 99), 0) / provList.length).toFixed(1)
+    : "99.9";
 
   const badges = [
     { label: "Agentes", value: `${online}/${total}`, icon: "Bot" },
-    { label: "Sucesso", value: "97.2%", icon: "TrendingUp" },
-    { label: "Custo/h", value: `$${(totalCost / Math.max(total * 24 * 14, 1) * 24).toFixed(2)}`, icon: "DollarSign" },
-    { label: "Uptime", value: "99.8%", icon: "Activity" },
+    { label: "Sucesso", value: `${successRate}%`, icon: "TrendingUp" },
+    { label: "Custo/h", value: `$${costPerHour.toFixed(2)}`, icon: "DollarSign" },
+    { label: "Uptime", value: `${avgUptime}%`, icon: "Activity" },
   ];
 
   return (
