@@ -6,6 +6,7 @@ import BillingCards from "@/components/finances/BillingCards";
 import CostChart from "@/components/finances/CostChart";
 import DailyConsumptionChart from "@/components/finances/DailyConsumptionChart";
 import ModelObservability from "@/components/finances/ModelObservability";
+import ModelStatsCards from "@/components/finances/ModelStatsCards";
 import AgentCostTable from "@/components/finances/AgentCostTable";
 import ProviderPieChart from "@/components/finances/ProviderPieChart";
 import TokenUsageChart from "@/components/finances/TokenUsageChart";
@@ -176,7 +177,10 @@ const Finances = () => {
             <CostChart data={dailyCosts} />
             <ModelObservability />
           </div>
-          <ProviderPieChart data={providerBreakdown} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <ProviderPieChart data={providerBreakdown} />
+            <ModelStatsCards />
+          </div>
           <AgentCostTable data={agentCosts} />
         </TabsContent>
 
