@@ -18,8 +18,8 @@ const StatusBar = () => {
   const online = list.filter((a) => a.status !== "error").length;
   const total = list.length;
 
-  // Real cost from daily_costs
-  const totalCost = (costs ?? []).reduce((s, c) => s + (c.total ?? 0), 0);
+  // Operational cost = only google (Antigravity/anthropic = subscription, not per-inference)
+  const totalCost = (costs ?? []).reduce((s, c) => s + (c.google ?? 0), 0);
   const days = new Set((costs ?? []).map(c => c.date)).size || 1;
   const costPerHour = totalCost / (days * 24);
 
