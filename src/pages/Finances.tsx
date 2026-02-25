@@ -55,13 +55,13 @@ const Finances = () => {
   })();
 
   const providerBreakdown = (() => {
-    // Use provider_limits for cost centers (proxies with $0 are filtered out)
+    // All 4 active providers (from openclaw.json auth profiles)
     const limits = dbProviderLimits ?? [];
     const provColors: Record<string, string> = {
-      "Anthropic": "hsl(260, 67%, 70%)",
       "Google": "hsl(45, 93%, 56%)",
+      "Vercel AI Gateway": "hsl(260, 67%, 70%)",
       "Antigravity": "hsl(200, 80%, 55%)",
-      "Vercel AI Gateway": "hsl(170, 60%, 45%)",
+      "Minimax": "hsl(340, 75%, 55%)",
     };
     if (limits.length > 0) {
       return limits
@@ -70,16 +70,17 @@ const Finances = () => {
           value: Math.round((p.monthly_spent ?? 0) * 100) / 100,
           color: provColors[p.provider ?? ""] ?? "hsl(0, 0%, 50%)",
         }))
-        .filter(p => p.value > 0)
         .sort((a, b) => b.value - a.value);
     }
-    // Fallback to daily_costs columns
+    // Fallback: map manufacturer columns → routing providers
     const g = Math.round(dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0) * 100) / 100;
-    const a = Math.round(dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0) * 100) / 100;
+    const v = Math.round(dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0) * 100) / 100;
     return [
-      { name: "Anthropic", value: a, color: "hsl(260, 67%, 70%)" },
+      { name: "Vercel AI Gateway", value: v, color: "hsl(260, 67%, 70%)" },
       { name: "Google", value: g, color: "hsl(45, 93%, 56%)" },
-    ].filter(p => p.value > 0);
+      { name: "Antigravity", value: 0, color: "hsl(200, 80%, 55%)" },
+      { name: "Minimax", value: 0, color: "hsl(340, 75%, 55%)" },
+    ];
   })();
 
   const dailyTokens: DailyTokenUsage[] = (dbDailyTokens ?? []).map((t: any) => ({
