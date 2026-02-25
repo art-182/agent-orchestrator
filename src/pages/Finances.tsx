@@ -14,25 +14,106 @@ import SkillCostTable from "@/components/finances/SkillCostTable";
 import ProjectionDetails from "@/components/finances/ProjectionDetails";
 import ProviderLimitsView from "@/components/finances/ProviderLimitsView";
 import { PageTransition } from "@/components/animations/MotionPrimitives";
-import { useDailyCosts, useAgents } from "@/hooks/use-supabase-data";
 import {
-  mockProviderBreakdown, mockDailyTokens, mockModelPricing, mockMonthlyProjections,
-  mockToolCosts, mockSkillCosts, mockProviderLimits, mockRateLimitEvents, mockCostAnomalies,
-} from "@/lib/finance-data";
-import type { DailyCost, AgentCost } from "@/lib/finance-data";
+  useDailyCosts, useAgents,
+  useDailyTokenUsage, useModelPricing, useMonthlyProjections,
+  useToolCosts, useSkillCosts, useProviderLimits,
+  useRateLimitEvents, useCostAnomalies,
+} from "@/hooks/use-supabase-data";
+import type { DailyCost, AgentCost, DailyTokenUsage, ModelPricing, MonthlyProjection, ToolCost, SkillCost, ProviderLimit, RateLimitEvent, CostAnomaly } from "@/lib/finance-types";
+import { parseJsonb } from "@/lib/parse-jsonb";
 
 const Finances = () => {
   const { data: dbCosts } = useDailyCosts();
   const { data: agents } = useAgents();
+  const { data: dbDailyTokens } = useDailyTokenUsage();
+  const { data: dbModelPricing } = useModelPricing();
+  const { data: dbMonthlyProjections } = useMonthlyProjections();
+  const { data: dbToolCosts } = useToolCosts();
+  const { data: dbSkillCosts } = useSkillCosts();
+  const { data: dbProviderLimits } = useProviderLimits();
+  const { data: dbRateLimitEvents } = useRateLimitEvents();
+  const { data: dbCostAnomalies } = useCostAnomalies();
 
   const dailyCosts: DailyCost[] = (dbCosts ?? []).map((c) => ({
     date: c.date, openai: c.openai ?? 0, anthropic: c.anthropic ?? 0, google: c.google ?? 0, total: c.total ?? 0,
   }));
 
-  const agentCosts: AgentCost[] = (agents ?? []).map((a) => ({
-    id: a.id, name: a.name, emoji: a.emoji, status: (a.status as AgentCost["status"]) ?? "online",
-    tokens: 0, cost: a.total_cost ?? 0, tasks: a.tasks_completed ?? 0,
-    costPerTask: a.tasks_completed ? (a.total_cost ?? 0) / a.tasks_completed : 0,
+  const agentCosts: AgentCost[] = (() => {
+    const totalFromDailyCosts = dailyCosts.reduce((s, c) => s + c.total, 0);
+    const agentList = agents ?? [];
+    const totalTasks = agentList.reduce((s, a) => s + (a.tasks_completed ?? 0), 0);
+    return agentList.filter(a => a.id !== "ceo").map((a) => {
+      const agentTasks = a.tasks_completed ?? 0;
+      const costShare = totalTasks > 0 ? totalFromDailyCosts * (agentTasks / totalTasks) : 0;
+      return {
+        id: a.id, name: a.name, emoji: a.emoji, status: (a.status as AgentCost["status"]) ?? "online",
+        tokens: 0, cost: costShare, tasks: agentTasks,
+        costPerTask: agentTasks > 0 ? costShare / agentTasks : 0,
+      };
+    });
+  })();
+
+  const providerBreakdown = (() => {
+    const g = dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0);
+    const a = dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0);
+    const o = dailyCosts.reduce((s, c) => s + (c.openai ?? 0), 0);
+    return [
+      { name: "Google", value: g, color: "hsl(45, 93%, 56%)" },
+      { name: "Anthropic", value: a, color: "hsl(260, 67%, 70%)" },
+      { name: "OpenAI", value: o, color: "hsl(160, 51%, 49%)" },
+    ].filter(p => p.value > 0);
+  })();
+
+  const dailyTokens: DailyTokenUsage[] = (dbDailyTokens ?? []).map((t: any) => ({
+    date: t.date, input: Number(t.input), output: Number(t.output), total: Number(t.total),
+  }));
+
+  const modelPricing: ModelPricing[] = (dbModelPricing ?? []).map((m: any) => ({
+    model: m.model, provider: m.provider,
+    inputCostPer1k: Number(m.input_cost_per_1k), outputCostPer1k: Number(m.output_cost_per_1k),
+    inputTokens: Number(m.input_tokens), outputTokens: Number(m.output_tokens),
+    totalCost: Number(m.total_cost), avgLatency: m.avg_latency ?? "",
+  }));
+
+  const monthlyProjections: MonthlyProjection[] = (dbMonthlyProjections ?? []).map((p: any) => ({
+    month: p.month, actual: p.actual != null ? Number(p.actual) : null, projected: Number(p.projected),
+  }));
+
+  const toolCosts: ToolCost[] = (dbToolCosts ?? []).map((t: any) => ({
+    tool: t.tool, agent: t.agent, calls: Number(t.calls), tokens: Number(t.tokens),
+    cost: Number(t.cost), avgDuration: t.avg_duration ?? "",
+  }));
+
+  const skillCosts: SkillCost[] = (dbSkillCosts ?? []).map((s: any) => ({
+    skill: s.skill, category: s.category, executions: Number(s.executions),
+    tokens: Number(s.tokens), cost: Number(s.cost), successRate: Number(s.success_rate),
+  }));
+
+  const providerLimits: ProviderLimit[] = (dbProviderLimits ?? []).map((p: any) => ({
+    provider: p.provider, tier: p.tier ?? "",
+    rpmLimit: Number(p.rpm_limit), rpmUsed: Number(p.rpm_used),
+    tpmLimit: Number(p.tpm_limit), tpmUsed: Number(p.tpm_used),
+    dailyBudget: Number(p.daily_budget), dailySpent: Number(p.daily_spent),
+    monthlyBudget: Number(p.monthly_budget), monthlySpent: Number(p.monthly_spent),
+    rateLimitHits24h: Number(p.rate_limit_hits_24h),
+    avgLatency: Number(p.avg_latency), p99Latency: Number(p.p99_latency),
+    uptime: Number(p.uptime),
+    fallbackProvider: p.fallback_provider, fallbackModel: p.fallback_model,
+    fallbackActivations24h: Number(p.fallback_activations_24h),
+    models: parseJsonb<any[]>(p.models, []),
+  }));
+
+  const rateLimitEvents: RateLimitEvent[] = (dbRateLimitEvents ?? []).map((e: any) => ({
+    timestamp: e.timestamp, provider: e.provider, model: e.model,
+    type: e.type as RateLimitEvent["type"], detail: e.detail ?? "",
+    fallbackUsed: e.fallback_used, latencyMs: Number(e.latency_ms),
+  }));
+
+  const costAnomalies: CostAnomaly[] = (dbCostAnomalies ?? []).map((a: any) => ({
+    date: a.date, provider: a.provider,
+    expectedCost: Number(a.expected_cost), actualCost: Number(a.actual_cost),
+    deviation: Number(a.deviation), reason: a.reason ?? "",
   }));
 
   return (
@@ -70,33 +151,33 @@ const Finances = () => {
 
         <TabsContent value="overview" className="mt-4 space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="lg:col-span-3"><CostChart data={dailyCosts.length > 0 ? dailyCosts : []} /></div>
-            <ProviderPieChart data={mockProviderBreakdown} />
+            <div className="lg:col-span-3"><CostChart data={dailyCosts} /></div>
+            <ProviderPieChart data={providerBreakdown} />
           </div>
           <AgentCostTable data={agentCosts} />
         </TabsContent>
 
         <TabsContent value="tokens" className="mt-4 space-y-6">
-          <TokenUsageChart data={mockDailyTokens} />
-          <ModelPricingTable data={mockModelPricing} />
+          <TokenUsageChart data={dailyTokens} />
+          <ModelPricingTable data={modelPricing} />
         </TabsContent>
 
         <TabsContent value="tools" className="mt-4 space-y-8">
           <div>
             <h2 className="text-sm font-semibold text-foreground mb-4 tracking-tight">Tools</h2>
-            <ToolCostTable data={mockToolCosts} />
+            <ToolCostTable data={toolCosts} />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground mb-4 tracking-tight">Skills</h2>
-            <SkillCostTable data={mockSkillCosts} />
+            <SkillCostTable data={skillCosts} />
           </div>
         </TabsContent>
 
         <TabsContent value="providers" className="mt-4">
-          <ProviderLimitsView providers={mockProviderLimits} events={mockRateLimitEvents} anomalies={mockCostAnomalies} />
+          <ProviderLimitsView providers={providerLimits} events={rateLimitEvents} anomalies={costAnomalies} />
         </TabsContent>
         <TabsContent value="projections" className="mt-4 space-y-6">
-          <ProjectionChart data={mockMonthlyProjections} />
+          <ProjectionChart data={monthlyProjections} />
           <ProjectionDetails />
         </TabsContent>
       </Tabs>
