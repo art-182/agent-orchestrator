@@ -6,35 +6,33 @@ interface CostChartProps {
   data: DailyCost[];
 }
 
-/* ── active providers (matches openclaw.json auth profiles) ── */
+/* ── all configured providers ─────────────────────────────────
+ *  Google + Google CLI   = paid (daily_costs.google)
+ *  Antigravity           = subscription (daily_costs.anthropic tracked but $0 operational)
+ *  Vercel AI Gateway     = paid, not used yet
+ *  Minimax               = paid, not used yet
+ */
 const PROVIDERS = [
-  { key: "google",       label: "Google (AI Studio)",  color: "hsl(45, 93%, 56%)" },
-  { key: "vercelAI",     label: "Vercel AI Gateway",   color: "hsl(260, 67%, 70%)" },
-  { key: "antigravity",  label: "Antigravity (OAuth)",  color: "hsl(200, 80%, 55%)" },
-  { key: "minimax",      label: "Minimax",             color: "hsl(340, 75%, 55%)" },
+  { key: "google",       label: "Google (AI Studio)",     color: "hsl(45, 93%, 56%)" },
+  { key: "googleCLI",    label: "Google CLI",             color: "hsl(30, 80%, 50%)" },
+  { key: "antigravity",  label: "Antigravity (assinatura)", color: "hsl(200, 80%, 55%)" },
+  { key: "vercelAI",     label: "Vercel AI Gateway",      color: "hsl(260, 67%, 70%)" },
+  { key: "minimax",      label: "Minimax",                color: "hsl(340, 75%, 55%)" },
 ] as const;
 
-/**
- * Map daily_costs (manufacturer columns) → provider-level aggregates per date.
- *
- * Routing map:
- *   daily_costs.google    → Google (AI Studio)   — direct API key
- *   daily_costs.anthropic → Vercel AI Gateway     — Claude routed via Vercel
- *   daily_costs.openai    → (not currently used)
- *   Antigravity           → $0  (OpenClaw OAuth, no inference cost)
- *   Minimax               → $0  (configured, unused so far)
- */
+/** Aggregate daily_costs rows per date → provider columns */
 function toProviderSeries(raw: DailyCost[]) {
   const byDate = new Map<string, Record<string, number>>();
 
   for (const r of raw) {
     const d = r.date;
-    if (!byDate.has(d)) byDate.set(d, { google: 0, vercelAI: 0, antigravity: 0, minimax: 0 });
+    if (!byDate.has(d)) byDate.set(d, { google: 0, googleCLI: 0, antigravity: 0, vercelAI: 0, minimax: 0 });
     const acc = byDate.get(d)!;
-    acc.google      += r.google ?? 0;
-    acc.vercelAI    += r.anthropic ?? 0;
-    acc.antigravity  = 0;
-    acc.minimax      = 0;
+    acc.google      += r.google ?? 0;   // real operational cost
+    acc.googleCLI    = 0;               // can't distinguish from google column yet
+    acc.antigravity  = 0;               // subscription — not per-inference
+    acc.vercelAI     = 0;               // configured, not used
+    acc.minimax      = 0;               // configured, not used
   }
 
   return Array.from(byDate.entries())
