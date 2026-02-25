@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
-import { useMissions, useTasks } from "@/hooks/use-supabase-data";
+import { useMissions, useTasks, useDailyCosts } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type MissionStatus = "active" | "completed" | "paused" | "failed";
@@ -39,6 +39,7 @@ const Missions = () => {
   const navigate = useNavigate();
   const { data: missions, isLoading: loadingMissions } = useMissions();
   const { data: tasks, isLoading: loadingTasks } = useTasks();
+  const { data: dailyCosts } = useDailyCosts();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -71,7 +72,7 @@ const Missions = () => {
   const activeMissions = missionList.filter((m) => m.status === "active").length;
   const totalTasks = taskList.length;
   const doneTasks = taskList.filter((t) => t.status === "done").length;
-  const totalCost = missionList.reduce((s, m) => s + (m.cost ?? 0), 0);
+  const totalCost = (dailyCosts ?? []).reduce((s, c) => s + (c.total ?? 0), 0);
   const avgProgress = missionList.length > 0 ? Math.round(missionList.reduce((s, m) => s + (m.progress ?? 0), 0) / missionList.length) : 0;
 
   return (
@@ -142,6 +143,7 @@ const Missions = () => {
           const sc = statusConfig[mappedStatus] ?? statusConfig.active;
           const mTasks = taskList.filter((t) => t.mission_id === m.id);
           const mDone = mTasks.filter((t) => t.status === "done").length;
+          const mCost = totalTasks > 0 ? totalCost * (mTasks.length / totalTasks) : 0;
 
           return (
             <Card key={m.id} className="border-border/50 bg-card surface-elevated cursor-pointer hover:border-border transition-all duration-200 glow-line" onClick={() => navigate(`/tasks?mission=${m.id}`)}>
@@ -171,7 +173,7 @@ const Missions = () => {
                 <Progress value={m.progress ?? 0} className="h-1.5" />
 
                 <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
-                  <span>💰 ${(m.cost ?? 0).toFixed(2)}</span>
+                  <span>💰 ${mCost.toFixed(2)}</span>
                   <span>🔤 {formatTokens(m.tokens_used ?? 0)} tokens</span>
                   {m.deadline && <span>📅 {new Date(m.deadline).toLocaleDateString("pt-BR")}</span>}
                 </div>
