@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { exportDailyCostsCSV, exportAgentCostsCSV } from "@/lib/export-utils";
 import BillingCards from "@/components/finances/BillingCards";
 import CostChart from "@/components/finances/CostChart";
+import DailyConsumptionChart from "@/components/finances/DailyConsumptionChart";
 import AgentCostTable from "@/components/finances/AgentCostTable";
 import ProviderPieChart from "@/components/finances/ProviderPieChart";
 import TokenUsageChart from "@/components/finances/TokenUsageChart";
@@ -56,12 +57,13 @@ const Finances = () => {
   })();
 
   const providerBreakdown = (() => {
-    // All 4 active providers (from openclaw.json auth profiles)
+    // All 5 configured providers
     const limits = dbProviderLimits ?? [];
     const provColors: Record<string, string> = {
       "Google": "hsl(45, 93%, 56%)",
-      "Vercel AI Gateway": "hsl(260, 67%, 70%)",
+      "Google CLI": "hsl(30, 80%, 50%)",
       "Antigravity": "hsl(200, 80%, 55%)",
+      "Vercel AI Gateway": "hsl(260, 67%, 70%)",
       "Minimax": "hsl(340, 75%, 55%)",
     };
     if (limits.length > 0) {
@@ -73,13 +75,13 @@ const Finances = () => {
         }))
         .sort((a, b) => b.value - a.value);
     }
-    // Fallback: map manufacturer columns → routing providers
+    // Fallback
     const g = Math.round(dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0) * 100) / 100;
-    const v = Math.round(dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0) * 100) / 100;
     return [
-      { name: "Vercel AI Gateway", value: v, color: "hsl(260, 67%, 70%)" },
       { name: "Google", value: g, color: "hsl(45, 93%, 56%)" },
+      { name: "Google CLI", value: 0, color: "hsl(30, 80%, 50%)" },
       { name: "Antigravity", value: 0, color: "hsl(200, 80%, 55%)" },
+      { name: "Vercel AI Gateway", value: 0, color: "hsl(260, 67%, 70%)" },
       { name: "Minimax", value: 0, color: "hsl(340, 75%, 55%)" },
     ];
   })();
@@ -169,10 +171,11 @@ const Finances = () => {
         </TabsList>
 
         <TabsContent value="overview" className="mt-4 space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div className="lg:col-span-3"><CostChart data={dailyCosts} /></div>
-            <ProviderPieChart data={providerBreakdown} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <CostChart data={dailyCosts} />
+            <DailyConsumptionChart data={dailyTokens} />
           </div>
+          <ProviderPieChart data={providerBreakdown} />
           <AgentCostTable data={agentCosts} />
         </TabsContent>
 
