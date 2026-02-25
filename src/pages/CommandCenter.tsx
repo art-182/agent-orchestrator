@@ -9,6 +9,7 @@ import QuickStats from "@/components/dashboard/QuickStats";
 import ActiveMissions from "@/components/dashboard/ActiveMissions";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { useAgents, useTasks, useDailyCosts, useDailyTokenUsage, useTraces } from "@/hooks/use-supabase-data";
+import { useRealTimeROI } from "@/hooks/use-realtime-roi";
 import type { DashboardMetric } from "@/components/dashboard/MetricCard";
 
 const CommandCenter = () => {
@@ -29,11 +30,9 @@ const CommandCenter = () => {
   const totalTokens = (tokens ?? []).reduce((s, t) => s + Number(t.input ?? 0) + Number(t.output ?? 0), 0);
   const tokensFormatted = totalTokens > 1_000_000 ? `${(totalTokens / 1_000_000).toFixed(1)}M` : totalTokens > 1_000 ? `${(totalTokens / 1_000).toFixed(0)}K` : totalTokens.toString();
 
-  // Real hours saved from agent ROI
-  const totalHours = (agents ?? []).reduce((s, a) => {
-    const roi = parseJsonb<any>(a.roi, {});
-    return s + (roi?.hoursPerWeekSaved ?? 0);
-  }, 0);
+  // Real hours saved — centralized from traces
+  const roiData = useRealTimeROI();
+  const totalHours = roiData.totalHoursSaved;
 
   // Build real sparklines from daily data
   const costSparkline = sortedCosts.map(c => c.google ?? 0);
@@ -101,10 +100,10 @@ const CommandCenter = () => {
     },
     {
       label: "Horas Economizadas",
-      value: `${totalHours.toFixed(1)}h/sem`,
+      value: `${totalHours.toFixed(1)}h`,
       icon: "Clock",
-      sparkline: (agents ?? []).filter(a => a.id !== "ceo").map(a => parseJsonb<any>(a.roi, {})?.hoursPerWeekSaved ?? 0),
-      change: `${(agents ?? []).filter(a => a.id !== "ceo").length} agentes`,
+      sparkline: roiData.agents.map(a => a.hoursSaved),
+      change: `${roiData.hoursPerDay.toFixed(1)}h/dia`,
       trend: "up",
     },
   ];
