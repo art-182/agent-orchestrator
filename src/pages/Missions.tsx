@@ -72,7 +72,8 @@ const Missions = () => {
   const activeMissions = missionList.filter((m) => m.status === "active").length;
   const totalTasks = taskList.length;
   const doneTasks = taskList.filter((t) => t.status === "done").length;
-  const totalCost = (dailyCosts ?? []).reduce((s, c) => s + (c.total ?? 0), 0);
+  // Operational cost = only google (Antigravity = subscription, $0 inference)
+  const totalCost = (dailyCosts ?? []).reduce((s, c) => s + (c.google ?? 0), 0);
   const avgProgress = missionList.length > 0 ? Math.round(missionList.reduce((s, m) => s + (m.progress ?? 0), 0) / missionList.length) : 0;
 
   return (
