@@ -2,10 +2,12 @@ import { parseJsonb } from "@/lib/parse-jsonb";
 import { Card, CardContent } from "@/components/ui/card";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { useAgents, useDailyCosts } from "@/hooks/use-supabase-data";
+import { useRealTimeROI } from "@/hooks/use-realtime-roi";
 
 const QuickStats = () => {
   const { data: agents } = useAgents();
   const { data: costs } = useDailyCosts();
+  const roiData = useRealTimeROI();
 
   const list = agents ?? [];
   const costData = (costs ?? []).slice(-7).map((c) => ({ v: c.google ?? 0 }));
@@ -13,10 +15,7 @@ const QuickStats = () => {
   const totalTasks = list.reduce((s, a) => s + (a.tasks_completed ?? 0), 0);
   const avgError = list.length > 0 ? (list.reduce((s, a) => s + (a.error_rate ?? 0), 0) / list.length).toFixed(1) : "0";
 
-  const totalROISavings = list.reduce((s, a) => {
-    const roi = parseJsonb<any>(a.roi, {});
-    return s + (roi?.monthlySavings ?? 0);
-  }, 0);
+  const totalROISavings = roiData.monthlyValue;
 
   return (
     <Card className="border-border/50 bg-card surface-elevated flex-1 flex flex-col">
