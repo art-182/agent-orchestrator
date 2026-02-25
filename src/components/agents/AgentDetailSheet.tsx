@@ -8,12 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Tables, Json } from "@/integrations/supabase/types";
 import { useDailyCosts, useAgents } from "@/hooks/use-supabase-data";
+import { useRealTimeROI, type AgentROIMetrics } from "@/hooks/use-realtime-roi";
 
 type DbAgent = Tables<"agents">;
 type AgentStatus = "online" | "busy" | "idle" | "error";
 
 interface AgentSkill { name: string; level: number; category: string; connections: string[]; }
-interface AgentROI { hoursPerWeekSaved: number; costPerHourHuman: number; weeklySavings: number; monthlySavings: number; roiMultiplier: number; tasksAutomated: number; automationRate: number; avgTaskTimeHuman: string; avgTaskTimeAgent: string; speedup: string; qualityScore: number; incidentsPrevented: number; revenueImpact: string; }
 
 const statusBgMap: Record<AgentStatus, string> = {
   online: "bg-terminal/10 text-terminal border-terminal/20",
@@ -65,19 +65,19 @@ const SoulMdViewer = ({ content }: { content: string }) => {
   );
 };
 
-const AgentROIView = ({ roi, agent }: { roi: AgentROI; agent: DbAgent }) => (
+const AgentROIView = ({ roi, agentCostShare }: { roi: AgentROIMetrics; agentCostShare: number }) => (
   <ScrollArea className="h-[450px] pr-2">
     <div className="space-y-4">
       <div className="rounded-2xl border border-terminal/20 bg-terminal/5 p-4 text-center">
-        <p className="text-[11px] text-muted-foreground font-medium">ROI deste agente</p>
-        <p className="text-3xl font-bold text-terminal tracking-tight">{roi.roiMultiplier}x</p>
+        <p className="text-[11px] text-muted-foreground font-medium">Speedup deste agente</p>
+        <p className="text-3xl font-bold text-terminal tracking-tight">{roi.speedup > 0 ? `${roi.speedup}x` : "—"}</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "Economia Mensal", value: `$${roi.monthlySavings.toLocaleString()}`, sub: `$${roi.weeklySavings.toLocaleString()}/sem`, color: "text-terminal" },
-          { label: "Horas Poupadas/Sem", value: `${roi.hoursPerWeekSaved}h`, sub: `@$${roi.costPerHourHuman}/h humano`, color: "text-cyan" },
-          { label: "Speedup vs Humano", value: roi.speedup, sub: `${roi.avgTaskTimeHuman} → ${roi.avgTaskTimeAgent}`, color: "text-amber" },
-          { label: "Impacto em Receita", value: roi.revenueImpact, sub: "", color: "text-violet" },
+          { label: "Horas Economizadas", value: `${roi.hoursSaved.toFixed(1)}h`, sub: `${roi.hoursPerDay.toFixed(1)}h/dia`, color: "text-terminal" },
+          { label: "Equivalente Humano", value: `${roi.humanEquivalentHours.toFixed(1)}h`, sub: `@$${roi.costPerHourHuman}/h humano`, color: "text-cyan" },
+          { label: "Speedup vs Humano", value: roi.speedup > 0 ? `${roi.speedup}x` : "—", sub: `${roi.avgTaskTimeHuman} → ${roi.avgTaskTimeAgent}`, color: "text-amber" },
+          { label: "Calls LLM", value: roi.calls.toLocaleString(), sub: `${(roi.outputTokens / 1000).toFixed(0)}K tokens`, color: "text-violet" },
         ].map((m) => (
           <div key={m.label} className="rounded-xl border border-border/30 bg-muted/15 p-3">
             <p className="text-[10px] text-muted-foreground font-medium">{m.label}</p>
@@ -90,14 +90,6 @@ const AgentROIView = ({ roi, agent }: { roi: AgentROI; agent: DbAgent }) => (
       <div className="space-y-3">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[12px]">
-            <span className="text-muted-foreground">Taxa de Automação</span>
-            <span className="text-foreground font-semibold tabular-nums">{roi.automationRate}%</span>
-          </div>
-          <Progress value={roi.automationRate} className="h-2" />
-          <p className="text-[10px] text-muted-foreground">{roi.tasksAutomated.toLocaleString()} tarefas automatizadas</p>
-        </div>
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-[12px]">
             <span className="text-muted-foreground">Quality Score</span>
             <span className={`font-semibold tabular-nums ${roi.qualityScore >= 95 ? "text-terminal" : roi.qualityScore >= 90 ? "text-amber" : "text-rose"}`}>{roi.qualityScore}%</span>
           </div>
@@ -106,14 +98,13 @@ const AgentROIView = ({ roi, agent }: { roi: AgentROI; agent: DbAgent }) => (
       </div>
       <Separator className="bg-border/30" />
       <div className="space-y-2">
-        <p className="text-[12px] font-semibold text-foreground">Métricas para Investidores</p>
+        <p className="text-[12px] font-semibold text-foreground">Métricas Detalhadas</p>
         {[
-          { label: "Custo Operacional (agente)", value: `$${agentCostShare.toFixed(2)}/mês` },
-          { label: "Custo Equivalente (humano)", value: `$${(roi.hoursPerWeekSaved * roi.costPerHourHuman * 4.33).toFixed(0)}/mês` },
-          { label: "Economia Anual Projetada", value: `$${(roi.monthlySavings * 12).toLocaleString()}` },
-          { label: "Incidentes Prevenidos", value: `${roi.incidentsPrevented} este mês` },
-          { label: "Payback Period", value: roi.roiMultiplier > 20 ? "< 2 dias" : roi.roiMultiplier > 10 ? "< 1 semana" : "< 2 semanas" },
-          { label: "Custo por Tarefa", value: `$${(agentCostShare / Math.max(roi.tasksAutomated, 1)).toFixed(3)}` },
+          { label: "Custo Operacional (agente)", value: `$${agentCostShare.toFixed(2)}` },
+          { label: "Custo Equivalente (humano)", value: `$${(roi.hoursSaved * roi.costPerHourHuman).toFixed(0)}` },
+          { label: "Custo por Tarefa", value: `$${roi.costPerTask.toFixed(3)}` },
+          { label: "Tarefas Concluídas", value: `${roi.tasksDone}` },
+          { label: "Tempo Agente (total)", value: `${roi.agentActualHours.toFixed(2)}h` },
         ].map((m) => (
           <div key={m.label} className="flex items-center justify-between text-[12px] py-1 border-b border-border/20 last:border-0">
             <span className="text-muted-foreground">{m.label}</span>
@@ -147,9 +138,13 @@ const AgentDetailSheet = ({ agent, open, onOpenChange }: AgentDetailSheetProps) 
       connections: Array.isArray(s.connections) ? s.connections : [],
     };
   });
-  const roi = parseJsonb<AgentROI | null>(agent.roi, null);
+  const roi = parseJsonb<any>(agent.roi, null);
 
-  // Compute cost share from daily_costs (not agent.total_cost which is only set for oracli)
+  // Get real-time ROI for this agent from traces
+  const roiData = useRealTimeROI();
+  const agentROI = roiData.agents.find(a => a.id === agent.id);
+
+  // Compute cost share from daily_costs
   const { data: dailyCosts } = useDailyCosts();
   const { data: allAgents } = useAgents();
   const agentCostShare = useMemo(() => {
@@ -185,7 +180,7 @@ const AgentDetailSheet = ({ agent, open, onOpenChange }: AgentDetailSheetProps) 
             </TabsList>
 
             <TabsContent value="roi" className="mt-4">
-              {roi ? <AgentROIView roi={roi} agent={agent} /> : <p className="text-[12px] text-muted-foreground">Sem dados de ROI</p>}
+              {agentROI ? <AgentROIView roi={agentROI} agentCostShare={agentCostShare} /> : <p className="text-[12px] text-muted-foreground">Sem dados de ROI (nenhum trace registrado)</p>}
             </TabsContent>
 
             <TabsContent value="skills" className="mt-4">
