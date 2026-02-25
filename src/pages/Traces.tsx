@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useState, useMemo } from "react";
 import { PageTransition, StaggerContainer, FadeIn } from "@/components/animations/MotionPrimitives";
 import { useTraces } from "@/hooks/use-supabase-data";
+import { parseJsonb } from "@/lib/parse-jsonb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -65,7 +66,7 @@ const Traces = () => {
   const errors = all.filter((t) => t.status === "error").length;
   const warnings = all.filter((t) => t.status === "warning").length;
   const successes = all.filter((t) => t.status === "success").length;
-  const avgSpans = all.length > 0 ? Math.round(all.reduce((s, t) => s + ((t.spans as any[]) ?? []).length, 0) / all.length) : 0;
+  const avgSpans = all.length > 0 ? Math.round(all.reduce((s, t) => s + (parseJsonb<any[]>(t.spans, [])).length, 0) / all.length) : 0;
   const successRate = all.length > 0 ? Math.round((successes / all.length) * 100) : 0;
 
   return (
@@ -129,7 +130,7 @@ const Traces = () => {
             {list.map((trace) => {
               const isExpanded = expanded === trace.id;
               const agent = trace.agents as any;
-              const spans = (trace.spans as any[]) ?? [];
+              const spans = parseJsonb<any[]>(trace.spans, []);
               const maxMs = Math.max(...spans.map((s: any) => parseFloat(s.duration) * 1000 || 1), 1);
               const totalTokens = spans.reduce((s: number, sp: any) => s + (sp.tokens ?? 0), 0);
 
@@ -205,7 +206,7 @@ const Traces = () => {
                       <div className="flex items-center gap-4 pt-2 border-t border-border/30 text-[11px] text-muted-foreground">
                         <span>Total: {totalTokens > 0 ? `${(totalTokens / 1000).toFixed(1)}K tokens` : "—"}</span>
                         <span>{spans.length} spans</span>
-                        <span>{new Date(trace.created_at).toLocaleString("pt-BR")}</span>
+                        <span>{trace.created_at ? new Date(trace.created_at).toLocaleString("pt-BR") : "—"}</span>
                       </div>
                     )}
                   </CardContent>
