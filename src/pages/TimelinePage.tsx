@@ -1,6 +1,6 @@
-import { useState, useMemo, useRef, useCallback } from "react";
-import { GanttChart, X, FileJson, Puzzle, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Milestone, Link2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { GanttChart, X, FileJson, Puzzle, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Link2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,6 +11,7 @@ import { PageTransition } from "@/components/animations/MotionPrimitives";
 import { useAgents, useTasks, useInteractions, useMissions } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import WeeklyCalendar from "@/components/timeline/WeeklyCalendar";
 
 const statusColor: Record<string, string> = {
   todo: "bg-muted-foreground/40", in_progress: "bg-cyan", done: "bg-terminal", blocked: "bg-rose",
@@ -18,14 +19,16 @@ const statusColor: Record<string, string> = {
 const statusLabel: Record<string, string> = {
   todo: "Pendente", in_progress: "Em Progresso", done: "Concluído", blocked: "Bloqueado",
 };
-const priorityColor: Record<string, string> = {
+const priorityBorder: Record<string, string> = {
   critical: "border-rose/60", high: "border-amber/60", medium: "border-cyan/40", low: "border-muted-foreground/30",
 };
 
-const ROW_HEIGHT = 56;
-
-const ZOOM_LEVELS = [60, 80, 100, 140, 180];
-const ZOOM_LABELS = ["1h", "1.5h", "2h", "3h", "4h"];
+const TASK_HEIGHT = 36;
+const TASK_GAP = 6;
+const ZOOM_LEVELS = [80, 100, 140, 180, 220];
+const ZOOM_LABELS = ["XS", "S", "M", "L", "XL"];
+const MIN_BAR_WIDTH = 180;
+const HOURS = Array.from({ length: 17 }, (_, i) => i + 6);
 
 interface SelectedTask {
   id: string;
@@ -51,70 +54,99 @@ const TimelinePage = () => {
   const [selected, setSelected] = useState<SelectedTask | null>(null);
   const [zoomIdx, setZoomIdx] = useState(2);
   const [missionFilter, setMissionFilter] = useState<string>("all");
-  const [showDependencies, setShowDependencies] = useState(true);
+  const [dateFilter, setDateFilter] = useState<string>("all");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const didAutoScroll = useRef(false);
 
   const HOUR_WIDTH = ZOOM_LEVELS[zoomIdx];
-  const HOURS = Array.from({ length: 14 }, (_, i) => i + 6); // 06:00 - 19:00
-
   const isLoading = la || lt || li;
+
+  useEffect(() => {
+    if (!didAutoScroll.current && scrollRef.current && !isLoading) {
+      const now = new Date();
+      const nowH = now.getHours();
+      const scrollTo = Math.max((nowH - 8) * HOUR_WIDTH, 0);
+      scrollRef.current.scrollLeft = scrollTo;
+      didAutoScroll.current = true;
+    }
+  }, [isLoading, HOUR_WIDTH]);
+
+  const availableDates = useMemo(() => {
+    if (!tasks) return [];
+    const dates = new Set<string>();
+    tasks.forEach(t => {
+      const d = (t as any).scheduled_date ?? (t as any).started_at?.slice(0, 10) ?? t.created_at?.slice(0, 10);
+      if (d) dates.add(d);
+    });
+    return [...dates].sort().reverse();
+  }, [tasks]);
 
   const ganttData = useMemo(() => {
     if (!agents || !tasks) return [];
-    const filtered = missionFilter === "all" ? tasks : tasks.filter((t) => t.mission_id === missionFilter);
+    let filtered = missionFilter === "all" ? tasks : tasks.filter((t) => t.mission_id === missionFilter);
+
+    if (dateFilter !== "all") {
+      if (dateFilter === "week") {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+        startOfWeek.setHours(0, 0, 0, 0);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+        filtered = filtered.filter(t => {
+          const d = (t as any).scheduled_date ?? (t as any).started_at?.slice(0, 10) ?? t.created_at?.slice(0, 10);
+          if (!d) return false;
+          const taskDate = new Date(d + "T12:00:00");
+          return taskDate >= startOfWeek && taskDate <= endOfWeek;
+        });
+      } else {
+        const targetDate = dateFilter === "today" ? new Date().toISOString().slice(0, 10) : dateFilter;
+        filtered = filtered.filter(t => {
+          const d = (t as any).scheduled_date ?? (t as any).started_at?.slice(0, 10) ?? t.created_at?.slice(0, 10);
+          return d === targetDate;
+        });
+      }
+    }
+
     return agents.map((agent) => {
       const agentTasks = filtered
         .filter((t) => t.agent_id === agent.id)
-        .map((t, idx) => {
-          const startHour = 7 + (idx * 2) % 11;
-          const durationHours = t.status === "done" ? 2.5 : t.status === "in_progress" ? 3 : t.status === "blocked" ? 1 : 1.5;
-          return { ...t, startHour, durationHours };
-        });
+        .map((t) => {
+          const startedAt = (t as any).started_at ? new Date((t as any).started_at) : new Date(t.created_at);
+          const startHour = startedAt.getHours() + startedAt.getMinutes() / 60;
+
+          let durationHours = 0.5;
+          if ((t as any).completed_at && (t as any).started_at) {
+            const diff = new Date((t as any).completed_at).getTime() - new Date((t as any).started_at).getTime();
+            durationHours = Math.max(diff / 3600000, 0.3);
+          } else if (t.duration) {
+            const m = t.duration.match(/(\d+)/);
+            if (m) durationHours = Math.max(parseInt(m[1]) / 60, 0.3);
+          } else {
+            durationHours = t.status === "in_progress" ? 1.5 : 0.5;
+          }
+
+          return {
+            id: t.id,
+            name: t.name,
+            status: t.status,
+            priority: t.priority,
+            duration: t.duration,
+            tokens: t.tokens ?? 0,
+            cost: t.cost ?? 0,
+            mission_id: t.mission_id,
+            missionName: (t as any).missions?.name ?? "—",
+            agent_id: t.agent_id,
+            startHour,
+            durationHours,
+          };
+        })
+        .sort((a, b) => a.startHour - b.startHour);
+
       return { agent, tasks: agentTasks };
     }).filter((r) => r.tasks.length > 0);
-  }, [agents, tasks, missionFilter]);
-
-  // Build dependency lines between tasks in same mission
-  const dependencies = useMemo(() => {
-    if (!showDependencies) return [];
-    const deps: { fromX: number; fromY: number; toX: number; toY: number }[] = [];
-    const taskPositions: Record<string, { x: number; y: number; w: number }> = {};
-
-    ganttData.forEach((row, rowIdx) => {
-      row.tasks.forEach((task) => {
-        const left = (task.startHour - 6) * HOUR_WIDTH;
-        const width = task.durationHours * HOUR_WIDTH;
-        const y = rowIdx * ROW_HEIGHT + ROW_HEIGHT / 2;
-        taskPositions[task.id] = { x: left, y, w: width };
-      });
-    });
-
-    // Connect sequential tasks within same mission
-    ganttData.forEach((row) => {
-      for (let i = 0; i < row.tasks.length - 1; i++) {
-        const curr = row.tasks[i];
-        const next = row.tasks[i + 1];
-        if (curr.mission_id && curr.mission_id === next.mission_id) {
-          const from = taskPositions[curr.id];
-          const to = taskPositions[next.id];
-          if (from && to) {
-            deps.push({ fromX: from.x + from.w, fromY: from.y, toX: to.x, toY: to.y });
-          }
-        }
-      }
-    });
-    return deps;
-  }, [ganttData, showDependencies, HOUR_WIDTH]);
-
-  // Milestones from missions
-  const milestones = useMemo(() => {
-    if (!missions) return [];
-    return missions.filter((m) => m.deadline).map((m) => {
-      const deadline = new Date(m.deadline!);
-      const hour = deadline.getHours() + deadline.getMinutes() / 60;
-      return { name: m.name, hour, status: m.status, progress: m.progress ?? 0 };
-    });
-  }, [missions]);
+  }, [agents, tasks, missionFilter, dateFilter]);
 
   const decisionTree = useMemo(() => {
     if (!selected || !interactions) return [];
@@ -140,7 +172,12 @@ const TimelinePage = () => {
   }
 
   const scrollTimeline = (dir: number) => {
-    scrollRef.current?.scrollBy({ left: dir * 300, behavior: "smooth" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        left: scrollRef.current.scrollLeft + dir * HOUR_WIDTH * 3,
+        behavior: "smooth",
+      });
+    }
   };
 
   const nowHour = new Date().getHours() + new Date().getMinutes() / 60;
@@ -169,19 +206,24 @@ const TimelinePage = () => {
               ))}
             </SelectContent>
           </Select>
-          <Button
-            variant={showDependencies ? "default" : "outline"}
-            size="sm"
-            className={`text-[11px] h-8 gap-1.5 rounded-xl ${showDependencies ? "bg-terminal text-background hover:bg-terminal/80" : "border-border/50"}`}
-            onClick={() => setShowDependencies(!showDependencies)}
-          >
-            <Link2 className="h-3.5 w-3.5" /> Deps
-          </Button>
+          <Select value={dateFilter} onValueChange={setDateFilter}>
+            <SelectTrigger className="w-[130px] text-[12px] bg-card border-border/50 rounded-xl h-8">
+              <SelectValue placeholder="Data" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-[12px]">Todos os dias</SelectItem>
+              <SelectItem value="today" className="text-[12px]">Hoje</SelectItem>
+              <SelectItem value="week" className="text-[12px]">Esta Semana</SelectItem>
+              {availableDates.map((d) => (
+                <SelectItem key={d} value={d} className="text-[12px]">{new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="flex items-center gap-1 border border-border/50 rounded-xl px-1">
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} disabled={zoomIdx === 0}>
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
-            <span className="text-[10px] text-muted-foreground w-8 text-center tabular-nums">{ZOOM_LABELS[zoomIdx]}</span>
+            <span className="text-[10px] text-muted-foreground w-6 text-center tabular-nums">{ZOOM_LABELS[zoomIdx]}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomIn} disabled={zoomIdx === ZOOM_LEVELS.length - 1}>
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
@@ -197,21 +239,32 @@ const TimelinePage = () => {
         </div>
       </div>
 
-      {/* Gantt Chart */}
+      {/* Gantt Chart - Row per task */}
       <div className="border border-border/50 rounded-2xl bg-card surface-elevated overflow-hidden">
         <div className="flex">
-          {/* Agent labels column */}
-          <div className="shrink-0 w-[180px] border-r border-border/30 z-10 bg-card">
+          {/* Task labels column */}
+          <div className="shrink-0 w-[220px] border-r border-border/30 z-10 bg-card">
             <div className="h-10 border-b border-border/30 flex items-center px-3">
-              <span className="text-[11px] text-muted-foreground font-medium">Agentes</span>
+              <span className="text-[11px] text-muted-foreground font-medium">Tarefas</span>
             </div>
             {ganttData.map((row) => (
-              <div key={row.agent.id} className="flex items-center gap-2 px-3 border-b border-border/20" style={{ height: ROW_HEIGHT }}>
-                <span className="text-base">{row.agent.emoji}</span>
-                <div className="min-w-0">
-                  <p className="text-[12px] font-semibold text-foreground truncate">{row.agent.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{row.agent.model}</p>
+              <div key={row.agent.id}>
+                {/* Agent header */}
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted/20 border-b border-border/20">
+                  <span className="text-sm">{row.agent.emoji}</span>
+                  <span className="text-[12px] font-semibold text-foreground">{row.agent.name}</span>
+                  <Badge variant="outline" className="text-[9px] ml-auto rounded-full px-1.5">{row.tasks.length}</Badge>
                 </div>
+                {/* Task rows */}
+                {row.tasks.map((task) => {
+                  const sc = statusColor[task.status] ?? "bg-muted";
+                  return (
+                    <div key={task.id} className="flex items-center gap-2 px-3 border-b border-border/10" style={{ height: TASK_HEIGHT + TASK_GAP }}>
+                      <div className={`h-2 w-2 rounded-full ${sc} shrink-0`} />
+                      <span className="text-[11px] text-foreground truncate flex-1" title={task.name}>{task.name}</span>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
@@ -222,10 +275,8 @@ const TimelinePage = () => {
               {/* Time headers */}
               <div className="flex h-10 border-b border-border/30">
                 {HOURS.map((h) => (
-                  <div key={h} className="flex items-center justify-center border-r border-border/15 text-[10px] text-muted-foreground tabular-nums relative" style={{ width: HOUR_WIDTH }}>
+                  <div key={h} className="flex items-center justify-center border-r border-border/15 text-[10px] text-muted-foreground tabular-nums" style={{ width: HOUR_WIDTH }}>
                     {String(h).padStart(2, "0")}:00
-                    {/* Half hour mark */}
-                    <div className="absolute bottom-0 left-1/2 w-px h-2 bg-border/30" />
                   </div>
                 ))}
               </div>
@@ -233,100 +284,81 @@ const TimelinePage = () => {
               {/* Rows */}
               <TooltipProvider>
                 <div className="relative">
-                  {/* Dependency arrows SVG */}
-                  {dependencies.length > 0 && (
-                    <svg className="absolute inset-0 pointer-events-none z-20" style={{ width: HOURS.length * HOUR_WIDTH, height: ganttData.length * ROW_HEIGHT }}>
-                      <defs>
-                        <marker id="dep-arrow" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="6" markerHeight="4" orient="auto">
-                          <path d="M 0 0 L 10 3 L 0 6 z" fill="hsl(260, 67%, 70%)" />
-                        </marker>
-                      </defs>
-                      {dependencies.map((dep, idx) => (
-                        <line key={idx} x1={dep.fromX} y1={dep.fromY} x2={dep.toX} y2={dep.toY} stroke="hsl(260, 67%, 70%)" strokeWidth={1.5} strokeDasharray="6,4" opacity={0.5} markerEnd="url(#dep-arrow)" />
-                      ))}
-                    </svg>
+                  {/* Now indicator - full height */}
+                  {nowHour >= 6 && nowHour <= 22 && (
+                    <div className="absolute top-0 bottom-0 w-px bg-rose/50 z-30" style={{ left: (nowHour - 6) * HOUR_WIDTH }}>
+                      <div className="absolute -top-1 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-rose" />
+                    </div>
                   )}
 
-                  {/* Milestone lines */}
-                  {milestones.map((ms, idx) => {
-                    if (ms.hour < 6 || ms.hour > 20) return null;
-                    const left = (ms.hour - 6) * HOUR_WIDTH;
-                    return (
-                      <div key={idx} className="absolute top-0 z-30" style={{ left, height: ganttData.length * ROW_HEIGHT }}>
-                        <div className="w-px h-full bg-violet/40 border-l border-dashed border-violet/30" />
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="absolute -top-1 -translate-x-1/2 cursor-pointer">
-                              <Milestone className="h-4 w-4 text-violet" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent className="text-xs">
-                            <p className="font-semibold">{ms.name}</p>
-                            <p className="text-muted-foreground">{ms.progress}% · {ms.status}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    );
-                  })}
-
                   {ganttData.map((row) => (
-                    <div key={row.agent.id} className="relative border-b border-border/50" style={{ height: ROW_HEIGHT }}>
-                      {/* Grid lines */}
-                      {HOURS.map((h) => (
-                        <div key={h} className="absolute top-0 bottom-0 border-r border-border/10" style={{ left: (h - 6) * HOUR_WIDTH, width: HOUR_WIDTH }} />
-                      ))}
-
-                      {/* Now indicator */}
-                      {nowHour >= 6 && nowHour <= 20 && (
-                        <div className="absolute top-0 bottom-0 w-px bg-rose/50 z-10" style={{ left: (nowHour - 6) * HOUR_WIDTH }}>
-                          <div className="absolute -top-1 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-rose" />
-                        </div>
-                      )}
-
-                      {/* Task bars */}
+                    <div key={row.agent.id}>
+                      {/* Agent header spacer */}
+                      <div className="h-[36px] border-b border-border/20 bg-muted/10 relative">
+                        {HOURS.map((h) => (
+                          <div key={h} className="absolute top-0 bottom-0 border-r border-border/5" style={{ left: (h - 6) * HOUR_WIDTH, width: HOUR_WIDTH }} />
+                        ))}
+                      </div>
+                      {/* Task bars - one per row */}
                       {row.tasks.map((task) => {
-                        const left = (task.startHour - 6) * HOUR_WIDTH;
-                        const width = task.durationHours * HOUR_WIDTH;
+                        const left = Math.max((task.startHour - 6) * HOUR_WIDTH, 0);
+                        const calculatedWidth = task.durationHours * HOUR_WIDTH;
+                        const width = Math.max(calculatedWidth, MIN_BAR_WIDTH);
                         const sc = statusColor[task.status] ?? "bg-muted";
-                        const pc = priorityColor[task.priority] ?? "border-border";
-                        const agent = (task as any).agents as any;
-                        const mission = (task as any).missions as any;
+                        const pc = priorityBorder[task.priority] ?? "border-border";
 
                         return (
-                          <Tooltip key={task.id}>
-                            <TooltipTrigger asChild>
-                              <button
-                                className={`absolute top-2 h-[calc(100%-16px)] rounded-md border-2 ${pc} ${sc}/20 backdrop-blur-sm flex items-center px-2 gap-1.5 cursor-pointer hover:brightness-125 transition-all group z-10`}
-                                style={{ left, width: Math.max(width, 60) }}
-                                onClick={() => setSelected({
-                                  id: task.agent_id ?? "",
-                                  name: task.name,
-                                  status: task.status,
-                                  priority: task.priority,
-                                  duration: task.duration ?? "—",
-                                  agentName: agent?.name ?? row.agent.name,
-                                  agentEmoji: agent?.emoji ?? row.agent.emoji,
-                                  missionName: mission?.name ?? "—",
-                                  startHour: task.startHour,
-                                  tokens: task.tokens ?? 0,
-                                  cost: task.cost ?? 0,
-                                  durationHours: task.durationHours,
-                                  missionId: task.mission_id,
-                                })}
-                              >
-                                <div className={`h-2 w-2 rounded-full ${sc} shrink-0`} />
-                                <span className="text-[10px] text-foreground truncate">{task.name}</span>
-                                {task.status === "in_progress" && (
-                                  <span className="ml-auto shrink-0 h-1.5 w-1.5 rounded-full bg-cyan animate-pulse" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent className="text-xs space-y-1">
-                              <p className="font-semibold">{task.name}</p>
-                              <p className="text-muted-foreground">{task.priority} · {statusLabel[task.status]} · {task.durationHours}h</p>
-                              {task.tokens && <p className="text-muted-foreground">{task.tokens} tokens · ${(task.cost ?? 0).toFixed(2)}</p>}
-                            </TooltipContent>
-                          </Tooltip>
+                          <div key={task.id} className="relative border-b border-border/10" style={{ height: TASK_HEIGHT + TASK_GAP }}>
+                            {/* Grid lines */}
+                            {HOURS.map((h) => (
+                              <div key={h} className="absolute top-0 bottom-0 border-r border-border/5" style={{ left: (h - 6) * HOUR_WIDTH, width: HOUR_WIDTH }} />
+                            ))}
+
+                            {/* Task bar */}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  className={`absolute rounded-lg border-2 ${pc} ${sc}/15 backdrop-blur-sm flex items-center px-3 gap-2 cursor-pointer hover:brightness-125 transition-all group z-10`}
+                                  style={{
+                                    left,
+                                    width,
+                                    top: (TASK_GAP / 2),
+                                    height: TASK_HEIGHT,
+                                  }}
+                                  onClick={() => setSelected({
+                                    id: task.agent_id ?? "",
+                                    name: task.name,
+                                    status: task.status,
+                                    priority: task.priority,
+                                    duration: task.duration ?? "—",
+                                    agentName: row.agent.name,
+                                    agentEmoji: row.agent.emoji,
+                                    missionName: task.missionName,
+                                    startHour: task.startHour,
+                                    tokens: task.tokens,
+                                    cost: task.cost,
+                                    durationHours: task.durationHours,
+                                    missionId: task.mission_id,
+                                  })}
+                                >
+                                  <div className={`h-2.5 w-2.5 rounded-full ${sc} shrink-0`} />
+                                  <span className="text-[11px] text-foreground truncate font-medium">{task.name}</span>
+                                  {task.duration && task.duration !== "—" && (
+                                    <span className="text-[10px] text-muted-foreground shrink-0 ml-auto tabular-nums">{task.duration}</span>
+                                  )}
+                                  {task.status === "in_progress" && (
+                                    <span className="shrink-0 h-2 w-2 rounded-full bg-cyan animate-pulse" />
+                                  )}
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent className="text-xs space-y-1 max-w-[250px]">
+                                <p className="font-semibold">{task.name}</p>
+                                <p className="text-muted-foreground">{task.priority} · {statusLabel[task.status]} · {Math.round(task.durationHours * 60)}min</p>
+                                <p className="text-muted-foreground">{row.agent.emoji} {row.agent.name} · {task.missionName}</p>
+                                {task.tokens > 0 && <p className="text-muted-foreground">{task.tokens.toLocaleString()} tokens · ${task.cost.toFixed(2)}</p>}
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
                         );
                       })}
                     </div>
@@ -350,17 +382,27 @@ const TimelinePage = () => {
           <div className="h-3 w-px bg-rose/50" />
           <span className="text-[10px] text-rose/60">Agora</span>
         </div>
-        <div className="flex items-center gap-1.5 ml-2">
-          <Milestone className="h-3 w-3 text-violet" />
-          <span className="text-[10px] text-violet/60">Milestone</span>
-        </div>
-        {showDependencies && (
-          <div className="flex items-center gap-1.5 ml-2">
-            <div className="h-px w-4 bg-violet/50 border-t border-dashed border-violet/40" />
-            <span className="text-[10px] text-violet/60">Dependência</span>
-          </div>
-        )}
       </div>
+
+      {/* Weekly Calendar */}
+      <WeeklyCalendar
+        tasks={(tasks ?? []).map(t => {
+          const agent = (agents ?? []).find(a => a.id === t.agent_id);
+          return {
+            id: t.id,
+            name: t.name,
+            status: t.status,
+            priority: t.priority,
+            agent_id: t.agent_id,
+            started_at: (t as any).started_at ?? t.created_at,
+            completed_at: (t as any).completed_at ?? null,
+            scheduled_date: (t as any).scheduled_date ?? null,
+            duration: t.duration,
+            agentEmoji: agent?.emoji ?? "🤖",
+            agentName: agent?.name ?? t.agent_id ?? "?",
+          };
+        })}
+      />
 
       {/* Detail Sheet */}
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
@@ -376,94 +418,47 @@ const TimelinePage = () => {
                 </div>
                 <SheetTitle className="text-lg tracking-tight">{selected.name}</SheetTitle>
                 <SheetDescription className="text-[12px]">
-                  {selected.agentEmoji} {selected.agentName} · {selected.missionName} · {selected.durationHours}h
+                  {selected.agentEmoji} {selected.agentName} · {selected.missionName} · {selected.duration}
                 </SheetDescription>
               </SheetHeader>
 
               <div className="mt-6">
-                <Tabs defaultValue="tree">
+                <Tabs defaultValue="info">
                   <TabsList className="w-full bg-muted/30 border border-border/30 rounded-xl p-1">
-                    <TabsTrigger value="tree" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Decisão</TabsTrigger>
-                    <TabsTrigger value="logs" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">JSON</TabsTrigger>
-                    <TabsTrigger value="artifacts" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Artifacts</TabsTrigger>
+                    <TabsTrigger value="info" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Info</TabsTrigger>
+                    <TabsTrigger value="json" className="text-[11px] flex-1 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">JSON</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="tree" className="mt-4">
-                    <div className="space-y-3">
-                      <div className="rounded-xl border border-border/30 bg-muted/20 p-3">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="h-2 w-2 rounded-full bg-foreground" />
-                          <span className="text-[10px] font-semibold text-muted-foreground tracking-wide uppercase">Input Received</span>
-                        </div>
-                        <p className="text-[12px] text-foreground">"{selected.name}"</p>
-                      </div>
-
-                      <div className="rounded-xl border border-violet/20 bg-violet/5 p-3">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-violet" />
-                            <span className="text-[10px] font-semibold text-violet tracking-wide uppercase">Intent Classification</span>
-                          </div>
-                          <Badge variant="outline" className="text-[9px] border-terminal/20 text-terminal rounded-full px-2">
-                            {selected.priority === "critical" ? "98" : selected.priority === "high" ? "95" : "90"}%
-                          </Badge>
-                        </div>
-                        <p className="text-[12px] text-foreground">
-                          Severity: <span className={selected.priority === "critical" ? "text-rose" : selected.priority === "high" ? "text-amber" : "text-terminal"}>
-                            {selected.priority}
-                          </span>
-                        </p>
-                      </div>
-
-                      {decisionTree.length > 0 && (
-                        <div className="rounded-xl border border-cyan/20 bg-cyan/5 p-3 space-y-2">
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="h-2 w-2 rounded-full bg-cyan" />
-                            <span className="text-[10px] font-semibold text-cyan tracking-wide uppercase">Agent Interactions</span>
-                          </div>
-                          {decisionTree.map((d, idx) => (
-                            <div key={idx} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/20">
-                              <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-full border-border/50">{d.type}</Badge>
-                              <span className="text-[11px] text-foreground truncate flex-1">{d.message.slice(0, 60)}</span>
-                              <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{d.tokens}t</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
+                  <TabsContent value="info" className="mt-4 space-y-3">
+                    <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="rounded-xl border border-border/30 bg-muted/15 p-3">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="h-2 w-2 rounded-full bg-muted-foreground" />
-                          <span className="text-[10px] font-semibold text-muted-foreground tracking-wide uppercase">Output</span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 mt-2 text-center">
-                          <div>
-                            <p className="text-[10px] text-muted-foreground">Tokens</p>
-                            <p className="text-sm font-bold text-foreground tabular-nums">{selected.tokens}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-muted-foreground">Custo</p>
-                            <p className="text-sm font-bold text-terminal tabular-nums">${selected.cost.toFixed(2)}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-muted-foreground">Duração</p>
-                            <p className="text-sm font-bold text-foreground">{selected.duration}</p>
-                          </div>
-                        </div>
+                        <p className="text-[10px] text-muted-foreground">Tokens</p>
+                        <p className="text-sm font-bold text-foreground tabular-nums">{selected.tokens.toLocaleString()}</p>
+                      </div>
+                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3">
+                        <p className="text-[10px] text-muted-foreground">Custo</p>
+                        <p className="text-sm font-bold text-terminal tabular-nums">${selected.cost.toFixed(2)}</p>
+                      </div>
+                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3">
+                        <p className="text-[10px] text-muted-foreground">Duração</p>
+                        <p className="text-sm font-bold text-foreground">{selected.duration}</p>
                       </div>
                     </div>
 
-                    <div className="flex gap-3 mt-6">
-                      <Button variant="outline" className="flex-1 gap-2 text-[12px] border-rose/20 text-rose hover:bg-rose/10 rounded-xl">
-                        <X className="h-3.5 w-3.5" /> Interromper
-                      </Button>
-                      <Button className="flex-1 gap-2 text-[12px] bg-terminal hover:bg-terminal/80 text-background rounded-xl">
-                        <Puzzle className="h-3.5 w-3.5" /> Detalhes
-                      </Button>
-                    </div>
+                    {decisionTree.length > 0 && (
+                      <div className="rounded-xl border border-cyan/20 bg-cyan/5 p-3 space-y-2">
+                        <span className="text-[10px] font-semibold text-cyan tracking-wide uppercase">Interações</span>
+                        {decisionTree.map((d, idx) => (
+                          <div key={idx} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/20">
+                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-full border-border/50">{d.type}</Badge>
+                            <span className="text-[11px] text-foreground truncate flex-1">{d.message.slice(0, 60)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </TabsContent>
 
-                  <TabsContent value="logs" className="mt-4">
+                  <TabsContent value="json" className="mt-4">
                     <ScrollArea className="h-[400px]">
                       <pre className="font-mono text-[10px] text-muted-foreground bg-muted/30 rounded-lg p-3 whitespace-pre-wrap">
 {JSON.stringify({
@@ -472,33 +467,12 @@ const TimelinePage = () => {
   mission: selected.missionName,
   status: selected.status,
   priority: selected.priority,
-  duration_hours: selected.durationHours,
+  duration: selected.duration,
   tokens_used: selected.tokens,
   cost: selected.cost,
-  decision_path: ["INPUT", "CLASSIFY", "DECIDE", "EXECUTE", "OUTPUT"],
-  interactions: decisionTree,
 }, null, 2)}
                       </pre>
                     </ScrollArea>
-                  </TabsContent>
-
-                  <TabsContent value="artifacts" className="mt-4">
-                    <div className="space-y-2">
-                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3 flex items-center gap-3">
-                        <FileJson className="h-4 w-4 text-cyan" />
-                        <div>
-                          <p className="text-[12px] text-foreground font-medium">decision_log.json</p>
-                          <p className="text-[10px] text-muted-foreground">Árvore de decisão</p>
-                        </div>
-                      </div>
-                      <div className="rounded-xl border border-border/30 bg-muted/15 p-3 flex items-center gap-3">
-                        <FileJson className="h-4 w-4 text-terminal" />
-                        <div>
-                          <p className="text-[12px] text-foreground font-medium">output_response.md</p>
-                          <p className="text-[10px] text-muted-foreground">Resposta do agente</p>
-                        </div>
-                      </div>
-                    </div>
                   </TabsContent>
                 </Tabs>
               </div>
