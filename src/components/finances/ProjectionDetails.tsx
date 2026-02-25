@@ -2,25 +2,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Target, Shield, Zap, Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { useDailyCosts, useAgents, useTraces, useDailyTokenUsage } from "@/hooks/use-supabase-data";
+import { useDailyCosts, useTraces, useDailyTokenUsage } from "@/hooks/use-supabase-data";
 import { useRealTimeROI } from "@/hooks/use-realtime-roi";
 
 const ProjectionDetails = () => {
   const { data: dbCosts } = useDailyCosts();
-  const { data: agents } = useAgents();
   const { data: traces } = useTraces();
   const { data: tokenUsage } = useDailyTokenUsage();
 
   const dailyCosts = dbCosts ?? [];
-  const agentList = agents ?? [];
   const traceList = traces ?? [];
 
-  // ── Centralized ROI ──
+  // ── Centralized ROI (single source of truth) ──
   const roi = useRealTimeROI();
 
   const totalGoogle = dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0);
-  const totalAnthro = dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0);
-  const totalOpenAI = dailyCosts.reduce((s, c) => s + (c.openai ?? 0), 0);
 
   const successRate = traceList.length > 0
     ? (traceList.filter(t => t.status === "success").length / traceList.length * 100)
@@ -28,7 +24,7 @@ const ProjectionDetails = () => {
 
   // ── ROI Metrics ──
   const roiMetrics = [
-    { label: "Horas Economizadas", value: `${roi.totalHoursSaved.toFixed(1)}h`, subtext: `${roi.hoursPerDay.toFixed(1)}h/dia · ~$${(roi.totalHoursSaved * roi.avgHumanHourRate).toFixed(0)} valor humano`, icon: Clock, color: "text-terminal" },
+    { label: "Horas Economizadas", value: `${roi.totalHoursSaved.toFixed(1)}h`, subtext: `${roi.hoursPerDay.toFixed(1)}h/dia · ${roi.operatingDays.toFixed(1)} dias`, icon: Clock, color: "text-terminal" },
     { label: "ROI Atual", value: `${roi.roiMultiplier.toFixed(1)}x`, subtext: `custo $${roi.monthlyCostProjection.toFixed(0)}/mês · valor $${roi.monthlyValue.toFixed(0)}/mês`, icon: TrendingUp, color: "text-terminal" },
     { label: "Custo por Tarefa", value: `$${(roi.totalTasksDone > 0 ? roi.operationalCost / roi.totalTasksDone : 0).toFixed(4)}`, subtext: `média · ${roi.totalTasksDone} tarefas`, icon: Zap, color: "text-cyan" },
     { label: "Taxa de Sucesso", value: `${successRate.toFixed(1)}%`, subtext: `${traceList.length} chamadas LLM`, icon: Target, color: "text-violet" },
@@ -36,12 +32,10 @@ const ProjectionDetails = () => {
 
   // ── Budget Alerts ──
   const mp = roi.monthlyCostProjection;
-  const days = new Set((dailyCosts).map(c => c.date)).size || 1;
+  const days = roi.operatingDays;
   const budgetAlerts = [
     { label: "Budget Mensal", budget: 500, spent: mp, status: mp > 450 ? "warning" as const : "ok" as const },
-    { label: "Google (Gemini)", budget: 400, spent: totalGoogle * (30 / days), status: totalGoogle * (30 / days) > 350 ? "warning" as const : "ok" as const },
-    { label: "Anthropic (Claude)", budget: 100, spent: totalAnthro * (30 / days), status: totalAnthro * (30 / days) > 85 ? "warning" as const : "ok" as const },
-    { label: "OpenAI", budget: 50, spent: totalOpenAI * (30 / days), status: "ok" as const },
+    { label: "Google (Gemini)", budget: 400, spent: totalGoogle * (30 / Math.max(days, 1)), status: totalGoogle * (30 / Math.max(days, 1)) > 350 ? "warning" as const : "ok" as const },
   ];
 
   const alertStatusIcon = {
@@ -53,7 +47,7 @@ const ProjectionDetails = () => {
   // ── Scenarios ──
   const scenarios = [
     { label: "Conservador", description: "Manter uso atual, sem novos agentes", monthlyCost: Math.round(mp * 0.8), annualCost: Math.round(mp * 0.8 * 12), savings: Math.round(mp * 0.2 * 12), risk: "low" as const },
-    { label: "Uso Atual", description: `Projeção baseada em ${days}d de dados reais`, monthlyCost: Math.round(mp), annualCost: Math.round(mp * 12), savings: 0, risk: "medium" as const },
+    { label: "Uso Atual", description: `Projeção baseada em ${days.toFixed(1)}d de dados reais`, monthlyCost: Math.round(mp), annualCost: Math.round(mp * 12), savings: 0, risk: "medium" as const },
     { label: "Otimizado (Cache++)", description: "Aumentar cache hit rate para 80%+", monthlyCost: Math.round(mp * 0.5), annualCost: Math.round(mp * 0.5 * 12), savings: Math.round(mp * 0.5 * 12), risk: "low" as const },
     { label: "Escala Total", description: "+5 agentes, pipeline 24/7 com Pro", monthlyCost: Math.round(mp * 2.5), annualCost: Math.round(mp * 2.5 * 12), savings: -Math.round(mp * 1.5 * 12), risk: "high" as const },
   ];
@@ -170,25 +164,12 @@ const ProjectionDetails = () => {
                   <XAxis dataKey="day" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={{ stroke: "hsl(var(--border))" }} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v.toFixed(0)}`} />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "12px",
-                      fontSize: 11,
-                      color: "hsl(var(--foreground))",
-                    }}
-                    labelStyle={{ color: "hsl(var(--muted-foreground))" }}
-                    formatter={(value: number, name: string) => [
-                      `$${value.toFixed(2)}`,
-                      "Custo/Dia",
-                    ]}
+                    contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 11, color: "hsl(var(--foreground))" }}
+                    formatter={(value: number) => [`$${value.toFixed(2)}`, "Custo/Dia"]}
                   />
                   <Bar dataKey="costPerDay" name="costPerDay" radius={[4, 4, 0, 0]}>
                     {efficiencyByDay.map((entry, i) => (
-                      <Cell
-                        key={i}
-                        fill={entry.costPerDay <= 20 ? "hsl(160, 51%, 49%)" : entry.costPerDay <= 30 ? "hsl(45, 93%, 56%)" : "hsl(350, 80%, 55%)"}
-                      />
+                      <Cell key={i} fill={entry.costPerDay <= 20 ? "hsl(160, 51%, 49%)" : entry.costPerDay <= 30 ? "hsl(45, 93%, 56%)" : "hsl(350, 80%, 55%)"} />
                     ))}
                   </Bar>
                 </BarChart>
