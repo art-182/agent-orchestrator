@@ -68,7 +68,7 @@ const TimelinePage = () => {
 
   const selectedDayCost = useMemo(() => {
     if (!selectedDay) return 0;
-    return (dailyCosts ?? []).filter(c => c.date === selectedDay).reduce((s, c) => s + (c.total ?? 0), 0);
+    return (dailyCosts ?? []).filter(c => c.date === selectedDay).reduce((s, c) => s + (c.google ?? 0), 0);
   }, [selectedDay, dailyCosts]);
 
   if (isLoading) {
