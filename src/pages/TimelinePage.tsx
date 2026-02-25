@@ -3,7 +3,7 @@ import { CalendarDays, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import GitHubCalendar from "@/components/ui/git-hub-calendar";
+import { GitHubCalendar } from "@/components/ui/git-hub-calendar";
 import { PageTransition } from "@/components/animations/MotionPrimitives";
 import { useAgents, useTasks, useMissions, useDailyCosts } from "@/hooks/use-supabase-data";
 import { Skeleton } from "@/components/ui/skeleton";
