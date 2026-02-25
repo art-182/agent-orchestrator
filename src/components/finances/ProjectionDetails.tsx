@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Target, Shield, Zap, Clock, AlertTriangle, Ch
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { useDailyCosts, useAgents, useTraces, useDailyTokenUsage } from "@/hooks/use-supabase-data";
-import { calculateROI } from "@/lib/roi-calculator";
+import { useRealTimeROI } from "@/hooks/use-realtime-roi";
 
 const ProjectionDetails = () => {
   const { data: dbCosts } = useDailyCosts();
@@ -16,7 +16,7 @@ const ProjectionDetails = () => {
   const traceList = traces ?? [];
 
   // ── Centralized ROI ──
-  const roi = calculateROI(agentList, dailyCosts);
+  const roi = useRealTimeROI();
 
   const totalGoogle = dailyCosts.reduce((s, c) => s + (c.google ?? 0), 0);
   const totalAnthro = dailyCosts.reduce((s, c) => s + (c.anthropic ?? 0), 0);
@@ -28,15 +28,15 @@ const ProjectionDetails = () => {
 
   // ── ROI Metrics ──
   const roiMetrics = [
-    { label: "Horas Economizadas", value: `${roi.totalHoursPerWeek.toFixed(1)}h/sem`, subtext: `~$${(roi.totalHoursPerWeek * roi.avgHumanHourRate).toFixed(0)} em valor humano/sem`, icon: Clock, color: "text-terminal" },
-    { label: "ROI Atual", value: `${roi.roiMultiplier.toFixed(1)}x`, subtext: `custo $${roi.monthlyProjection.toFixed(0)}/mês · valor $${roi.monthlyValue.toFixed(0)}/mês`, icon: TrendingUp, color: "text-terminal" },
-    { label: "Custo por Tarefa", value: `$${roi.costPerTask.toFixed(4)}`, subtext: `média · ${roi.totalTasks} tarefas`, icon: Zap, color: "text-cyan" },
+    { label: "Horas Economizadas", value: `${roi.totalHoursSaved.toFixed(1)}h`, subtext: `${roi.hoursPerDay.toFixed(1)}h/dia · ~$${(roi.totalHoursSaved * roi.avgHumanHourRate).toFixed(0)} valor humano`, icon: Clock, color: "text-terminal" },
+    { label: "ROI Atual", value: `${roi.roiMultiplier.toFixed(1)}x`, subtext: `custo $${roi.monthlyCostProjection.toFixed(0)}/mês · valor $${roi.monthlyValue.toFixed(0)}/mês`, icon: TrendingUp, color: "text-terminal" },
+    { label: "Custo por Tarefa", value: `$${(roi.totalTasksDone > 0 ? roi.operationalCost / roi.totalTasksDone : 0).toFixed(4)}`, subtext: `média · ${roi.totalTasksDone} tarefas`, icon: Zap, color: "text-cyan" },
     { label: "Taxa de Sucesso", value: `${successRate.toFixed(1)}%`, subtext: `${traceList.length} chamadas LLM`, icon: Target, color: "text-violet" },
   ];
 
   // ── Budget Alerts ──
-  const mp = roi.monthlyProjection;
-  const days = roi.days;
+  const mp = roi.monthlyCostProjection;
+  const days = new Set((dailyCosts).map(c => c.date)).size || 1;
   const budgetAlerts = [
     { label: "Budget Mensal", budget: 500, spent: mp, status: mp > 450 ? "warning" as const : "ok" as const },
     { label: "Google (Gemini)", budget: 400, spent: totalGoogle * (30 / days), status: totalGoogle * (30 / days) > 350 ? "warning" as const : "ok" as const },
