@@ -138,7 +138,8 @@ const Missions = () => {
 
       <div className="space-y-3">
         {filtered.map((m) => {
-          const sc = statusConfig[(m.status as MissionStatus) ?? "active"];
+          const mappedStatus = m.status === "in_progress" ? "active" : (m.status as MissionStatus);
+          const sc = statusConfig[mappedStatus] ?? statusConfig.active;
           const mTasks = taskList.filter((t) => t.mission_id === m.id);
           const mDone = mTasks.filter((t) => t.status === "done").length;
 
@@ -152,7 +153,7 @@ const Missions = () => {
                       <Badge variant="outline" className={`text-[10px] px-2 py-0.5 border rounded-full font-medium ${sc.color}`}>
                         {sc.icon}<span className="ml-1">{sc.label}</span>
                       </Badge>
-                      <Badge variant="outline" className={`text-[10px] px-2 py-0.5 border rounded-full font-medium ${priorityColor[m.priority] ?? ""}`}>
+                      <Badge variant="outline" className={`text-[10px] px-2 py-0.5 border rounded-full font-medium ${priorityColor[m.priority] ?? priorityColor.medium ?? ""}`}>
                         {m.priority}
                       </Badge>
                     </div>
