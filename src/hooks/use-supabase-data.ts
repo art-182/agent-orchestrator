@@ -87,12 +87,22 @@ export const useInteractions = () => {
   return useQuery({
     queryKey: ["interactions"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("interactions")
-        .select("*, from:agents!interactions_from_agent_fkey(name, emoji), to:agents!interactions_to_agent_fkey(name, emoji), missions(name)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      const all: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      while (true) {
+        const { data, error } = await supabase
+          .from("interactions")
+          .select("*, from:agents!interactions_from_agent_fkey(name, emoji), to:agents!interactions_to_agent_fkey(name, emoji), missions(name)")
+          .order("created_at", { ascending: false })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+      return all;
     },
   });
 };
@@ -147,9 +157,22 @@ export const useTraces = () =>
   useQuery({
     queryKey: ["traces"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("traces").select("*, agents:agent_id(name, emoji)").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      const all: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      while (true) {
+        const { data, error } = await supabase
+          .from("traces")
+          .select("*, agents:agent_id(name, emoji)")
+          .order("created_at", { ascending: false })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+      return all;
     },
   });
 
@@ -169,9 +192,22 @@ export const useTimelineEvents = () => {
   return useQuery({
     queryKey: ["timeline_events"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("timeline_events").select("*, agents:agent_id(name, emoji), missions:mission_id(name)").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      const all: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      while (true) {
+        const { data, error } = await supabase
+          .from("timeline_events")
+          .select("*, agents:agent_id(name, emoji), missions:mission_id(name)")
+          .order("created_at", { ascending: false })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+      return all;
     },
   });
 };
@@ -180,9 +216,22 @@ export const useDailyCosts = () =>
   useQuery({
     queryKey: ["daily_costs"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("daily_costs").select("*").order("date", { ascending: true });
-      if (error) throw error;
-      return data;
+      const all: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      while (true) {
+        const { data, error } = await supabase
+          .from("daily_costs")
+          .select("*")
+          .order("date", { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < pageSize) break;
+        from += pageSize;
+      }
+      return all;
     },
   });
 
